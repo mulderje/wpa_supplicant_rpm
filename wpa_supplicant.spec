@@ -38,7 +38,7 @@ Graphical User Interface for wpa_supplicant written using QT3
 cp %{SOURCE1} ./.config
 tar -xjf %{SOURCE5}
 make %{_smp_mflags}
-QTDIR=/usr/lib/qt-3.3 make wpa_gui %{_smp_mflags}
+QTDIR=%{_libdir}/qt-3.3 make wpa_gui %{_smp_mflags}
 
 %install
 rm -rf %{buildroot}
