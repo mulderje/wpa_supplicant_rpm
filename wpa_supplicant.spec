@@ -1,7 +1,7 @@
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
-Version: 0.4.7
-Release: 2
+Version: 0.5.1
+Release: 1
 License: GPL
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -10,7 +10,7 @@ Source2: %{name}.conf
 Source3: %{name}.init.d
 Source4: %{name}.sysconfig
 Source5: madwifi-headers.tar.bz2
-Patch0: wpa_supplicant-ctrl-iface-ap-scan.patch
+Patch0: wpa_supplicant-auth-fallback-v3.patch
 URL: http://hostap.epitest.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -32,7 +32,7 @@ Graphical User Interface for wpa_supplicant written using QT3
 
 %prep
 %setup -q
-%patch0 -p1 -b .ctrl-iface-ap-scan
+%patch0 -p0 -b .we-auth-fallback
 
 %build
 cp %{SOURCE1} ./.config
@@ -95,6 +95,10 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Sun Feb  5 2006 Dan Williams <dcbw@redhat.com> 0.5.1-1
+- Update to 0.5.1
+- Add WE auth fallback to actually work with older drivers
+
 * Thu Jan 26 2006 Dan Williams <dcbw@redhat.com> 0.4.7-2
 - Bring package into Fedora Core
 - Add ap_scan control interface patch
