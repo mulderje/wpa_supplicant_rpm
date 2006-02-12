@@ -1,7 +1,7 @@
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Version: 0.5.1
-Release: 2
+Release: 3
 License: GPL
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -65,6 +65,16 @@ install -m 0755 -s wpa_gui/wpa_gui %{buildroot}/%{_bindir}
 # running
 mkdir -p %{buildroot}/%{_localstatedir}/run/%{name}
 
+# man pages
+install -d %{buildroot}%{_mandir}/man{5,8}
+install -m 0644 doc/docbook/*.8 %{buildroot}%{_mandir}/man8
+install -m 0644 doc/docbook/*.5 %{buildroot}%{_mandir}/man5
+
+# some cleanup in docs
+rm -f  doc/.cvsignore
+rm -rf doc/docbook
+
+
 %clean
 rm -rf %{buildroot}
 
@@ -82,19 +92,24 @@ fi
 
 %files
 %defattr(-, root, root)
-%doc COPYING ChangeLog README README-Windows.txt eap_testing.txt todo.txt wpa_supplicant.conf doc
+%doc COPYING ChangeLog README README-Windows.txt eap_testing.txt todo.txt wpa_supplicant.conf doc examples
 %config(noreplace) %{_sysconfdir}/%{name}/%{name}.conf
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 %{_sysconfdir}/rc.d/init.d/%{name}
 %{_sbindir}/wpa_supplicant
 %{_sbindir}/wpa_cli
 %{_localstatedir}/run/%{name}
+%{_mandir}/man8/*
+%{_mandir}/man5/*
 
 %files gui
 %defattr(-, root, root)
 %{_bindir}/wpa_gui
 
 %changelog
+* Sun Feb 12 2006 Dan Williams <dcbw@redhat.com> - 0.5.1-3
+- Documentation cleanup (Terje Rosten <terje.rosten@ntnu.no>)
+
 * Sun Feb 12 2006 Dan Williams <dcbw@redhat.com> - 0.5.1-2
 - Move initscript to /etc/rc.d/init.d
 
