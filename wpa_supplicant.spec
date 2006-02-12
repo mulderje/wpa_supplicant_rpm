@@ -1,7 +1,7 @@
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Version: 0.5.1
-Release: 1.2
+Release: 2
 License: GPL
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -44,9 +44,9 @@ QTDIR=%{_libdir}/qt-3.3 make wpa_gui %{_smp_mflags}
 rm -rf %{buildroot}
 
 # init scripts
-install -d %{buildroot}/%{_sysconfdir}/init.d
+install -d %{buildroot}/%{_sysconfdir}/rc.d/init.d
 install -d %{buildroot}/%{_sysconfdir}/sysconfig
-install -m 0755 %{SOURCE3} %{buildroot}/%{_sysconfdir}/init.d/%{name}
+install -m 0755 %{SOURCE3} %{buildroot}/%{_sysconfdir}/rc.d/init.d/%{name}
 install -m 0644 %{SOURCE4} %{buildroot}/%{_sysconfdir}/sysconfig/%{name}
 
 # config
@@ -85,7 +85,7 @@ fi
 %doc COPYING ChangeLog README README-Windows.txt eap_testing.txt todo.txt wpa_supplicant.conf doc
 %config(noreplace) %{_sysconfdir}/%{name}/%{name}.conf
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
-%{_sysconfdir}/init.d/%{name}
+%{_sysconfdir}/rc.d/init.d/%{name}
 %{_sbindir}/wpa_supplicant
 %{_sbindir}/wpa_cli
 %{_localstatedir}/run/%{name}
@@ -95,6 +95,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Sun Feb 12 2006 Dan Williams <dcbw@redhat.com> - 0.5.1-2
+- Move initscript to /etc/rc.d/init.d
+
 * Fri Feb 10 2006 Jesse Keating <jkeating@redhat.com> - 0.5.1-1.2
 - bump again for double-long bug on ppc(64)
 
