@@ -1,7 +1,8 @@
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
-Version: 0.5.1
-Release: 3
+Epoch: 1
+Version: 0.4.8
+Release: 1
 License: GPL
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -10,7 +11,8 @@ Source2: %{name}.conf
 Source3: %{name}.init.d
 Source4: %{name}.sysconfig
 Source5: madwifi-headers.tar.bz2
-Patch0: wpa_supplicant-auth-fallback-v3.patch
+Patch0: wpa_supplicant-auth-fallback-v4.patch
+Patch1: wpa_supplicant-ctrl-iface-ap-scan.patch
 URL: http://hostap.epitest.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -33,6 +35,7 @@ Graphical User Interface for wpa_supplicant written using QT3
 %prep
 %setup -q
 %patch0 -p0 -b .we-auth-fallback
+%patch1 -p1 -b .ap_scan
 
 %build
 cp %{SOURCE1} ./.config
@@ -107,6 +110,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Fri Feb 24 2006 Dan Williams <dcbw@redhat.com> - 0.4.8-1
+- Downgrade to 0.4.8 stable release rather than a dev release
+
 * Sun Feb 12 2006 Dan Williams <dcbw@redhat.com> - 0.5.1-3
 - Documentation cleanup (Terje Rosten <terje.rosten@ntnu.no>)
 
