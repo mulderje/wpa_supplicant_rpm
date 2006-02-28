@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.4.8
-Release: 1
+Release: 2
 License: GPL
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -13,6 +13,7 @@ Source4: %{name}.sysconfig
 Source5: madwifi-headers.tar.bz2
 Patch0: wpa_supplicant-auth-fallback-v4.patch
 Patch1: wpa_supplicant-ctrl-iface-ap-scan.patch
+Patch2: wpa_supplicant-ctrl-iface-hide-keys.patch
 URL: http://hostap.epitest.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -35,7 +36,8 @@ Graphical User Interface for wpa_supplicant written using QT3
 %prep
 %setup -q
 %patch0 -p0 -b .we-auth-fallback
-%patch1 -p1 -b .ap_scan
+%patch1 -p1 -b .ap-scan
+%patch2 -p1 -b .ctrl-iface-hide-keys
 
 %build
 cp %{SOURCE1} ./.config
@@ -110,6 +112,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Mon Feb 27 2006 Dan Williams <dcbw@redhat.com> - 0.4.8-2
+- Don't expose private data on the control interface unless requested
+
 * Fri Feb 24 2006 Dan Williams <dcbw@redhat.com> - 0.4.8-1
 - Downgrade to 0.4.8 stable release rather than a dev release
 
