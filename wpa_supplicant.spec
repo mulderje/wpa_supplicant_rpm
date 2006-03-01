@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.4.8
-Release: 2
+Release: 3
 License: GPL
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -60,6 +60,7 @@ install -m 0600 %{SOURCE2} %{buildroot}/%{_sysconfdir}/%{name}
 
 # binary
 install -d %{buildroot}/%{_sbindir}
+install -m 0755 -s wpa_passphrase %{buildroot}/%{_sbindir}
 install -m 0755 -s wpa_cli %{buildroot}/%{_sbindir}
 install -m 0755 -s wpa_supplicant %{buildroot}/%{_sbindir}
 
@@ -101,6 +102,7 @@ fi
 %config(noreplace) %{_sysconfdir}/%{name}/%{name}.conf
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 %{_sysconfdir}/rc.d/init.d/%{name}
+%{_sbindir}/wpa_passphrase
 %{_sbindir}/wpa_supplicant
 %{_sbindir}/wpa_cli
 %{_localstatedir}/run/%{name}
@@ -112,6 +114,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Wed Mar  1 2006 Dan Williams <dcbw@redhat.com> - 0.4.8-3
+- Install wpa_passphrase too #rh183480#
+
 * Mon Feb 27 2006 Dan Williams <dcbw@redhat.com> - 0.4.8-2
 - Don't expose private data on the control interface unless requested
 
