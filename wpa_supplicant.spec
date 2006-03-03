@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.4.8
-Release: 3
+Release: 4
 License: GPL
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -18,6 +18,10 @@ URL: http://hostap.epitest.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: qt-devel
+BuildRequires: openssl-devel
+BuildRequires: readline-devel
+
+PreReq: chkconfig
 
 %description
 wpa_supplicant is a WPA Supplicant for Linux, BSD and Windows with support 
@@ -105,7 +109,8 @@ fi
 %{_sbindir}/wpa_passphrase
 %{_sbindir}/wpa_supplicant
 %{_sbindir}/wpa_cli
-%{_localstatedir}/run/%{name}
+%dir %{_localstatedir}/run/%{name}
+%dir %{_sysconfdir}/%{name}
 %{_mandir}/man8/*
 %{_mandir}/man5/*
 
@@ -114,6 +119,11 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Fri Mar  3 2006 Dan Williams <dcbw@redhat.com> - 0.4.8-4
+- Add additional BuildRequires #rh181914#
+- Add prereq on chkconfig #rh182905# #rh182906#
+- Own /var/run/wpa_supplicant and /etc/wpa_supplicant #rh183696#
+
 * Wed Mar  1 2006 Dan Williams <dcbw@redhat.com> - 0.4.8-3
 - Install wpa_passphrase too #rh183480#
 
