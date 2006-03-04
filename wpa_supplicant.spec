@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.4.8
-Release: 4
+Release: 5
 License: GPL
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -14,6 +14,8 @@ Source5: madwifi-headers.tar.bz2
 Patch0: wpa_supplicant-auth-fallback-v4.patch
 Patch1: wpa_supplicant-ctrl-iface-ap-scan.patch
 Patch2: wpa_supplicant-ctrl-iface-hide-keys.patch
+Patch3: wpa_supplicant-assoc-timeout.patch
+Patch4: wpa_supplicant-driver-wext-debug.patch
 URL: http://hostap.epitest.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -42,6 +44,8 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch0 -p0 -b .we-auth-fallback
 %patch1 -p1 -b .ap-scan
 %patch2 -p1 -b .ctrl-iface-hide-keys
+%patch3 -p1 -b .assoc-timeout
+%patch4 -p1 -b .driver-wext-debug
 
 %build
 cp %{SOURCE1} ./.config
@@ -119,6 +123,10 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Fri Mar  3 2006 Dan Williams <dcbw@redhat.com> - 0.4.8-5
+- Increase association timeout, mainly for drivers that don't
+	fully support WPA ioctls yet
+
 * Fri Mar  3 2006 Dan Williams <dcbw@redhat.com> - 0.4.8-4
 - Add additional BuildRequires #rh181914#
 - Add prereq on chkconfig #rh182905# #rh182906#
