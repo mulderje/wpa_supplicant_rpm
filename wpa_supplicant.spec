@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.4.8
-Release: 7.fc6
+Release: 8.fc6
 License: GPL
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -127,6 +127,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Tue Apr 11 2006 Dan Williams <dcbw@redhat.com> - 0.4.8-8
+- Fix control interface key obfuscation a bit
+
 * Sun Apr  2 2006 Dan Williams <dcbw@redhat.com> - 0.4.8-7
 - Work around older & incorrect drivers that return null-terminated SSIDs
 
