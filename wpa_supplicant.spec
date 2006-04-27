@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.4.8
-Release: 9.fc6
+Release: 10.fc6
 License: GPL
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -10,7 +10,7 @@ Source1: %{name}.config
 Source2: %{name}.conf
 Source3: %{name}.init.d
 Source4: %{name}.sysconfig
-Source5: madwifi-headers.tar.bz2
+Source5: madwifi-headers-r1475.tar.bz2
 Patch0: wpa_supplicant-auth-fallback-v4.patch
 Patch1: wpa_supplicant-ctrl-iface-ap-scan.patch
 Patch2: wpa_supplicant-ctrl-iface-hide-keys.patch
@@ -18,6 +18,8 @@ Patch3: wpa_supplicant-assoc-timeout.patch
 Patch4: wpa_supplicant-driver-wext-debug.patch
 Patch5: wpa_supplicant-wep-key-fix.patch
 Patch6: wpa_supplicant-ssid-len-fix.patch
+Patch7: wpa_supplicant-0.4.8-madwifi-privacy-invoked-fix.patch
+Patch8: wpa_supplicant-0.4.8-madwifi-ioctl-reorder.patch
 URL: http://hostap.epitest.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -50,6 +52,8 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch4 -p1 -b .driver-wext-debug
 %patch5 -p1 -b .wep-key-fix
 %patch6 -p1 -b .ssid-len-fix
+%patch7 -p1 -b .madwifi-privacy-invoked-fix
+%patch8 -p1 -b .madwifi-ioctl-reorder
 
 %build
 cp %{SOURCE1} ./.config
@@ -127,6 +131,11 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Thu Apr 27 2006 Dan Williams <dcbw@redhat.com> - 0.4.8-10
+- Add fix for madwifi and WEP (wpa_supplicant/hostap bud #140) (#rh190075#)
+- Fix up madwifi-ng private ioctl()s for r1331 and later
+- Update madwifi headers to r1475
+
 * Tue Apr 25 2006 Dan Williams <dcbw@redhat.com> - 0.4.8-9
 - Enable Wired driver, PKCS12, and Smartcard options (#rh189805#)
 
