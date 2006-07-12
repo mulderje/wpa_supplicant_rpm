@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.4.8
-Release: 10.fc6
+Release: 10.fc6.1
 License: GPL
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -131,6 +131,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Wed Jul 12 2006 Jesse Keating <jkeating@redhat.com> - sh: line 0: fg: no job control
+- rebuild
+
 * Thu Apr 27 2006 Dan Williams <dcbw@redhat.com> - 0.4.8-10
 - Add fix for madwifi and WEP (wpa_supplicant/hostap bud #140) (#rh190075#)
 - Fix up madwifi-ng private ioctl()s for r1331 and later
