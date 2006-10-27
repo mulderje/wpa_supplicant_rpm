@@ -1,8 +1,8 @@
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
-Version: 0.4.8
-Release: 10.1.fc6
+Version: 0.4.9
+Release: 1%{?dist}
 License: GPL
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -11,15 +11,11 @@ Source2: %{name}.conf
 Source3: %{name}.init.d
 Source4: %{name}.sysconfig
 Source5: madwifi-headers-r1475.tar.bz2
-Patch0: wpa_supplicant-auth-fallback-v4.patch
-Patch1: wpa_supplicant-ctrl-iface-ap-scan.patch
-Patch2: wpa_supplicant-ctrl-iface-hide-keys.patch
-Patch3: wpa_supplicant-assoc-timeout.patch
-Patch4: wpa_supplicant-driver-wext-debug.patch
-Patch5: wpa_supplicant-wep-key-fix.patch
-Patch6: wpa_supplicant-ssid-len-fix.patch
-Patch7: wpa_supplicant-0.4.8-madwifi-privacy-invoked-fix.patch
-Patch8: wpa_supplicant-0.4.8-madwifi-ioctl-reorder.patch
+Patch0: wpa_supplicant-ctrl-iface-ap-scan.patch
+Patch1: wpa_supplicant-assoc-timeout.patch
+Patch2: wpa_supplicant-driver-wext-debug.patch
+Patch3: wpa_supplicant-wep-key-fix.patch
+Patch4: wpa_supplicant-0.4.8-madwifi-ioctl-reorder.patch
 URL: http://hostap.epitest.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -45,15 +41,11 @@ Graphical User Interface for wpa_supplicant written using QT3
 
 %prep
 %setup -q
-%patch0 -p0 -b .we-auth-fallback
-%patch1 -p1 -b .ap-scan
-%patch2 -p1 -b .ctrl-iface-hide-keys
-%patch3 -p1 -b .assoc-timeout
-%patch4 -p1 -b .driver-wext-debug
-%patch5 -p1 -b .wep-key-fix
-%patch6 -p1 -b .ssid-len-fix
-%patch7 -p1 -b .madwifi-privacy-invoked-fix
-%patch8 -p1 -b .madwifi-ioctl-reorder
+%patch0 -p1 -b .ap-scan
+%patch1 -p1 -b .assoc-timeout
+%patch2 -p1 -b .driver-wext-debug
+%patch3 -p1 -b .wep-key-fix
+%patch4 -p1 -b .madwifi-ioctl-reorder
 
 %build
 cp %{SOURCE1} ./.config
@@ -114,7 +106,7 @@ fi
 
 %files
 %defattr(-, root, root)
-%doc COPYING ChangeLog README README-Windows.txt eap_testing.txt todo.txt wpa_supplicant.conf doc examples
+%doc COPYING ChangeLog README README-Windows.txt eap_testing.txt todo.txt wpa_supplicant.conf examples
 %config(noreplace) %{_sysconfdir}/%{name}/%{name}.conf
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 %{_sysconfdir}/rc.d/init.d/%{name}
@@ -131,6 +123,11 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Mon Oct 27 2006 Dan Williams <dcbw@redhat.com> - 0.4.9-1
+- Update to 0.4.9 for WE-21 fixes, remove upstreamed patches
+- Don't package doc/ because they aren't actually wpa_supplicant user documentation,
+    and becuase it pulls in perl
+
 * Wed Jul 12 2006 Jesse Keating <jkeating@redhat.com> - 0.4.8-10.1
 - rebuild
 
