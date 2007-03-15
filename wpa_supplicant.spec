@@ -1,7 +1,7 @@
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
-Version: 0.4.9
+Version: 0.5.7
 Release: 1%{?dist}
 License: GPL
 Group: System Environment/Base
@@ -11,17 +11,18 @@ Source2: %{name}.conf
 Source3: %{name}.init.d
 Source4: %{name}.sysconfig
 Source5: madwifi-headers-r1475.tar.bz2
-Patch0: wpa_supplicant-ctrl-iface-ap-scan.patch
-Patch1: wpa_supplicant-assoc-timeout.patch
-Patch2: wpa_supplicant-driver-wext-debug.patch
-Patch3: wpa_supplicant-wep-key-fix.patch
-Patch4: wpa_supplicant-0.4.8-madwifi-ioctl-reorder.patch
-URL: http://hostap.epitest.fi/wpa_supplicant/
+Patch0: wpa_supplicant-assoc-timeout.patch
+Patch1: wpa_supplicant-driver-wext-debug.patch
+Patch2: wpa_supplicant-wep-key-fix.patch
+# http://hostap.epitest.fi/bugz/show_bug.cgi?id=192
+Patch3: wpa_supplicant-fix-deprecated-dbus-function.patch
+URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 BuildRequires: qt-devel
 BuildRequires: openssl-devel
 BuildRequires: readline-devel
+BuildRequires: dbus-devel
 
 PreReq: chkconfig
 
@@ -41,11 +42,10 @@ Graphical User Interface for wpa_supplicant written using QT3
 
 %prep
 %setup -q
-%patch0 -p1 -b .ap-scan
-%patch1 -p1 -b .assoc-timeout
-%patch2 -p1 -b .driver-wext-debug
-%patch3 -p1 -b .wep-key-fix
-%patch4 -p1 -b .madwifi-ioctl-reorder
+%patch0 -p1 -b .assoc-timeout
+%patch1 -p1 -b .driver-wext-debug
+%patch2 -p1 -b .wep-key-fix
+%patch3 -p0 -b .fix-deprecated-dbus-functions
 
 %build
 cp %{SOURCE1} ./.config
@@ -71,6 +71,8 @@ install -d %{buildroot}/%{_sbindir}
 install -m 0755 -s wpa_passphrase %{buildroot}/%{_sbindir}
 install -m 0755 -s wpa_cli %{buildroot}/%{_sbindir}
 install -m 0755 -s wpa_supplicant %{buildroot}/%{_sbindir}
+mkdir -p %{buildroot}/%{_sysconfdir}/dbus-1/system.d/
+install -m 0644 dbus-wpa_supplicant.conf %{buildroot}/%{_sysconfdir}/dbus-1/system.d/wpa_supplicant.conf
 
 # gui
 install -d %{buildroot}/%{_bindir}
@@ -110,6 +112,7 @@ fi
 %config(noreplace) %{_sysconfdir}/%{name}/%{name}.conf
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 %{_sysconfdir}/rc.d/init.d/%{name}
+%{_sysconfdir}/dbus-1/system.d/%{name}.conf
 %{_sbindir}/wpa_passphrase
 %{_sbindir}/wpa_supplicant
 %{_sbindir}/wpa_cli
@@ -123,6 +126,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Thu Mar 15 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-1
+- Update to 0.5.7 stable release
+
 * Mon Oct 27 2006 Dan Williams <dcbw@redhat.com> - 0.4.9-1
 - Update to 0.4.9 for WE-21 fixes, remove upstreamed patches
 - Don't package doc/ because they aren't actually wpa_supplicant user documentation,
