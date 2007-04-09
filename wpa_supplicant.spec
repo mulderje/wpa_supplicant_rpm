@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.7
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: GPL
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -16,6 +16,7 @@ Patch1: wpa_supplicant-driver-wext-debug.patch
 Patch2: wpa_supplicant-wep-key-fix.patch
 # http://hostap.epitest.fi/bugz/show_bug.cgi?id=192
 Patch3: wpa_supplicant-fix-deprecated-dbus-function.patch
+Patch4: wpa_supplicant-0.5.7-use-syslog.patch
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -46,6 +47,7 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch1 -p1 -b .driver-wext-debug
 %patch2 -p1 -b .wep-key-fix
 %patch3 -p0 -b .fix-deprecated-dbus-functions
+%patch4 -p1 -b .syslog
 
 %build
 cp %{SOURCE1} ./.config
@@ -126,6 +128,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Mon Apr  9 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-2
+- Add patch to send output to syslog
+
 * Thu Mar 15 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-1
 - Update to 0.5.7 stable release
 

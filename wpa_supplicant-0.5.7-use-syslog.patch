@@ -1,0 +1,405 @@
+--- wpa_supplicant-0.5.7/wpa_supplicant.c.syslog	2007-04-09 10:54:27.000000000 -0400
++++ wpa_supplicant-0.5.7/wpa_supplicant.c	2007-04-09 10:54:27.000000000 -0400
+@@ -18,6 +18,8 @@
+ 
+ #include "includes.h"
+ 
++#include <syslog.h>
++
+ #include "common.h"
+ #include "eapol_sm.h"
+ #include "eap.h"
+@@ -111,6 +113,8 @@
+ extern int wpa_debug_show_keys;
+ extern int wpa_debug_timestamp;
+ 
++extern char * use_syslog;
++
+ static void wpa_supplicant_scan(void *eloop_ctx, void *timeout_ctx);
+ 
+ #if defined(IEEE8021X_EAPOL) || !defined(CONFIG_NO_WPA)
+@@ -2533,6 +2537,28 @@
+ 	return global;
+ }
+ 
++static int get_facility(const char *f)
++{
++	if (!strcmp(f, "authpriv"))	return LOG_AUTHPRIV;
++	if (!strcmp(f, "cron"))		return LOG_CRON;
++	if (!strcmp(f, "daemon"))	return LOG_DAEMON;
++	if (!strcmp(f, "ftp"))		return LOG_FTP;
++	if (!strcmp(f, "kern"))		return LOG_KERN;
++	if (!strcmp(f, "local0"))	return LOG_LOCAL0;
++	if (!strcmp(f, "local1"))	return LOG_LOCAL1;
++	if (!strcmp(f, "local2"))	return LOG_LOCAL2;
++	if (!strcmp(f, "local3"))	return LOG_LOCAL3;
++	if (!strcmp(f, "local4"))	return LOG_LOCAL4;
++	if (!strcmp(f, "local5"))	return LOG_LOCAL5;
++	if (!strcmp(f, "local6"))	return LOG_LOCAL6;
++	if (!strcmp(f, "local7"))	return LOG_LOCAL7;
++	if (!strcmp(f, "lpr"))		return LOG_LPR;
++	if (!strcmp(f, "mail"))		return LOG_MAIL;
++	if (!strcmp(f, "news"))		return LOG_NEWS;
++	if (!strcmp(f, "user"))		return LOG_USER;
++	if (!strcmp(f, "uucp"))		return LOG_UUCP;
++	return LOG_DAEMON;
++}
+ 
+ /**
+  * wpa_supplicant_run - Run the %wpa_supplicant main event loop
+@@ -2551,6 +2577,9 @@
+ 	    wpa_supplicant_daemon(global->params.pid_file))
+ 		return -1;
+ 
++	if (use_syslog)
++		openlog("wpa_supplicant", LOG_PID | LOG_CONS | LOG_PERROR, get_facility(use_syslog));
++
+ 	if (global->params.wait_for_monitor) {
+ 		for (wpa_s = global->ifaces; wpa_s; wpa_s = wpa_s->next)
+ 			if (wpa_s->ctrl_iface)
+@@ -2563,6 +2592,9 @@
+ 
+ 	eloop_run();
+ 
++	if (use_syslog)
++		closelog();
++
+ 	return 0;
+ }
+ 
+--- wpa_supplicant-0.5.7/common.c.syslog	2006-12-31 16:41:44.000000000 -0500
++++ wpa_supplicant-0.5.7/common.c	2007-04-09 10:54:27.000000000 -0400
+@@ -13,6 +13,7 @@
+  */
+ 
+ #include "includes.h"
++#include <syslog.h>
+ 
+ #include "common.h"
+ 
+@@ -37,6 +38,7 @@
+ 	return -1;
+ }
+ 
++extern char * use_syslog;
+ 
+ static int hex2byte(const char *hex)
+ {
+@@ -162,6 +164,35 @@
+ 	printf("%ld.%06u: ", (long) tv.sec, (unsigned int) tv.usec);
+ }
+ 
++char * wpa_debug_print_timestamp_internal(char *out)
++{
++	struct timeval tv;
++	char buf[16];
++	char *p = out;
++
++	if (!wpa_debug_timestamp)
++		return out;
++
++	gettimeofday(&tv, NULL);
++	if (strftime(buf, sizeof(buf), "%b %d %H:%M:%S",
++		     localtime((const time_t *) &tv.tv_sec)) <= 0) {
++		snprintf(buf, sizeof(buf), "%u", (int) tv.tv_sec);
++	}
++	return p + sprintf(out, "%s.%06u: ", buf, (unsigned int) tv.tv_usec);
++}
++
++int wpa_to_syslog_level(int wpal)
++{
++	if (wpal <= MSG_DEBUG)
++		return LOG_DEBUG;
++	else if (wpal == MSG_INFO)
++		return LOG_INFO;
++	else if (wpal == MSG_WARNING)
++		return LOG_WARNING;
++	else if (wpal == MSG_ERROR)
++		return LOG_ERR;
++	return LOG_INFO;
++}
+ 
+ /**
+  * wpa_printf - conditional printf
+@@ -177,20 +208,26 @@
+ void wpa_printf(int level, char *fmt, ...)
+ {
+ 	va_list ap;
++	char out_buf[2048];
++	char * p = &out_buf[0];
+ 
+ 	va_start(ap, fmt);
+ 	if (level >= wpa_debug_level) {
+ 		wpa_debug_print_timestamp();
++		p = wpa_debug_print_timestamp_internal(p);
++		vsprintf(p, fmt, ap);
++		if (use_syslog)
++			syslog(wpa_to_syslog_level(level), "%s\n", out_buf);
++		else
+ #ifdef CONFIG_DEBUG_FILE
+-		if (out_file) {
+-			vfprintf(out_file, fmt, ap);
+-			fprintf(out_file, "\n");
+-		} else {
++			if (out_file) {
++				fprintf(out_file, out_buf);
++				fprintf(out_file, "\n");
++			} else {
+ #endif /* CONFIG_DEBUG_FILE */
+-		vprintf(fmt, ap);
+-		printf("\n");
++				printf("%s\n", out_buf);
+ #ifdef CONFIG_DEBUG_FILE
+-		}
++			}
+ #endif /* CONFIG_DEBUG_FILE */
+ 	}
+ 	va_end(ap);
+@@ -201,36 +238,33 @@
+ 			 size_t len, int show)
+ {
+ 	size_t i;
++	char out_buf[2048];
++	char * p = &out_buf[0];
++
+ 	if (level < wpa_debug_level)
+ 		return;
+-	wpa_debug_print_timestamp();
+-#ifdef CONFIG_DEBUG_FILE
+-	if (out_file) {
+-		fprintf(out_file, "%s - hexdump(len=%lu):",
+-			title, (unsigned long) len);
+-		if (buf == NULL) {
+-			fprintf(out_file, " [NULL]");
+-		} else if (show) {
+-			for (i = 0; i < len; i++)
+-				fprintf(out_file, " %02x", buf[i]);
+-		} else {
+-			fprintf(out_file, " [REMOVED]");
+-		}
+-		fprintf(out_file, "\n");
+-	} else {
+-#endif /* CONFIG_DEBUG_FILE */
+-	printf("%s - hexdump(len=%lu):", title, (unsigned long) len);
++	p = wpa_debug_print_timestamp_internal(p);
++	p += sprintf(p, "%s - hexdump(len=%lu):", title, (unsigned long) len);
+ 	if (buf == NULL) {
+-		printf(" [NULL]");
++		p += sprintf(p, " [NULL]");
+ 	} else if (show) {
+ 		for (i = 0; i < len; i++)
+-			printf(" %02x", buf[i]);
++			p += sprintf(p, " %02x", buf[i]);
+ 	} else {
+-		printf(" [REMOVED]");
++		p += sprintf(p, " [REMOVED]");
+ 	}
+-	printf("\n");
++	if (use_syslog)
++		syslog(wpa_to_syslog_level(level), "%s\n", out_buf);
++	else
+ #ifdef CONFIG_DEBUG_FILE
+-	}
++		if (out_file) {
++			fprintf(out_file, out_buf);
++			fprintf(out_file, "\n");
++		} else {
++#endif /* CONFIG_DEBUG_FILE */
++			printf("%s\n", out_buf);
++#ifdef CONFIG_DEBUG_FILE
++		}
+ #endif /* CONFIG_DEBUG_FILE */
+ }
+ 
+@@ -252,81 +286,55 @@
+ 	size_t i, llen;
+ 	const u8 *pos = buf;
+ 	const size_t line_len = 16;
++	char out_buf[2048];
++	char * p = &out_buf[0];
+ 
+ 	if (level < wpa_debug_level)
+ 		return;
+-	wpa_debug_print_timestamp();
+-#ifdef CONFIG_DEBUG_FILE
+-	if (out_file) {
+-		if (!show) {
+-			fprintf(out_file,
+-				"%s - hexdump_ascii(len=%lu): [REMOVED]\n",
+-				title, (unsigned long) len);
+-			return;
+-		}
+-		if (buf == NULL) {
+-			fprintf(out_file,
+-				"%s - hexdump_ascii(len=%lu): [NULL]\n",
+-				title, (unsigned long) len);
+-			return;
+-		}
+-		fprintf(out_file, "%s - hexdump_ascii(len=%lu):\n",
+-			title, (unsigned long) len);
+-		while (len) {
+-			llen = len > line_len ? line_len : len;
+-			fprintf(out_file, "    ");
+-			for (i = 0; i < llen; i++)
+-				fprintf(out_file, " %02x", pos[i]);
+-			for (i = llen; i < line_len; i++)
+-				fprintf(out_file, "   ");
+-			fprintf(out_file, "   ");
+-			for (i = 0; i < llen; i++) {
+-				if (isprint(pos[i]))
+-					fprintf(out_file, "%c", pos[i]);
+-				else
+-					fprintf(out_file, "_");
+-			}
+-			for (i = llen; i < line_len; i++)
+-				fprintf(out_file, " ");
+-			fprintf(out_file, "\n");
+-			pos += llen;
+-			len -= llen;
+-		}
+-	} else {
+-#endif /* CONFIG_DEBUG_FILE */
++	p = wpa_debug_print_timestamp_internal(p);
+ 	if (!show) {
+-		printf("%s - hexdump_ascii(len=%lu): [REMOVED]\n",
++		p += sprintf(p, "%s - hexdump_ascii(len=%lu): [REMOVED]\n",
+ 		       title, (unsigned long) len);
+-		return;
++		goto out;
+ 	}
+ 	if (buf == NULL) {
+-		printf("%s - hexdump_ascii(len=%lu): [NULL]\n",
++		p += sprintf(p, "%s - hexdump_ascii(len=%lu): [NULL]\n",
+ 		       title, (unsigned long) len);
+-		return;
++		goto out;
+ 	}
+-	printf("%s - hexdump_ascii(len=%lu):\n", title, (unsigned long) len);
++	p += sprintf(p, "%s - hexdump_ascii(len=%lu):\n", title, (unsigned long) len);
+ 	while (len) {
+ 		llen = len > line_len ? line_len : len;
+-		printf("    ");
++		p += sprintf(p, "    ");
+ 		for (i = 0; i < llen; i++)
+-			printf(" %02x", pos[i]);
++			p += sprintf(p, " %02x", pos[i]);
+ 		for (i = llen; i < line_len; i++)
+-			printf("   ");
+-		printf("   ");
++			p += sprintf(p, "   ");
++		p += sprintf(p, "   ");
+ 		for (i = 0; i < llen; i++) {
+ 			if (isprint(pos[i]))
+-				printf("%c", pos[i]);
++				p += sprintf(p, "%c", pos[i]);
+ 			else
+-				printf("_");
++				p += sprintf(p, "_");
+ 		}
+ 		for (i = llen; i < line_len; i++)
+-			printf(" ");
+-		printf("\n");
++			p += sprintf(p, " ");
+ 		pos += llen;
+ 		len -= llen;
+ 	}
++out:
++	if (use_syslog)
++		syslog(wpa_to_syslog_level(level), "%s\n", out_buf);
++	else
+ #ifdef CONFIG_DEBUG_FILE
+-	}
++		if (out_file) {
++			fprintf(out_file, out_buf);
++			fprintf(out_file, "\n");
++		} else {
++#endif /* CONFIG_DEBUG_FILE */
++			printf("%s\n", out_buf);
++#ifdef CONFIG_DEBUG_FILE
++		}
+ #endif /* CONFIG_DEBUG_FILE */
+ }
+ 
+--- wpa_supplicant-0.5.7/wpa_passphrase.c.syslog	2007-04-09 10:55:41.000000000 -0400
++++ wpa_supplicant-0.5.7/wpa_passphrase.c	2007-04-09 10:55:53.000000000 -0400
+@@ -17,6 +17,7 @@
+ #include "common.h"
+ #include "sha1.h"
+ 
++char * use_syslog = NULL;
+ 
+ int main(int argc, char *argv[])
+ {
+--- wpa_supplicant-0.5.7/main.c.syslog	2006-11-29 22:37:01.000000000 -0500
++++ wpa_supplicant-0.5.7/main.c	2007-04-09 10:54:27.000000000 -0400
+@@ -33,6 +33,7 @@
+ 
+ extern struct wpa_driver_ops *wpa_supplicant_drivers[];
+ 
++char * use_syslog = NULL;
+ 
+ static void usage(void)
+ {
+@@ -69,7 +70,8 @@
+ 	       "  -K = include keys (passwords, etc.) in debug output\n"
+ 	       "  -t = include timestamp in debug messages\n"
+ 	       "  -h = show this help text\n"
+-	       "  -L = show license (GPL and BSD)\n");
++	       "  -L = show license (GPL and BSD)\n"
++	       "  -o = syslog facility to use\n");
+ 	printf("  -p = driver parameters\n"
+ 	       "  -P = PID file\n"
+ 	       "  -q = decrease debugging verbosity (-qq even less)\n"
+@@ -120,6 +122,20 @@
+ #endif /* __linux__ */
+ }
+ 
++static int
++validate_syslog_facility(const char * f)
++{
++	if (!f) return 0;
++	if (strcmp(f, "authpriv") && strcmp(f, "cron") && strcmp(f, "daemon")
++	    && strcmp(f, "ftp") && strcmp(f, "kern") && strcmp(f, "local0")
++	    && strcmp(f, "local1") && strcmp(f, "local2") && strcmp(f, "local3")
++	    && strcmp(f, "local4") && strcmp(f, "local5") && strcmp(f, "local6")
++	    && strcmp(f, "local8") && strcmp(f, "lpr") && strcmp(f, "mail")
++	    && strcmp(f, "news") && strcmp(f, "user") && strcmp(f, "uucp"))
++		return -1;
++	return 0;
++}
++
+ 
+ int main(int argc, char *argv[])
+ {
+@@ -143,7 +159,7 @@
+ 	wpa_supplicant_fd_workaround();
+ 
+ 	for (;;) {
+-		c = getopt(argc, argv, "b:Bc:C:D:dg:hi:KLNp:P:qtuvwW");
++		c = getopt(argc, argv, "b:Bc:C:D:dg:hi:KLNo:p:P:qtuvwW");
+ 		if (c < 0)
+ 			break;
+ 		switch (c) {
+@@ -187,6 +203,9 @@
+ 		case 'L':
+ 			license();
+ 			goto out;
++		case 'o':
++			use_syslog = optarg;
++			break;
+ 		case 'p':
+ 			iface->driver_param = optarg;
+ 			break;
+@@ -231,6 +250,12 @@
+ 	}
+ 
+ 	exitcode = 0;
++
++	if (validate_syslog_facility (use_syslog)) {
++		printf("Invalid syslog facility '%s'\n", use_syslog);
++		exitcode = -1;
++	}
++
+ 	global = wpa_supplicant_init(&params);
+ 	if (global == NULL) {
+ 		printf("Failed to initialize wpa_supplicant\n");
