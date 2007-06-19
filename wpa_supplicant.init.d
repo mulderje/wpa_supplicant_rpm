@@ -31,7 +31,7 @@ lockfile=/var/lock/subsys/$prog
 [ "$DRIVERS" != "" ] || exit 0
 
 start() {
- 	echo -n $"Starting $prog: "
+ 	echo -n $"Starting $prog: $conf, $INTERFACES, $DRIVERS"
 	daemon $prog -c $conf $INTERFACES $DRIVERS -B
 	retval=$?
 	echo

@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.7
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: GPL
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -126,6 +126,10 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Tue Jun 19 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-4
+- Fix initscripts to use -Dwext by default, be more verbose on startup
+    (rh #244511)
+
 * Mon Jun  4 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-3
 - Fix buffer overflow by removing syslog patch (#rh242455)
 
