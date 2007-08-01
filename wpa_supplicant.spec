@@ -16,6 +16,9 @@ Patch1: wpa_supplicant-driver-wext-debug.patch
 Patch2: wpa_supplicant-wep-key-fix.patch
 # http://hostap.epitest.fi/bugz/show_bug.cgi?id=192
 Patch3: wpa_supplicant-fix-deprecated-dbus-function.patch
+Patch4: wpa_supplicant-0.5.7-debug-file.patch
+Patch5: wpa_supplicant-0.5.7-qmake-location.patch
+Patch6: wpa_supplicant-0.5.7-flush-debug-output.patch
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -46,10 +49,15 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch1 -p1 -b .driver-wext-debug
 %patch2 -p1 -b .wep-key-fix
 %patch3 -p0 -b .fix-deprecated-dbus-functions
+%patch4 -p1 -b .debug-file
+%patch5 -p1 -b .qmake-location
+%patch6 -p1 -b .flush-debug-output
 
 %build
 cp %{SOURCE1} ./.config
 tar -xjf %{SOURCE5}
+CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ;
+CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS ;
 make %{_smp_mflags}
 QTDIR=%{_libdir}/qt-3.3 make wpa_gui %{_smp_mflags}
 
@@ -129,6 +137,8 @@ fi
 * Tue Jun 19 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-4
 - Fix initscripts to use -Dwext by default, be more verbose on startup
     (rh #244511)
+- Fix compilation with RPM_OPT_FLAGS (rh #249951)
+- Make debug output to logfile a runtime option
 
 * Mon Jun  4 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-3
 - Fix buffer overflow by removing syslog patch (#rh242455)
