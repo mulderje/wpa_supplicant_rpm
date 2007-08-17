@@ -2,8 +2,8 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.7
-Release: 4%{?dist}
-License: GPL
+Release: 5%{?dist}
+License: GPLv2
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
 Source1: %{name}.config
@@ -126,6 +126,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Fri Aug 17 2007 Christopher Aillon <caillon@redhat.com> - 0.5.7-5
+- Update the license tag
+
 * Tue Jun 19 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-4
 - Fix initscripts to use -Dwext by default, be more verbose on startup
     (rh #244511)
