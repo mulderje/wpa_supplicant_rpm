@@ -18,21 +18,16 @@
 # Source networking configuration.
 . /etc/sysconfig/network
 
-# Check that networking is up.
-[ "$NETWORKING" = "no" ] && exit 0
-
 exec="/usr/sbin/wpa_supplicant"
 prog=$(basename $exec)
 conf="/etc/wpa_supplicant/wpa_supplicant.conf"
 lockfile=/var/lock/subsys/$prog
 
 [ -e /etc/sysconfig/$prog ] && . /etc/sysconfig/$prog
-[ "$INTERFACES" != "" ] || exit 0
-[ "$DRIVERS" != "" ] || exit 0
 
 start() {
  	echo -n $"Starting $prog: $conf, $INTERFACES, $DRIVERS"
-	daemon $prog -c $conf $INTERFACES $DRIVERS -B
+	daemon $prog -c $conf $INTERFACES $DRIVERS -B -u -f
 	retval=$?
 	echo
 	[ $retval -eq 0 ] && touch $lockfile

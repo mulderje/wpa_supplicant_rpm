@@ -1,2 +1,2 @@
-INTERFACES="-iwlan0"
-DRIVERS="-Dwext"
+INTERFACES=""
+DRIVERS=""

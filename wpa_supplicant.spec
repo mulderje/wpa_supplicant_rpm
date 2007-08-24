@@ -11,6 +11,7 @@ Source2: %{name}.conf
 Source3: %{name}.init.d
 Source4: %{name}.sysconfig
 Source5: madwifi-headers-r1475.tar.bz2
+Source6: %{name}.service
 Patch0: wpa_supplicant-assoc-timeout.patch
 Patch1: wpa_supplicant-driver-wext-debug.patch
 Patch2: wpa_supplicant-wep-key-fix.patch
@@ -81,8 +82,10 @@ install -d %{buildroot}/%{_sbindir}
 install -m 0755 wpa_passphrase %{buildroot}/%{_sbindir}
 install -m 0755 wpa_cli %{buildroot}/%{_sbindir}
 install -m 0755 wpa_supplicant %{buildroot}/%{_sbindir}
-mkdir -p %{buildroot}/%{_sysconfdir}/dbus-1/system.d/
+install -d %{buildroot}/%{_sysconfdir}/dbus-1/system.d/
 install -m 0644 dbus-wpa_supplicant.conf %{buildroot}/%{_sysconfdir}/dbus-1/system.d/wpa_supplicant.conf
+install -d %{buildroot}/%{_datadir}/dbus-1/system-services/
+install -m 0644 %{SOURCE6} %{buildroot}/%{_datadir}/dbus-1/system-services
 
 # gui
 install -d %{buildroot}/%{_bindir}
@@ -118,11 +121,12 @@ fi
 
 %files
 %defattr(-, root, root)
-%doc COPYING ChangeLog README README-Windows.txt eap_testing.txt todo.txt wpa_supplicant.conf examples
+%doc COPYING ChangeLog README eap_testing.txt todo.txt wpa_supplicant.conf examples
 %config(noreplace) %{_sysconfdir}/%{name}/%{name}.conf
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 %{_sysconfdir}/rc.d/init.d/%{name}
 %{_sysconfdir}/dbus-1/system.d/%{name}.conf
+%{_datadir}/dbus-1/system-services/%{name}.service
 %{_sbindir}/wpa_passphrase
 %{_sbindir}/wpa_supplicant
 %{_sbindir}/wpa_cli
@@ -140,6 +144,8 @@ fi
 - Make SIGUSR1 change debug level on-the-fly; useful in combination with
     the -f switch to log output to /var/log/wpa_supplicant.log
 - Stop stripping binaries on install so we get debuginfo packages
+- Remove service start requirement for interfaces & devices from sysconfig file,
+    since wpa_supplicant's D-Bus interface is now turned on
 
 * Fri Aug 17 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-6
 - Fix compilation with RPM_OPT_FLAGS (rh #249951)
