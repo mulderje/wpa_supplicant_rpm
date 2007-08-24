@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.7
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: GPLv2
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -19,6 +19,7 @@ Patch3: wpa_supplicant-fix-deprecated-dbus-function.patch
 Patch4: wpa_supplicant-0.5.7-debug-file.patch
 Patch5: wpa_supplicant-0.5.7-qmake-location.patch
 Patch6: wpa_supplicant-0.5.7-flush-debug-output.patch
+Patch7: wpa_supplicant-0.5.7-sigusr1-changes-debuglevel.patch
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -52,6 +53,7 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch4 -p1 -b .debug-file
 %patch5 -p1 -b .qmake-location
 %patch6 -p1 -b .flush-debug-output
+%patch7 -p1 -b .sigusr1-changes-debuglevel
 
 %build
 cp %{SOURCE1} ./.config
@@ -76,15 +78,15 @@ install -m 0600 %{SOURCE2} %{buildroot}/%{_sysconfdir}/%{name}
 
 # binary
 install -d %{buildroot}/%{_sbindir}
-install -m 0755 -s wpa_passphrase %{buildroot}/%{_sbindir}
-install -m 0755 -s wpa_cli %{buildroot}/%{_sbindir}
-install -m 0755 -s wpa_supplicant %{buildroot}/%{_sbindir}
+install -m 0755 wpa_passphrase %{buildroot}/%{_sbindir}
+install -m 0755 wpa_cli %{buildroot}/%{_sbindir}
+install -m 0755 wpa_supplicant %{buildroot}/%{_sbindir}
 mkdir -p %{buildroot}/%{_sysconfdir}/dbus-1/system.d/
 install -m 0644 dbus-wpa_supplicant.conf %{buildroot}/%{_sysconfdir}/dbus-1/system.d/wpa_supplicant.conf
 
 # gui
 install -d %{buildroot}/%{_bindir}
-install -m 0755 -s wpa_gui/wpa_gui %{buildroot}/%{_bindir}
+install -m 0755 wpa_gui/wpa_gui %{buildroot}/%{_bindir}
 
 # running
 mkdir -p %{buildroot}/%{_localstatedir}/run/%{name}
@@ -134,6 +136,11 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Fri Aug 24 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-7
+- Make SIGUSR1 change debug level on-the-fly; useful in combination with
+    the -f switch to log output to /var/log/wpa_supplicant.log
+- Stop stripping binaries on install so we get debuginfo packages
+
 * Fri Aug 17 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-6
 - Fix compilation with RPM_OPT_FLAGS (rh #249951)
 - Make debug output to logfile a runtime option
