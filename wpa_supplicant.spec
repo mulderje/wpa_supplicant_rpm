@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.7
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: GPLv2
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -11,7 +11,7 @@ Source2: %{name}.conf
 Source3: %{name}.init.d
 Source4: %{name}.sysconfig
 Source5: madwifi-headers-r1475.tar.bz2
-Source6: %{name}.service
+Source6: fi.epitest.hostap.WPASupplicant.service
 Patch0: wpa_supplicant-assoc-timeout.patch
 Patch1: wpa_supplicant-driver-wext-debug.patch
 Patch2: wpa_supplicant-wep-key-fix.patch
@@ -126,7 +126,7 @@ fi
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 %{_sysconfdir}/rc.d/init.d/%{name}
 %{_sysconfdir}/dbus-1/system.d/%{name}.conf
-%{_datadir}/dbus-1/system-services/%{name}.service
+%{_datadir}/dbus-1/system-services/fi.epitest.hostap.WPASupplicant.service
 %{_sbindir}/wpa_passphrase
 %{_sbindir}/wpa_supplicant
 %{_sbindir}/wpa_cli
@@ -140,6 +140,11 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Thu Sep 20 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-8
+- Change system bus activation file name to work around D-Bus bug that fails
+    to launch services unless their .service file is named the same as the
+    service itself
+
 * Fri Aug 24 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-7
 - Make SIGUSR1 change debug level on-the-fly; useful in combination with
     the -f switch to log output to /var/log/wpa_supplicant.log
