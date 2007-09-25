@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.7
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: GPLv2
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -21,6 +21,7 @@ Patch4: wpa_supplicant-0.5.7-debug-file.patch
 Patch5: wpa_supplicant-0.5.7-qmake-location.patch
 Patch6: wpa_supplicant-0.5.7-flush-debug-output.patch
 Patch7: wpa_supplicant-0.5.7-sigusr1-changes-debuglevel.patch
+Patch8: wpa_supplicant-0.5.7-always-scan.patch
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -55,6 +56,7 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch5 -p1 -b .qmake-location
 %patch6 -p1 -b .flush-debug-output
 %patch7 -p1 -b .sigusr1-changes-debuglevel
+%patch8 -p1 -b .always-scan
 
 %build
 cp %{SOURCE1} ./.config
@@ -140,6 +142,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Tue Sep 25 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-9
+- Always allow explicit wireless scans triggered from a control interface
+
 * Thu Sep 20 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-8
 - Change system bus activation file name to work around D-Bus bug that fails
     to launch services unless their .service file is named the same as the
