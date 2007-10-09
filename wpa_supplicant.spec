@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.7
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: GPLv2
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -22,6 +22,7 @@ Patch5: wpa_supplicant-0.5.7-qmake-location.patch
 Patch6: wpa_supplicant-0.5.7-flush-debug-output.patch
 Patch7: wpa_supplicant-0.5.7-sigusr1-changes-debuglevel.patch
 Patch8: wpa_supplicant-0.5.7-always-scan.patch
+Patch9: wpa_supplicant-0.5.7-dbus-iface-segfault-fix.patch
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -57,6 +58,7 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch6 -p1 -b .flush-debug-output
 %patch7 -p1 -b .sigusr1-changes-debuglevel
 %patch8 -p1 -b .always-scan
+%patch9 -p1 -b .dbus-iface-segfault-fix
 
 %build
 cp %{SOURCE1} ./.config
@@ -142,6 +144,10 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Tue Oct  9 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-10
+- Don't segfault with dbus control interface enabled and invalid network
+    interface (rh #310531)
+
 * Tue Sep 25 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-9
 - Always allow explicit wireless scans triggered from a control interface
 
