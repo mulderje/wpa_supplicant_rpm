@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.7
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: GPLv2
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -23,6 +23,8 @@ Patch6: wpa_supplicant-0.5.7-flush-debug-output.patch
 Patch7: wpa_supplicant-0.5.7-sigusr1-changes-debuglevel.patch
 Patch8: wpa_supplicant-0.5.7-always-scan.patch
 Patch9: wpa_supplicant-0.5.7-dbus-iface-segfault-fix.patch
+Patch10: wpa_supplicant-0.5.7-dbus-blobs.patch
+Patch11: wpa_supplicant-0.5.7-dbus-permissions-fix.patch
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -59,6 +61,8 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch7 -p1 -b .sigusr1-changes-debuglevel
 %patch8 -p1 -b .always-scan
 %patch9 -p1 -b .dbus-iface-segfault-fix
+%patch10 -p2 -b .dbus-blobs
+%patch11 -p1 -b .dbus-permissions-fix
 
 %build
 cp %{SOURCE1} ./.config
@@ -144,6 +148,11 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Sat Oct 20 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-11
+- Add BLOB support to the D-Bus interface
+- Fix D-Bus interface permissions so that only root can use the wpa_supplicant
+    D-Bus interface
+
 * Tue Oct  9 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-10
 - Don't segfault with dbus control interface enabled and invalid network
     interface (rh #310531)
