@@ -17,7 +17,7 @@ diff --git a/wpa_supplicant/ctrl_iface_dbus_handlers.c b/wpa_supplicant/ctrl_ifa
 index 5e952ec..3ece2fe 100644
 --- a/wpa_supplicant/ctrl_iface_dbus_handlers.c
 +++ b/wpa_supplicant/ctrl_iface_dbus_handlers.c
-@@ -1203,3 +1203,128 @@ DBusMessage * wpas_dbus_iface_get_state(DBusMessage *message,
+@@ -1203,3 +1203,129 @@ DBusMessage * wpas_dbus_iface_get_state(DBusMessage *message,
  
  	return reply;
  }
@@ -84,6 +84,7 @@ index 5e952ec..3ece2fe 100644
 +		}
 +
 +		blob->name = os_strdup(entry.key);
++		blob->len = entry.array_len;
 +		os_memcpy(blob->data, (u8 *) entry.bytearray_value,
 +				entry.array_len);
 +		if (blob->name == NULL || blob->data == NULL) {

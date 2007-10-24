@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.7
-Release: 12%{?dist}
+Release: 13%{?dist}
 License: GPLv2
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -148,6 +148,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Wed Oct 24 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-13
+- Correctly set the length of blobs added via the D-Bus interface
+
 * Wed Oct 24 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-12
 - Fix conversion of byte arrays to strings by ensuring the buffer is NULL
     terminated after conversion
