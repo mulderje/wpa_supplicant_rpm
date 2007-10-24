@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.7
-Release: 11%{?dist}
+Release: 12%{?dist}
 License: GPLv2
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -148,6 +148,10 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Wed Oct 24 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-12
+- Fix conversion of byte arrays to strings by ensuring the buffer is NULL
+    terminated after conversion
+
 * Sat Oct 20 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-11
 - Add BLOB support to the D-Bus interface
 - Fix D-Bus interface permissions so that only root can use the wpa_supplicant
