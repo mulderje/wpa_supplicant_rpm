@@ -164,8 +164,8 @@ index 0fd1d31..0ae94c4 100644
  
  #endif /* CTRL_IFACE_DBUS_HANDLERS_H */
 diff -up wpa_supplicant-0.5.7/config.c.dbus-blobs wpa_supplicant-0.5.7/config.c
---- wpa_supplicant-0.5.7/config.c.dbus-blobs	2007-10-24 16:41:37.000000000 -0400
-+++ wpa_supplicant-0.5.7/config.c	2007-10-24 16:41:49.000000000 -0400
+--- a/wpa_supplicant-0.5.7/config.c.dbus-blobs	2007-10-24 16:41:37.000000000 -0400
++++ b/wpa_supplicant-0.5.7/config.c	2007-10-24 16:41:49.000000000 -0400
 @@ -70,13 +70,14 @@ static char * wpa_config_parse_string(co
  		if (hlen & 1)
  			return NULL;
