@@ -1,0 +1,22 @@
+diff -up wpa_supplicant-0.5.7/tls_openssl.c.ignore-dup-ca-cert wpa_supplicant-0.5.7/tls_openssl.c
+--- wpa_supplicant-0.5.7/tls_openssl.c.ignore-dup-ca-cert	2007-10-27 23:20:13.000000000 -0400
++++ wpa_supplicant-0.5.7/tls_openssl.c	2007-10-27 23:20:57.000000000 -0400
+@@ -1105,11 +1105,13 @@ static int tls_connection_ca_cert(void *
+ 		}
+ 
+ 		if (!X509_STORE_add_cert(ssl_ctx->cert_store, cert)) {
+-			tls_show_errors(MSG_WARNING, __func__,
+-					"Failed to add ca_cert_blob to "
+-					"certificate store");
+-			X509_free(cert);
+-			return -1;
++			if (ERR_get_error() != X509_R_CERT_ALREADY_IN_HASH_TABLE) {
++				tls_show_errors(MSG_WARNING, __func__,
++						"Failed to add ca_cert_blob to "
++						"certificate store");
++				X509_free(cert);
++				return -1;
++			}
+ 		}
+ 		X509_free(cert);
+ 		wpa_printf(MSG_DEBUG, "OpenSSL: %s - added ca_cert_blob "
