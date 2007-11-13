@@ -2,8 +2,8 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.7
-Release: 11%{?dist}
-License: GPLv2
+Release: 16%{?dist}
+License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
 Source1: %{name}.config
@@ -25,6 +25,9 @@ Patch8: wpa_supplicant-0.5.7-always-scan.patch
 Patch9: wpa_supplicant-0.5.7-dbus-iface-segfault-fix.patch
 Patch10: wpa_supplicant-0.5.7-dbus-blobs.patch
 Patch11: wpa_supplicant-0.5.7-dbus-permissions-fix.patch
+Patch12: wpa_supplicant-0.5.7-ignore-dup-ca-cert-addition.patch
+Patch13: wpa_supplicant-0.5.7-fix-dynamic-wep-with-mac80211.patch
+Patch14: wpa_supplicant-0.5.7-use-IW_ENCODE_TEMP.patch
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -63,6 +66,9 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch9 -p1 -b .dbus-iface-segfault-fix
 %patch10 -p2 -b .dbus-blobs
 %patch11 -p1 -b .dbus-permissions-fix
+%patch12 -p1 -b .ignore-dup-ca-cert-addition
+%patch13 -p1 -b .fix-dynamic-wep-with-mac80211
+%patch14 -p1 -b .use-IW_ENCODE_TEMP
 
 %build
 cp %{SOURCE1} ./.config
@@ -148,6 +154,28 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Tue Nov 13 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-16
+- Add IW_ENCODE_TEMP patch for airo driver and Dynamic WEP
+- Fix error in wpa_supplicant-0.5.7-ignore-dup-ca-cert-addition.patch that
+    caused the last error to not be printed
+- Fix wpa_supplicant-0.5.7-ignore-dup-ca-cert-addition.patch to ignore
+    duplicate cert additions for all certs and keys
+- Change license to BSD due to linkage against OpenSSL since there is no
+    OpenSSL exception in the GPLv2 license text that upstream ships
+
+* Sun Oct 28 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-15
+- Fix Dynamic WEP associations with mac80211-based drivers
+
+* Sun Oct 28 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-14
+- Don't error an association on duplicate CA cert additions
+
+* Wed Oct 24 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-13
+- Correctly set the length of blobs added via the D-Bus interface
+
+* Wed Oct 24 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-12
+- Fix conversion of byte arrays to strings by ensuring the buffer is NULL
+    terminated after conversion
+
 * Sat Oct 20 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-11
 - Add BLOB support to the D-Bus interface
 - Fix D-Bus interface permissions so that only root can use the wpa_supplicant
