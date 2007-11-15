@@ -2,7 +2,7 @@
 #
 # wpa_supplicant 
 #
-# chkconfig:   - 12 88
+# chkconfig:   - 23 88
 # description: wpa_supplicant is a WPA Supplicant for Linux, BSD and \
 #     Windows with support for WPA and WPA2 (IEEE 802.11i / RSN). Supplicant \
 #     is the IEEE 802.1X/WPA component that is used in the client stations. \
@@ -72,7 +72,7 @@ case "$1" in
 		fdr_status
 		;;
 	condrestart|try-restart)
-		[ -f $lockfile ] || restart
+		[ -f $lockfile ] && restart
 		;;
 	*)
 		echo $"Usage: $0 {start|stop|status|restart|try-restart|reload|force-reload}"

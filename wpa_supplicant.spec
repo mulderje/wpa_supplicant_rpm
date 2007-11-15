@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.7
-Release: 16%{?dist}
+Release: 17%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -154,6 +154,10 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Thu Nov 15 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-17
+- Start after messagebus service (rh #385191)
+- Fix initscript 'condrestart' command (rh #217281)
+
 * Tue Nov 13 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-16
 - Add IW_ENCODE_TEMP patch for airo driver and Dynamic WEP
 - Fix error in wpa_supplicant-0.5.7-ignore-dup-ca-cert-addition.patch that
