@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.7
-Release: 16%{?dist}
+Release: 17%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -47,7 +47,7 @@ authentication/association of the wlan driver.
 
 %package gui
 Summary: Graphical User Interface for %{name}
-Group: Application/System
+Group: Applications/System
 
 %description gui
 Graphical User Interface for wpa_supplicant written using QT3
@@ -154,6 +154,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Tue Dec  4 2007 Ville Skyttä <ville.skytta at iki.fi> - 1:0.5.7-17
+- Group: Application/System -> Applications/System in -gui.
+
 * Tue Nov 13 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-16
 - Add IW_ENCODE_TEMP patch for airo driver and Dynamic WEP
 - Fix error in wpa_supplicant-0.5.7-ignore-dup-ca-cert-addition.patch that
