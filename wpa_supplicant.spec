@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.7
-Release: 18%{?dist}
+Release: 19%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -29,6 +29,7 @@ Patch11: wpa_supplicant-0.5.7-dbus-permissions-fix.patch
 Patch12: wpa_supplicant-0.5.7-ignore-dup-ca-cert-addition.patch
 Patch13: wpa_supplicant-0.5.7-fix-dynamic-wep-with-mac80211.patch
 Patch14: wpa_supplicant-0.5.7-use-IW_ENCODE_TEMP.patch
+Patch15: wpa_supplicant-0.5.7-fix-signal-leaks.patch
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -70,6 +71,7 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch12 -p1 -b .ignore-dup-ca-cert-addition
 %patch13 -p1 -b .fix-dynamic-wep-with-mac80211
 %patch14 -p1 -b .use-IW_ENCODE_TEMP
+%patch15 -p1 -b .signal-leak-fixes
 
 %build
 cp %{SOURCE1} ./.config
@@ -158,6 +160,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Thu Dec  6 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-19
+- Fix two leaks when signalling state and scan results (rh #408141)
+
 * Mon Dec  3 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-18
 - Add logrotate config file (rh #404181)
 - Add new LSB initscript header to initscript with correct deps (rh #244029)
