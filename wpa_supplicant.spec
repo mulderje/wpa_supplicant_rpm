@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.7
-Release: 18%{?dist}
+Release: 19%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -12,6 +12,7 @@ Source3: %{name}.init.d
 Source4: %{name}.sysconfig
 Source5: madwifi-headers-r1475.tar.bz2
 Source6: fi.epitest.hostap.WPASupplicant.service
+Source7: %{name}.logrotate
 Patch0: wpa_supplicant-assoc-timeout.patch
 Patch1: wpa_supplicant-driver-wext-debug.patch
 Patch2: wpa_supplicant-wep-key-fix.patch
@@ -28,6 +29,7 @@ Patch11: wpa_supplicant-0.5.7-dbus-permissions-fix.patch
 Patch12: wpa_supplicant-0.5.7-ignore-dup-ca-cert-addition.patch
 Patch13: wpa_supplicant-0.5.7-fix-dynamic-wep-with-mac80211.patch
 Patch14: wpa_supplicant-0.5.7-use-IW_ENCODE_TEMP.patch
+Patch15: wpa_supplicant-0.5.7-fix-signal-leaks.patch
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -69,6 +71,7 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch12 -p1 -b .ignore-dup-ca-cert-addition
 %patch13 -p1 -b .fix-dynamic-wep-with-mac80211
 %patch14 -p1 -b .use-IW_ENCODE_TEMP
+%patch15 -p1 -b .signal-leak-fixes
 
 %build
 cp %{SOURCE1} ./.config
@@ -86,6 +89,8 @@ install -d %{buildroot}/%{_sysconfdir}/rc.d/init.d
 install -d %{buildroot}/%{_sysconfdir}/sysconfig
 install -m 0755 %{SOURCE3} %{buildroot}/%{_sysconfdir}/rc.d/init.d/%{name}
 install -m 0644 %{SOURCE4} %{buildroot}/%{_sysconfdir}/sysconfig/%{name}
+install -d %{buildroot}/%{_sysconfdir}/logrotate.d
+install -m 0644 %{SOURCE7} %{buildroot}/%{_sysconfdir}/logrotate.d/%{name}
 
 # config
 install -d %{buildroot}/%{_sysconfdir}/%{name}
@@ -138,6 +143,7 @@ fi
 %doc COPYING ChangeLog README eap_testing.txt todo.txt wpa_supplicant.conf examples
 %config(noreplace) %{_sysconfdir}/%{name}/%{name}.conf
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
+%config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
 %{_sysconfdir}/rc.d/init.d/%{name}
 %{_sysconfdir}/dbus-1/system.d/%{name}.conf
 %{_datadir}/dbus-1/system-services/fi.epitest.hostap.WPASupplicant.service
@@ -154,6 +160,14 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Thu Dec  6 2007 Dan Williams <dcbw@redhat.com> - 1:0.5.7-19
+- Fix two leaks when signalling state and scan results (rh #408141)
+- Add logrotate config file (rh #404181)
+- Add new LSB initscript header to initscript with correct deps (rh #244029)
+- Move other runtime arguments to /etc/sysconfig/wpa_supplicant
+- Start after messagebus service (rh #385191)
+- Fix initscript 'condrestart' command (rh #217281)
+
 * Tue Dec  4 2007 Matthias Clasen <mclasen@redhat.com> - 1:0.5.7-18
 - Rebuild against new openssl
 
