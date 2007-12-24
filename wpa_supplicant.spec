@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.7
-Release: 19%{?dist}
+Release: 20%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -160,6 +160,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Mon Dec 24 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-20
+- Fix LSB initscript header to ensure 'messagebus' is started first (rh #244029)
+
 * Thu Dec  6 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-19
 - Fix two leaks when signalling state and scan results (rh #408141)
 
