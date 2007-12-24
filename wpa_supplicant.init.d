@@ -13,8 +13,8 @@
 #
 ### BEGIN INIT INFO
 # Provides: wpa_supplicant
-# Required-Start: $local_fs $messagebus
-# Required-Stop: $local_fs $messagebus
+# Required-Start: $local_fs messagebus
+# Required-Stop: $local_fs messagebus
 # Default-Start:  3 4 5
 # Default-Stop: 0 1 6
 # Short-Description: start and stop wpa_supplicant
