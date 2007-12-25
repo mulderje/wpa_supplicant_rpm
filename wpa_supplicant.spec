@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.7
-Release: 20%{?dist}
+Release: 21%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -17,19 +17,27 @@ Patch0: wpa_supplicant-assoc-timeout.patch
 Patch1: wpa_supplicant-driver-wext-debug.patch
 Patch2: wpa_supplicant-wep-key-fix.patch
 # http://hostap.epitest.fi/bugz/show_bug.cgi?id=192
+# Upstream
 Patch3: wpa_supplicant-fix-deprecated-dbus-function.patch
+# Upstream
 Patch4: wpa_supplicant-0.5.7-debug-file.patch
 Patch5: wpa_supplicant-0.5.7-qmake-location.patch
+# Upstream
 Patch6: wpa_supplicant-0.5.7-flush-debug-output.patch
+# Rejected by upstream
 Patch7: wpa_supplicant-0.5.7-sigusr1-changes-debuglevel.patch
 Patch8: wpa_supplicant-0.5.7-always-scan.patch
+# Upstream
 Patch9: wpa_supplicant-0.5.7-dbus-iface-segfault-fix.patch
 Patch10: wpa_supplicant-0.5.7-dbus-blobs.patch
 Patch11: wpa_supplicant-0.5.7-dbus-permissions-fix.patch
 Patch12: wpa_supplicant-0.5.7-ignore-dup-ca-cert-addition.patch
+# Upstream
 Patch13: wpa_supplicant-0.5.7-fix-dynamic-wep-with-mac80211.patch
 Patch14: wpa_supplicant-0.5.7-use-IW_ENCODE_TEMP.patch
+# Upstream
 Patch15: wpa_supplicant-0.5.7-fix-signal-leaks.patch
+Patch16: wpa_supplicant-0.5.9-adhoc-frequency.patch
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -72,6 +80,7 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch13 -p1 -b .fix-dynamic-wep-with-mac80211
 %patch14 -p1 -b .use-IW_ENCODE_TEMP
 %patch15 -p1 -b .signal-leak-fixes
+%patch16 -p2 -b .adhoc-freq
 
 %build
 cp %{SOURCE1} ./.config
@@ -160,6 +169,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Tue Dec 25 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-21
+- Backport 'frequency' option for Ad-Hoc network configs
+
 * Mon Dec 24 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-20
 - Fix LSB initscript header to ensure 'messagebus' is started first (rh #244029)
 
