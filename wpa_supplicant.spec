@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.7
-Release: 21%{?dist}
+Release: 22%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -169,6 +169,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Mon Feb 18 2008 Fedora Release Engineering <rel-eng@fedoraproject.org> - 1:0.5.7-22
+- Autorebuild for GCC 4.3
+
 * Tue Dec 25 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-21
 - Backport 'frequency' option for Ad-Hoc network configs
 
