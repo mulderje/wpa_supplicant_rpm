@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.7
-Release: 22%{?dist}
+Release: 23%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -38,6 +38,7 @@ Patch14: wpa_supplicant-0.5.7-use-IW_ENCODE_TEMP.patch
 # Upstream
 Patch15: wpa_supplicant-0.5.7-fix-signal-leaks.patch
 Patch16: wpa_supplicant-0.5.9-adhoc-frequency.patch
+Patch17: wpa_supplicant-0.5.7-include-stdlib.h
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -81,6 +82,7 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch14 -p1 -b .use-IW_ENCODE_TEMP
 %patch15 -p1 -b .signal-leak-fixes
 %patch16 -p2 -b .adhoc-freq
+%patch17 -p1 -b .atoi
 
 %build
 cp %{SOURCE1} ./.config
@@ -169,6 +171,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Fri Feb 22 2008 Dan Williams <dcbw@redhat.com> 1:0.5.7-23
+- Fix gcc 4.3 rebuild issues
+
 * Mon Feb 18 2008 Fedora Release Engineering <rel-eng@fedoraproject.org> - 1:0.5.7-22
 - Autorebuild for GCC 4.3
 
