@@ -82,7 +82,7 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch14 -p1 -b .use-IW_ENCODE_TEMP
 %patch15 -p1 -b .signal-leak-fixes
 %patch16 -p2 -b .adhoc-freq
-%patch17 -p1 -b .atoi
+%patch17 -p1 -b .stdlib
 
 %build
 cp %{SOURCE1} ./.config
