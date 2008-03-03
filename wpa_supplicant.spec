@@ -1,8 +1,8 @@
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
-Version: 0.5.7
-Release: 21%{?dist}
+Version: 0.5.10
+Release: 1%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -11,33 +11,16 @@ Source2: %{name}.conf
 Source3: %{name}.init.d
 Source4: %{name}.sysconfig
 Source5: madwifi-headers-r1475.tar.bz2
-Source6: fi.epitest.hostap.WPASupplicant.service
-Source7: %{name}.logrotate
+Source6: %{name}.logrotate
+
 Patch0: wpa_supplicant-assoc-timeout.patch
-Patch1: wpa_supplicant-driver-wext-debug.patch
-Patch2: wpa_supplicant-wep-key-fix.patch
-# http://hostap.epitest.fi/bugz/show_bug.cgi?id=192
-# Upstream
-Patch3: wpa_supplicant-fix-deprecated-dbus-function.patch
-# Upstream
-Patch4: wpa_supplicant-0.5.7-debug-file.patch
-Patch5: wpa_supplicant-0.5.7-qmake-location.patch
-# Upstream
-Patch6: wpa_supplicant-0.5.7-flush-debug-output.patch
-# Rejected by upstream
-Patch7: wpa_supplicant-0.5.7-sigusr1-changes-debuglevel.patch
-Patch8: wpa_supplicant-0.5.7-always-scan.patch
-# Upstream
-Patch9: wpa_supplicant-0.5.7-dbus-iface-segfault-fix.patch
-Patch10: wpa_supplicant-0.5.7-dbus-blobs.patch
-Patch11: wpa_supplicant-0.5.7-dbus-permissions-fix.patch
-Patch12: wpa_supplicant-0.5.7-ignore-dup-ca-cert-addition.patch
-# Upstream
-Patch13: wpa_supplicant-0.5.7-fix-dynamic-wep-with-mac80211.patch
-Patch14: wpa_supplicant-0.5.7-use-IW_ENCODE_TEMP.patch
-# Upstream
-Patch15: wpa_supplicant-0.5.7-fix-signal-leaks.patch
-Patch16: wpa_supplicant-0.5.9-adhoc-frequency.patch
+# Upstream in 0.6.x
+Patch1: wpa_supplicant-fix-deprecated-dbus-function.patch
+Patch2: wpa_supplicant-0.5.7-qmake-location.patch
+Patch3: wpa_supplicant-0.5.7-flush-debug-output.patch
+Patch4: wpa_supplicant-0.5.7-use-IW_ENCODE_TEMP.patch
+Patch5: wpa_supplicant-0.5.10-dbus-service-file.patch
+
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -65,22 +48,11 @@ Graphical User Interface for wpa_supplicant written using QT3
 %prep
 %setup -q
 %patch0 -p1 -b .assoc-timeout
-%patch1 -p1 -b .driver-wext-debug
-%patch2 -p1 -b .wep-key-fix
-%patch3 -p0 -b .fix-deprecated-dbus-functions
-%patch4 -p1 -b .debug-file
-%patch5 -p1 -b .qmake-location
-%patch6 -p1 -b .flush-debug-output
-%patch7 -p1 -b .sigusr1-changes-debuglevel
-%patch8 -p1 -b .always-scan
-%patch9 -p1 -b .dbus-iface-segfault-fix
-%patch10 -p2 -b .dbus-blobs
-%patch11 -p1 -b .dbus-permissions-fix
-%patch12 -p1 -b .ignore-dup-ca-cert-addition
-%patch13 -p1 -b .fix-dynamic-wep-with-mac80211
-%patch14 -p1 -b .use-IW_ENCODE_TEMP
-%patch15 -p1 -b .signal-leak-fixes
-%patch16 -p2 -b .adhoc-freq
+%patch1 -p0 -b .fix-deprecated-dbus-functions
+%patch2 -p1 -b .qmake-location
+%patch3 -p1 -b .flush-debug-output
+%patch4 -p1 -b .use-IW_ENCODE_TEMP
+%patch5 -p1 -b .dbus-service-file
 
 %build
 cp %{SOURCE1} ./.config
@@ -99,7 +71,7 @@ install -d %{buildroot}/%{_sysconfdir}/sysconfig
 install -m 0755 %{SOURCE3} %{buildroot}/%{_sysconfdir}/rc.d/init.d/%{name}
 install -m 0644 %{SOURCE4} %{buildroot}/%{_sysconfdir}/sysconfig/%{name}
 install -d %{buildroot}/%{_sysconfdir}/logrotate.d
-install -m 0644 %{SOURCE7} %{buildroot}/%{_sysconfdir}/logrotate.d/%{name}
+install -m 0644 %{SOURCE6} %{buildroot}/%{_sysconfdir}/logrotate.d/%{name}
 
 # config
 install -d %{buildroot}/%{_sysconfdir}/%{name}
@@ -113,7 +85,7 @@ install -m 0755 wpa_supplicant %{buildroot}/%{_sbindir}
 install -d %{buildroot}/%{_sysconfdir}/dbus-1/system.d/
 install -m 0644 dbus-wpa_supplicant.conf %{buildroot}/%{_sysconfdir}/dbus-1/system.d/wpa_supplicant.conf
 install -d %{buildroot}/%{_datadir}/dbus-1/system-services/
-install -m 0644 %{SOURCE6} %{buildroot}/%{_datadir}/dbus-1/system-services
+install -m 0644 dbus-wpa_supplicant.service %{buildroot}/%{_datadir}/dbus-1/system-services/fi.epitest.hostap.WPASupplicant.service
 
 # gui
 install -d %{buildroot}/%{_bindir}
@@ -169,6 +141,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Sun Mar  2 2008 Dan Williams <dcbw@redhat.com> - 0.5.10-1
+- Update to latest stable release; remove upstreamed patches
+
 * Tue Dec 25 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-21
 - Backport 'frequency' option for Ad-Hoc network configs
 
