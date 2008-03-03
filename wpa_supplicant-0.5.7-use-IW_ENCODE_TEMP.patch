@@ -1,7 +1,7 @@
-Index: wpa_supplicant-0.4.8/driver_wext.c
+Index: wpa_supplicant-0.6.3/src/drivers/driver_wext.c
 ===================================================================
---- wpa_supplicant-0.4.8.orig/driver_wext.c	2006-07-13 11:23:05.000000000 +0200
-+++ wpa_supplicant-0.4.8/driver_wext.c	2006-07-13 11:23:57.000000000 +0200
+--- wpa_supplicant-0.6.3/src/drivers/driver_wext.c.orig	2006-07-13 11:23:05.000000000 +0200
++++ wpa_supplicant-0.6.3/src/drivers/driver_wext.c	2006-07-13 11:23:57.000000000 +0200
 @@ -1280,6 +1280,7 @@ static int wpa_driver_wext_set_key_ext(v
  	memset(&iwr, 0, sizeof(iwr));
  	strncpy(iwr.ifr_name, drv->ifname, IFNAMSIZ);
