@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.6.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -19,6 +19,7 @@ Patch2: wpa_supplicant-0.5.7-qmake-location.patch
 Patch3: wpa_supplicant-0.5.7-flush-debug-output.patch
 Patch4: wpa_supplicant-0.5.7-use-IW_ENCODE_TEMP.patch
 Patch5: wpa_supplicant-0.5.10-dbus-service-file.patch
+Patch6: wpa_supplicant-0.6.3-fix-dbus-use-after-free.patch
 
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -52,6 +53,7 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch3 -p1 -b .flush-debug-output
 %patch4 -p1 -b .use-IW_ENCODE_TEMP
 %patch5 -p1 -b .dbus-service-file
+%patch6 -p1 -b .use-after-free
 
 %build
 pushd src
@@ -145,6 +147,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Tue Mar  4 2008 Dan Williams <dcbw@redhat.com> - 1:0.6.3-2
+- Fix a potential use-after-free in the D-Bus byte array demarshalling code
+
 * Mon Mar  3 2008 Dan Williams <dcbw@redhat.com> - 1:0.6.3-1
 - Update to latest development release; remove upstreamed patches
 
