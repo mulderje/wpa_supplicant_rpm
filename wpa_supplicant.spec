@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.10
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -141,6 +141,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Thu Mar  6 2008 Dan Williams <dcbw@redhat.com> - 0.5.10-3
+- Don't start the supplicant by default when installed (rh #436380)
+
 * Tue Mar  4 2008 Dan Williams <dcbw@redhat.com> - 0.5.10-2
 - Fix a potential use-after-free in the D-Bus byte array demarshalling code
 
