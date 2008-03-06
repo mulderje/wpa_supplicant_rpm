@@ -15,7 +15,7 @@
 # Provides: wpa_supplicant
 # Required-Start: $local_fs messagebus
 # Required-Stop: $local_fs messagebus
-# Default-Start:  3 4 5
+# Default-Start:
 # Default-Stop: 0 1 6
 # Short-Description: start and stop wpa_supplicant
 # Description: wpa_supplicant is a tool for connecting to wireless networks
