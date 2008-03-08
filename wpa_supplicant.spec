@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.10
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -20,6 +20,7 @@ Patch2: wpa_supplicant-0.5.7-qmake-location.patch
 Patch3: wpa_supplicant-0.5.7-flush-debug-output.patch
 Patch4: wpa_supplicant-0.5.7-use-IW_ENCODE_TEMP.patch
 Patch5: wpa_supplicant-0.5.10-dbus-service-file.patch
+Patch6: wpa_supplicant-0.5.10-default-log-file.patch
 
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -53,6 +54,7 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch3 -p1 -b .flush-debug-output
 %patch4 -p1 -b .use-IW_ENCODE_TEMP
 %patch5 -p1 -b .dbus-service-file
+%patch6 -p1 -b .default-log-file
 
 %build
 cp %{SOURCE1} ./.config
@@ -141,6 +143,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Sat Mar  8 2008 Dan Williams <dcbw@redhat.com> - 0.5.10-4
+- Fix log file path in service config file
+
 * Thu Mar  6 2008 Dan Williams <dcbw@redhat.com> - 0.5.10-3
 - Don't start the supplicant by default when installed (rh #436380)
 

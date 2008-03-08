@@ -9,4 +9,4 @@ DRIVERS=""
 # Other arguments
 #   -u   Enable the D-Bus interface (required for use with NetworkManager)
 #   -f   Log to /var/log/wpa_supplicant.log
-OTHER_ARGS="-u -f"
+OTHER_ARGS="-u -f /var/log/wpa_supplicant.log"

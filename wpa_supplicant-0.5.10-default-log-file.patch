@@ -1,0 +1,33 @@
+diff -up wpa_supplicant-0.5.10/main.c.default-log wpa_supplicant-0.5.10/main.c
+--- wpa_supplicant-0.5.10/main.c.default-log	2008-03-08 15:02:45.000000000 -0500
++++ wpa_supplicant-0.5.10/main.c	2008-03-08 15:05:27.000000000 -0500
+@@ -67,7 +67,7 @@ static void usage(void)
+ 	       "  -d = increase debugging verbosity (-dd even more)\n"
+ 	       "  -D = driver name\n"
+ #ifdef CONFIG_DEBUG_FILE
+-	       "  -f = log output to debug file instead of stdout\n"
++	       "  -f = log output to debug file instead of stdout (default: /var/log/wpa_supplicant.log)\n"
+ #endif /* CONFIG_DEBUG_FILE */
+ 	       "  -g = global ctrl_interface\n"
+ 	       "  -K = include keys (passwords, etc.) in debug output\n"
+@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
+ 	wpa_supplicant_fd_workaround();
+ 
+ 	for (;;) {
+-		c = getopt(argc, argv, "b:Bc:C:D:df:g:hi:KLNp:P:qtuvwW");
++		c = getopt(argc, argv, "b:Bc:C:D:df::g:hi:KLNp:P:qtuvwW");
+ 		if (c < 0)
+ 			break;
+ 		switch (c) {
+@@ -178,7 +178,10 @@ int main(int argc, char *argv[])
+ #endif /* CONFIG_NO_STDOUT_DEBUG */
+ #ifdef CONFIG_DEBUG_FILE
+ 		case 'f':
+-			params.wpa_debug_file_path = optarg;
++			if (!optarg)
++				params.wpa_debug_file_path = "/var/log/wpa_supplicant.log";
++			else
++				params.wpa_debug_file_path = optarg;
+ 			break;
+ #endif /* CONFIG_DEBUG_FILE */
+ 		case 'g':
