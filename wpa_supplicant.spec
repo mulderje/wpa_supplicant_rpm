@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.6.3
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -24,7 +24,7 @@ Patch6: wpa_supplicant-0.6.3-fix-dbus-use-after-free.patch
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-BuildRequires: qt-devel
+BuildRequires: qt3-devel
 BuildRequires: openssl-devel
 BuildRequires: readline-devel
 BuildRequires: dbus-devel
@@ -147,6 +147,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Mon Mar 10 2008 Christopher Aillon <caillon@redhat.com> - 1:0.6.3-5
+- BuildRequires qt3-devel
+
 * Sat Mar  8 2008 Dan Williams <dcbw@redhat.com> - 1:0.6.3-4
 - Fix log file path in service config file
 
