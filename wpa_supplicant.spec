@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.10
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -21,6 +21,10 @@ Patch3: wpa_supplicant-0.5.7-flush-debug-output.patch
 Patch4: wpa_supplicant-0.5.7-use-IW_ENCODE_TEMP.patch
 Patch5: wpa_supplicant-0.5.10-dbus-service-file.patch
 Patch6: wpa_supplicant-0.5.10-default-log-file.patch
+Patch7: wpa_supplicant-0.6.3-wext-dont-overwrite-BSS-frequency.patch
+Patch8: wpa_supplicant-0.6.3-dont-reschedule-specific-scans.patch
+Patch9: wpa_supplicant-0.6.3-wext-handle-mac80211-mode-switches.patch
+Patch10: wpa_supplicant-0.6.3-wpa-gui-fixes.patch
 
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -55,6 +59,10 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch4 -p1 -b .use-IW_ENCODE_TEMP
 %patch5 -p1 -b .dbus-service-file
 %patch6 -p1 -b .default-log-file
+%patch7 -p1 -b .bss-freq
+%patch8 -p3 -b .ssid-scans
+%patch9 -p3 -b .mac80211-mode
+%patch10 -p1 -b .wpa-gui-fixes
 
 %build
 cp %{SOURCE1} ./.config
@@ -143,6 +151,12 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Wed Jun 11 2008 Dan Williams <dcbw@redhat.com> - 0.5.10-5
+- Fix 802.11a frequency bug
+- Always schedule specific SSID scans to help find hidden APs
+- Properly switch between modes on mac80211 drivers
+- Give adhoc connections more time to assocate
+
 * Sat Mar  8 2008 Dan Williams <dcbw@redhat.com> - 0.5.10-4
 - Fix log file path in service config file
 

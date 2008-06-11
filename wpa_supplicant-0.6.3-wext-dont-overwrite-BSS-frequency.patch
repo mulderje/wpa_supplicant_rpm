@@ -1,0 +1,33 @@
+commit 2e5a7b49a0a52ce36033e4839aae90e638746b6a
+Author: Dan Williams <dcbw@redhat.com>
+Date:   Mon Jun 2 20:47:09 2008 +0300
+
+    wext: don't overwrite BSS frequency
+    
+    mac80211 sends _both_ channel and frequency in it's scan results, with
+    frequency first and channel second (it's since been fixed to send
+    channel first and frequency second to work around this issue).  This
+    results in wpa_supplicant getting the right value when the frequency
+    comes, but overwriting the value with '0' when the channel comes because
+    wpa_supplicant can't handle 5GHz channel numbers.  So if a valid
+    previous SIOCGIWFREQ event came in, don't try to overwrite it.
+
+diff -up wpa_supplicant-0.5.10/driver_wext.c.bss-freq wpa_supplicant-0.5.10/driver_wext.c
+--- wpa_supplicant-0.5.10/driver_wext.c.bss-freq	2008-06-10 17:41:18.000000000 -0400
++++ wpa_supplicant-0.5.10/driver_wext.c	2008-06-10 17:43:53.000000000 -0400
+@@ -1234,6 +1234,15 @@ int wpa_driver_wext_get_scan_results(voi
+ 					 * this to frequency by assuming they
+ 					 * are using IEEE 802.11b/g.
+ 					 */
++
++					/* Don't overwrite a previously parsed
++					 * frequency, since the driver may
++					 * be sending an A-band channel that
++					 * we can't handle here.
++					 */
++					if (results[ap_num].freq)
++						break;
++
+ 					if (iwe->u.freq.m >= 1 &&
+ 					    iwe->u.freq.m <= 13) {
+ 						results[ap_num].freq =

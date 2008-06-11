@@ -1,0 +1,163 @@
+commit 7e1488494e0150ee7fdef83355266b5633c5c1b0
+Author: Dan Williams <dcbw@redhat.com>
+Date:   Tue Jun 3 11:37:48 2008 +0300
+
+    Do not continually reschedule specific scans to help finding hidden SSIDs
+    
+    In situations where the driver does background scanning and sends a
+    steady stream of scan results, wpa_supplicant would continually
+    reschedule the scan.  This resulted in specific SSID scans never
+    happening for a hidden AP, and the supplicant never connecting to the AP
+    because it never got found.  Instead, if there's an already scheduled
+    scan, and a request comes in to reschedule it, and there are enabled
+    scan_ssid=1 network blocks, let the scan happen anyway so the hidden
+    SSID has a chance to be found.
+
+diff --git a/src/utils/eloop.c b/src/utils/eloop.c
+index f988e94..4edb2a7 100644
+--- a/src/utils/eloop.c
++++ b/src/utils/eloop.c
+@@ -315,6 +315,25 @@ int eloop_cancel_timeout(eloop_timeout_handler handler,
+ }
+ 
+ 
++int eloop_is_timeout_registered(eloop_timeout_handler handler,
++				void *eloop_data, void *user_data)
++{
++	struct eloop_timeout *tmp;
++
++	tmp = eloop.timeout;
++	while (tmp != NULL) {
++		if (tmp->handler == handler &&
++		    tmp->eloop_data == eloop_data &&
++		    tmp->user_data == user_data)
++			return 1;
++
++		tmp = tmp->next;
++	}
++
++	return 0;
++}
++
++
+ #ifndef CONFIG_NATIVE_WINDOWS
+ static void eloop_handle_alarm(int sig)
+ {
+diff --git a/src/utils/eloop.h b/src/utils/eloop.h
+index 4dd2871..cf83f38 100644
+--- a/src/utils/eloop.h
++++ b/src/utils/eloop.h
+@@ -207,6 +207,19 @@ int eloop_cancel_timeout(eloop_timeout_handler handler,
+ 			 void *eloop_data, void *user_data);
+ 
+ /**
++ * eloop_is_timeout_registered - Check if a timeout is already registered
++ * @handler: Matching callback function
++ * @eloop_data: Matching eloop_data
++ * @user_data: Matching user_data
++ * Returns: 1 if the timeout is registered, 0 if the timeout is not registered
++ *
++ * Determine if a matching <handler,eloop_data,user_data> timeout is registered
++ * with eloop_register_timeout().
++ */
++int eloop_is_timeout_registered(eloop_timeout_handler handler,
++				void *eloop_data, void *user_data);
++
++/**
+  * eloop_register_signal - Register handler for signals
+  * @sig: Signal number (e.g., SIGHUP)
+  * @handler: Callback function to be called when the signal is received
+diff --git a/src/utils/eloop_none.c b/src/utils/eloop_none.c
+index 6943109..215030b 100644
+--- a/src/utils/eloop_none.c
++++ b/src/utils/eloop_none.c
+@@ -197,6 +197,26 @@ int eloop_cancel_timeout(void (*handler)(void *eloop_ctx, void *sock_ctx),
+ }
+ 
+ 
++int eloop_is_timeout_registered(void (*handler)(void *eloop_ctx,
++						void *timeout_ctx),
++				void *eloop_data, void *user_data)
++{
++	struct eloop_timeout *tmp;
++
++	tmp = eloop.timeout;
++	while (tmp != NULL) {
++		if (tmp->handler == handler &&
++		    tmp->eloop_data == eloop_data &&
++		    tmp->user_data == user_data)
++			return 1;
++
++		tmp = tmp->next;
++	}
++
++	return 0;
++}
++
++
+ /* TODO: replace with suitable signal handler */
+ #if 0
+ static void eloop_handle_signal(int sig)
+diff --git a/src/utils/eloop_win.c b/src/utils/eloop_win.c
+index 73f0eaf..a1ccd94 100644
+--- a/src/utils/eloop_win.c
++++ b/src/utils/eloop_win.c
+@@ -320,6 +320,25 @@ int eloop_cancel_timeout(eloop_timeout_handler handler,
+ }
+ 
+ 
++int eloop_is_timeout_registered(eloop_timeout_handler handler,
++				void *eloop_data, void *user_data)
++{
++	struct eloop_timeout *tmp;
++
++	tmp = eloop.timeout;
++	while (tmp != NULL) {
++		if (tmp->handler == handler &&
++		    tmp->eloop_data == eloop_data &&
++		    tmp->user_data == user_data)
++			return 1;
++
++		tmp = tmp->next;
++	}
++
++	return 0;
++}
++
++
+ /* TODO: replace with suitable signal handler */
+ #if 0
+ static void eloop_handle_signal(int sig)
+diff --git a/wpa_supplicant/scan.c b/wpa_supplicant/scan.c
+index b046d90..c2549e2 100644
+--- a/b/c/wpa_supplicant.c
++++ b/b/c/wpa_supplicant.c
+@@ -172,6 +172,28 @@ static void wpa_supplicant_scan(void *eloop_ctx, void *timeout_ctx)
+  */
+ void wpa_supplicant_req_scan(struct wpa_supplicant *wpa_s, int sec, int usec)
+ {
++	/* If there's at least one network that should be specifically scanned
++	 * then don't cancel the scan and reschedule.  Some drivers do
++	 * background scanning which generates frequent scan results, and that
++	 * causes the specific SSID scan to get continually pushed back and
++	 * never happen, which causes hidden APs to never get probe-scanned.
++	 */
++	if (eloop_is_timeout_registered(wpa_supplicant_scan, wpa_s, NULL) &&
++	    wpa_s->conf->ap_scan == 1) {
++		struct wpa_ssid *ssid = wpa_s->conf->ssid;
++
++		while (ssid) {
++			if (!ssid->disabled && ssid->scan_ssid)
++				break;
++			ssid = ssid->next;
++		}
++		if (ssid) {
++			wpa_msg(wpa_s, MSG_DEBUG, "Not rescheduling scan to "
++			        "ensure that specific SSID scans occur");
++			return;
++		}
++	}
++
+ 	wpa_msg(wpa_s, MSG_DEBUG, "Setting scan request: %d sec %d usec",
+ 		sec, usec);
+ 	eloop_cancel_timeout(wpa_supplicant_scan, wpa_s, NULL);

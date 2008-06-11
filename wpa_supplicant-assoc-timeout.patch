@@ -8,7 +8,7 @@
 +			timeout = 15;
  		else if (wpa_s->conf->ap_scan == 1)
 -			timeout = 10;
-+			timeout = 15;
++			timeout = 20;
  		else
  			timeout = 60;
  		wpa_supplicant_req_auth_timeout(wpa_s, timeout, 0);
