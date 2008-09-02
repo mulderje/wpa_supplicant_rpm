@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.5.10
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -21,10 +21,19 @@ Patch3: wpa_supplicant-0.5.7-flush-debug-output.patch
 Patch4: wpa_supplicant-0.5.7-use-IW_ENCODE_TEMP.patch
 Patch5: wpa_supplicant-0.5.10-dbus-service-file.patch
 Patch6: wpa_supplicant-0.5.10-default-log-file.patch
+# Upstream in 0.6.x
 Patch7: wpa_supplicant-0.6.3-wext-dont-overwrite-BSS-frequency.patch
+# Upstream in 0.6.x
 Patch8: wpa_supplicant-0.6.3-dont-reschedule-specific-scans.patch
+# Upstream in 0.6.x
 Patch9: wpa_supplicant-0.6.3-wext-handle-mac80211-mode-switches.patch
+# Upstream in 0.6.x
 Patch10: wpa_supplicant-0.6.3-wpa-gui-fixes.patch
+# Backported from 0.6.x
+Patch11: wpa_supplicant-0.6.3-wext-scan-parser-crash-fix.patch
+# Backported from 0.6.x
+Patch12: wpa_supplicant-0.5.10-rsn-race-fix.patch
+Patch13: wpa_supplicant-0.6.4-mac80211-mode-order-fix.patch
 
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -63,6 +72,9 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch8 -p3 -b .ssid-scans
 %patch9 -p3 -b .mac80211-mode
 %patch10 -p1 -b .wpa-gui-fixes
+%patch11 -p1 -b .scan-parse-crash
+%patch12 -p1 -b .rsn-race-fix
+%patch13 -p1 -b .mode-order-fix
 
 %build
 cp %{SOURCE1} ./.config
@@ -70,7 +82,8 @@ tar -xjf %{SOURCE5}
 CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ;
 CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS ;
 make %{_smp_mflags}
-QTDIR=%{_libdir}/qt-3.3 make wpa_gui %{_smp_mflags}
+unset QTDIR && . /etc/profile.d/qt.sh
+make wpa_gui %{_smp_mflags}
 
 %install
 rm -rf %{buildroot}
@@ -151,6 +164,11 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Tue Sep  2 2008 Dan Williams <dcbw@redhat.com> - 0.5.10-6
+- Fix possible crash when parsing scan results
+- Fix possible race condition when using RSN/WPA2
+- Fix starting ad-hoc networks with mac80211-based drivers
+
 * Wed Jun 11 2008 Dan Williams <dcbw@redhat.com> - 0.5.10-5
 - Fix 802.11a frequency bug
 - Always schedule specific SSID scans to help find hidden APs

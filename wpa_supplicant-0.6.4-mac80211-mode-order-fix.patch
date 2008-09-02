@@ -1,0 +1,83 @@
+diff -up wpa_supplicant-0.5.10/driver.h.mode-order-fix wpa_supplicant-0.5.10/driver.h
+--- wpa_supplicant-0.5.10/driver.h.mode-order-fix	2007-03-24 22:09:49.000000000 -0400
++++ wpa_supplicant-0.5.10/driver.h	2008-08-29 19:07:47.000000000 -0400
+@@ -469,6 +469,15 @@ struct wpa_driver_ops {
+ 	 */
+ 	int (*disassociate)(void *priv, const u8 *addr, int reason_code);
+ 
++ 	/**
++	 * associate - Request driver to set the operating mode
++	 * @priv: private driver interface data
++	 * @mode: Operation mode (infra/ibss) IEEE80211_MODE_*
++	 *
++	 * Returns: 0 on success, -1 on failure
++	 */
++	int (*set_mode)(void *priv, int mode);
++
+ 	/**
+ 	 * associate - Request driver to associate
+ 	 * @priv: private driver interface data
+diff -up wpa_supplicant-0.5.10/driver_test.c.mode-order-fix wpa_supplicant-0.5.10/driver_test.c
+--- wpa_supplicant-0.5.10/driver_test.c.mode-order-fix	2007-12-27 19:21:09.000000000 -0500
++++ wpa_supplicant-0.5.10/driver_test.c	2008-08-29 19:07:47.000000000 -0400
+@@ -901,6 +901,7 @@ const struct wpa_driver_ops wpa_driver_t
+ 	wpa_driver_test_get_scan_results,
+ 	wpa_driver_test_deauthenticate,
+ 	wpa_driver_test_disassociate,
++	NULL /* set_mode */,
+ 	wpa_driver_test_associate,
+ 	NULL /* set_auth_alg */,
+ 	NULL /* add_pmkid */,
+diff -up wpa_supplicant-0.5.10/driver_wext.c.mode-order-fix wpa_supplicant-0.5.10/driver_wext.c
+--- wpa_supplicant-0.5.10/driver_wext.c.mode-order-fix	2008-08-29 19:07:47.000000000 -0400
++++ wpa_supplicant-0.5.10/driver_wext.c	2008-08-29 19:07:47.000000000 -0400
+@@ -1839,8 +1839,6 @@ wpa_driver_wext_associate(void *priv,
+ 	    wpa_driver_wext_set_bssid(drv, NULL) < 0)
+ 		ret = -1;
+ 
+-	if (wpa_driver_wext_set_mode(drv, params->mode) < 0)
+-		ret = -1;
+ 	/* TODO: should consider getting wpa version and cipher/key_mgmt suites
+ 	 * from configuration, not from here, where only the selected suite is
+ 	 * available */
+@@ -2398,6 +2396,7 @@ const struct wpa_driver_ops wpa_driver_w
+ 	.get_scan_results = wpa_driver_wext_get_scan_results,
+ 	.deauthenticate = wpa_driver_wext_deauthenticate,
+ 	.disassociate = wpa_driver_wext_disassociate,
++	.set_mode = wpa_driver_wext_set_mode,
+ 	.associate = wpa_driver_wext_associate,
+ 	.set_auth_alg = wpa_driver_wext_set_auth_alg,
+ 	.init = wpa_driver_wext_init,
+diff -up wpa_supplicant-0.5.10/wpa_supplicant.c.mode-order-fix wpa_supplicant-0.5.10/wpa_supplicant.c
+--- wpa_supplicant-0.5.10/wpa_supplicant.c.mode-order-fix	2008-08-29 19:07:47.000000000 -0400
++++ wpa_supplicant-0.5.10/wpa_supplicant.c	2008-08-29 19:07:47.000000000 -0400
+@@ -1379,6 +1379,11 @@ void wpa_supplicant_associate(struct wpa
+ 	 * previous association. */
+ 	wpa_sm_set_assoc_wpa_ie(wpa_s->wpa, NULL, 0);
+ 
++	if (wpa_drv_set_mode(wpa_s, ssid->mode)) {
++		wpa_printf(MSG_WARNING, "Failed to set operating mode");
++		assoc_failed = 1;
++	}
++
+ #ifdef IEEE8021X_EAPOL
+ 	if (ssid->key_mgmt & WPA_KEY_MGMT_IEEE8021X_NO_WPA) {
+ 		if (ssid->leap) {
+diff -up wpa_supplicant-0.5.10/wpa_supplicant_i.h.mode-order-fix wpa_supplicant-0.5.10/wpa_supplicant_i.h
+--- wpa_supplicant-0.5.10/wpa_supplicant_i.h.mode-order-fix	2007-12-27 19:50:15.000000000 -0500
++++ wpa_supplicant-0.5.10/wpa_supplicant_i.h	2008-08-29 19:07:47.000000000 -0400
+@@ -460,6 +460,14 @@ static inline int wpa_drv_set_wpa(struct
+ 	return 0;
+ }
+ 
++static inline int wpa_drv_set_mode(struct wpa_supplicant *wpa_s, int mode)
++{
++	if (wpa_s->driver->set_mode) {
++		return wpa_s->driver->set_mode(wpa_s->drv_priv, mode);
++	}
++	return 0;
++}
++
+ static inline int wpa_drv_associate(struct wpa_supplicant *wpa_s,
+ 				    struct wpa_driver_associate_params *params)
+ {

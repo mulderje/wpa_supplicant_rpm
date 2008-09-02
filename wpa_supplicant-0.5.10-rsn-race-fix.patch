@@ -1,0 +1,143 @@
+Backport of the following commit to 0.5.10:
+
+commit 3e2ad1b932d827ddb038a5f9163bca766803811a
+Author: Jouni Malinen <j@w1.fi>
+Date:   Mon Jun 9 16:26:47 2008 +0300
+
+    Fixed race condition between disassociation event and group key handshake
+    
+    This avoids getting stuck in state where wpa_supplicant has canceled scans,
+    but the driver is actually in disassociated state. The previously used code
+    that controlled scan timeout from WPA module is not really needed anymore
+    (and has not been needed for past four years since authentication timeout
+    was separated from scan request timeout), so this can simply be removed to
+    resolved the race condition. As an extra bonus, this simplifies the
+    interface to WPA module.
+    [Bug 261]
+
+diff -up wpa_supplicant-0.5.10/preauth_test.c.race-fix wpa_supplicant-0.5.10/preauth_test.c
+--- wpa_supplicant-0.5.10/preauth_test.c.race-fix	2007-03-24 22:09:50.000000000 -0400
++++ wpa_supplicant-0.5.10/preauth_test.c	2008-08-29 13:31:40.000000000 -0400
+@@ -44,12 +44,6 @@ struct preauth_test_data {
+ };
+ 
+ 
+-static void _wpa_supplicant_req_scan(void *wpa_s, int sec, int usec)
+-{
+-	wpa_supplicant_req_scan(wpa_s, sec, usec);
+-}
+-
+-
+ static void _wpa_supplicant_disassociate(void *wpa_s, int reason_code)
+ {
+ 	wpa_supplicant_disassociate(wpa_s, reason_code);
+@@ -254,7 +248,6 @@ static void wpa_init_conf(struct wpa_sup
+ 	ctx->ctx = wpa_s;
+ 	ctx->set_state = _wpa_supplicant_set_state;
+ 	ctx->get_state = _wpa_supplicant_get_state;
+-	ctx->req_scan = _wpa_supplicant_req_scan;
+ 	ctx->deauthenticate = _wpa_supplicant_deauthenticate;
+ 	ctx->disassociate = _wpa_supplicant_disassociate;
+ 	ctx->set_key = wpa_supplicant_set_key;
+diff -up wpa_supplicant-0.5.10/wpa.c.race-fix wpa_supplicant-0.5.10/wpa.c
+--- wpa_supplicant-0.5.10/wpa.c.race-fix	2008-02-17 19:10:46.000000000 -0500
++++ wpa_supplicant-0.5.10/wpa.c	2008-08-29 13:31:40.000000000 -0400
+@@ -1567,7 +1567,6 @@ static void wpa_supplicant_key_neg_compl
+ 		MACSTR " [PTK=%s GTK=%s]", MAC2STR(addr),
+ 		wpa_cipher_txt(sm->pairwise_cipher),
+ 		wpa_cipher_txt(sm->group_cipher));
+-	eloop_cancel_timeout(sm->ctx->scan, sm->ctx->ctx, NULL);
+ 	wpa_sm_cancel_auth_timeout(sm);
+ 	wpa_sm_set_state(sm, WPA_COMPLETED);
+ 
+@@ -1904,7 +1903,6 @@ static void wpa_report_ie_mismatch(struc
+ 	}
+ 
+ 	wpa_sm_disassociate(sm, REASON_IE_IN_4WAY_DIFFERS);
+-	wpa_sm_req_scan(sm, 0, 0);
+ }
+ 
+ 
+@@ -3798,7 +3796,6 @@ static void wpa_sm_pmksa_free_cb(struct 
+ 
+ 		os_memset(sm->pmk, 0, sizeof(sm->pmk));
+ 		wpa_sm_deauthenticate(sm, REASON_UNSPECIFIED);
+-		wpa_sm_req_scan(sm, 0, 0);
+ 	}
+ }
+ 
+diff -up wpa_supplicant-0.5.10/wpa.h.race-fix wpa_supplicant-0.5.10/wpa.h
+--- wpa_supplicant-0.5.10/wpa.h.race-fix	2007-03-24 22:09:50.000000000 -0400
++++ wpa_supplicant-0.5.10/wpa.h	2008-08-29 13:31:40.000000000 -0400
+@@ -59,7 +59,6 @@ struct wpa_sm_ctx {
+ 
+ 	void (*set_state)(void *ctx, wpa_states state);
+ 	wpa_states (*get_state)(void *ctx);
+-	void (*req_scan)(void *ctx, int sec, int usec);
+ 	void (*deauthenticate)(void * ctx, int reason_code); 
+ 	void (*disassociate)(void *ctx, int reason_code);
+ 	int (*set_key)(void *ctx, wpa_alg alg,
+diff -up wpa_supplicant-0.5.10/wpa_i.h.race-fix wpa_supplicant-0.5.10/wpa_i.h
+--- wpa_supplicant-0.5.10/wpa_i.h.race-fix	2007-03-24 22:09:50.000000000 -0400
++++ wpa_supplicant-0.5.10/wpa_i.h	2008-08-29 13:31:40.000000000 -0400
+@@ -146,11 +146,6 @@ static inline wpa_states wpa_sm_get_stat
+ 	return sm->ctx->get_state(sm->ctx->ctx);
+ }
+ 
+-static inline void wpa_sm_req_scan(struct wpa_sm *sm, int sec, int usec)
+-{
+-	sm->ctx->req_scan(sm->ctx->ctx, sec, usec);
+-}
+-
+ static inline void wpa_sm_deauthenticate(struct wpa_sm *sm, int reason_code)
+ {
+ 	sm->ctx->deauthenticate(sm->ctx->ctx, reason_code);
+diff -up wpa_supplicant-0.5.10/wpa_supplicant.c.race-fix wpa_supplicant-0.5.10/wpa_supplicant.c
+--- wpa_supplicant-0.5.10/wpa_supplicant.c.race-fix	2008-08-29 13:31:40.000000000 -0400
++++ wpa_supplicant-0.5.10/wpa_supplicant.c	2008-08-29 13:32:55.000000000 -0400
+@@ -362,7 +362,6 @@ static void wpa_supplicant_notify_eapol_
+ 	if (wpa_s->key_mgmt == WPA_KEY_MGMT_IEEE8021X) {
+ 		wpa_supplicant_set_state(wpa_s, WPA_4WAY_HANDSHAKE);
+ 	} else {
+-		eloop_cancel_timeout(wpa_supplicant_scan, wpa_s, NULL);
+ 		wpa_supplicant_cancel_auth_timeout(wpa_s);
+ 		wpa_supplicant_set_state(wpa_s, WPA_COMPLETED);
+ 	}
+@@ -1817,12 +1816,6 @@ static int _wpa_ether_send(void *wpa_s, 
+ }
+ 
+ 
+-static void _wpa_supplicant_req_scan(void *wpa_s, int sec, int usec)
+-{
+-	wpa_supplicant_req_scan(wpa_s, sec, usec);
+-}
+-
+-
+ static void _wpa_supplicant_cancel_auth_timeout(void *wpa_s)
+ {
+ 	wpa_supplicant_cancel_auth_timeout(wpa_s);
+@@ -1844,12 +1837,16 @@ static wpa_states _wpa_supplicant_get_st
+ static void _wpa_supplicant_disassociate(void *wpa_s, int reason_code)
+ {
+ 	wpa_supplicant_disassociate(wpa_s, reason_code);
++	/* Schedule a scan to make sure we continue looking for networks */
++	wpa_supplicant_req_scan(wpa_s, 0, 0);
+ }
+ 
+ 
+ static void _wpa_supplicant_deauthenticate(void *wpa_s, int reason_code)
+ {
+ 	wpa_supplicant_deauthenticate(wpa_s, reason_code);
++	/* Schedule a scan to make sure we continue looking for networks */
++	wpa_supplicant_req_scan(wpa_s, 0, 0);
+ }
+ 
+ 
+@@ -2227,7 +2224,6 @@ static int wpa_supplicant_init_wpa(struc
+ 	ctx->ctx = wpa_s;
+ 	ctx->set_state = _wpa_supplicant_set_state;
+ 	ctx->get_state = _wpa_supplicant_get_state;
+-	ctx->req_scan = _wpa_supplicant_req_scan;
+ 	ctx->deauthenticate = _wpa_supplicant_deauthenticate;
+ 	ctx->disassociate = _wpa_supplicant_disassociate;
+ 	ctx->set_key = wpa_supplicant_set_key;
