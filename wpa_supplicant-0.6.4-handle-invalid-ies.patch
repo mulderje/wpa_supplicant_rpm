@@ -1,0 +1,85 @@
+commit fd630bc183fb79d0a14b5f3a346544f3d277bd05
+Author: Jouni Malinen <jouni.malinen@atheros.com>
+Date:   Wed Aug 27 09:52:16 2008 +0300
+
+    Fixed WEXT scan result parser to not crash on invalid IEs (zero len buffer)
+    
+    If IWEVGENIE or custom event wpa_ie/rsn_ie is received in scan with empty
+    buffer, the previous version ended up calling realloc(NULL, 0) which seems
+    to return a non-NULL value in some cases. When this return value is passed
+    again into realloc with realloc(ptr, 0), the returned value could be NULL.
+    If the ptr is then freed (os_free(data.ie) in SIOCGIWAP handling), glibc
+    may crash due to invalid pointer being freed (or double-freed?). The
+    non-NULL realloc(NULL, 0) return value from glibc looks a bit odd behavior,
+    but anyway, better avoid this case completely and just skip the IE events
+    that have an empty buffer.
+    
+    This issue should not show up with drivers that produce proper scan results
+    since the IEs will always include the two-octet header. However, it seems
+    to be possible to see this when using 64-bit kernel and 32-bit userspace
+    with incorrect compat-ioctl processing.
+
+diff --git a/src/drivers/driver_nl80211.c b/src/drivers/driver_nl80211.c
+index 45e3e1f..98dddd6 100644
+--- a/src/drivers/driver_nl80211.c
++++ b/src/drivers/driver_nl80211.c
+@@ -1618,6 +1618,9 @@ static void wext_get_scan_iwevgenie(struct iw_event *iwe,
+ 	char *genie, *gpos, *gend;
+ 	u8 *tmp;
+ 
++	if (iwe->u.data.length == 0)
++		return;
++
+ 	gpos = genie = custom;
+ 	gend = genie + iwe->u.data.length;
+ 	if (gend > end) {
+@@ -1650,7 +1653,7 @@ static void wext_get_scan_custom(struct iw_event *iwe,
+ 		int bytes;
+ 		spos = custom + 7;
+ 		bytes = custom + clen - spos;
+-		if (bytes & 1)
++		if (bytes & 1 || bytes == 0)
+ 			return;
+ 		bytes /= 2;
+ 		tmp = os_realloc(res->ie, res->ie_len + bytes);
+@@ -1664,7 +1667,7 @@ static void wext_get_scan_custom(struct iw_event *iwe,
+ 		int bytes;
+ 		spos = custom + 7;
+ 		bytes = custom + clen - spos;
+-		if (bytes & 1)
++		if (bytes & 1 || bytes == 0)
+ 			return;
+ 		bytes /= 2;
+ 		tmp = os_realloc(res->ie, res->ie_len + bytes);
+diff --git a/src/drivers/driver_wext.c b/src/drivers/driver_wext.c
+index 6aac427..a3c4733 100644
+--- a/src/drivers/driver_wext.c
++++ b/src/drivers/driver_wext.c
+@@ -1447,6 +1447,9 @@ static void wext_get_scan_iwevgenie(struct iw_event *iwe,
+ 	char *genie, *gpos, *gend;
+ 	u8 *tmp;
+ 
++	if (iwe->u.data.length == 0)
++		return;
++
+ 	gpos = genie = custom;
+ 	gend = genie + iwe->u.data.length;
+ 	if (gend > end) {
+@@ -1479,7 +1482,7 @@ static void wext_get_scan_custom(struct iw_event *iwe,
+ 		int bytes;
+ 		spos = custom + 7;
+ 		bytes = custom + clen - spos;
+-		if (bytes & 1)
++		if (bytes & 1 || bytes == 0)
+ 			return;
+ 		bytes /= 2;
+ 		tmp = os_realloc(res->ie, res->ie_len + bytes);
+@@ -1493,7 +1496,7 @@ static void wext_get_scan_custom(struct iw_event *iwe,
+ 		int bytes;
+ 		spos = custom + 7;
+ 		bytes = custom + clen - spos;
+-		if (bytes & 1)
++		if (bytes & 1 || bytes == 0)
+ 			return;
+ 		bytes /= 2;
+ 		tmp = os_realloc(res->ie, res->ie_len + bytes);
