@@ -1,0 +1,37 @@
+commit 23e072374ea500002b8beec5d0e87f9fc6a7609c
+Author: Dan Nicholson <dbn.lists@gmail.com>
+Date:   Wed Sep 24 12:51:08 2008 +0300
+
+    Don't post scan results when initial scan is emtpy
+    
+    When the initial scan is made, just the cached results from the driver
+    are used. If this is empty, it's useless to post the results since
+    another scan is being scheduled immediately. This just causes extra
+    processing from listeners for no gain.
+
+diff --git a/wpa_supplicant/events.c b/wpa_supplicant/events.c
+index 0f9b338..04e3152 100644
+--- a/wpa_supplicant/events.c
++++ b/wpa_supplicant/events.c
+@@ -551,9 +551,18 @@ static void wpa_supplicant_event_scan_results(struct wpa_supplicant *wpa_s)
+ 		goto req_scan;
+ 	}
+ 
+-	wpa_msg(wpa_s, MSG_INFO, WPA_EVENT_SCAN_RESULTS);
+-
+-	wpa_supplicant_dbus_notify_scan_results(wpa_s);
++	/*
++	 * Don't post the results if this was the initial cached
++	 * and there were no results.
++	 */
++	if (wpa_s->scan_res_tried == 1 && wpa_s->conf->ap_scan == 1 &&
++	    wpa_s->scan_res->num == 0) {
++		wpa_msg(wpa_s, MSG_DEBUG, "Cached scan results are "
++			"empty - not posting");
++	} else {
++		wpa_msg(wpa_s, MSG_INFO, WPA_EVENT_SCAN_RESULTS);
++		wpa_supplicant_dbus_notify_scan_results(wpa_s);
++	}
+ 
+ 	if (wpa_s->conf->ap_scan == 2 || wpa_s->disconnected)
+ 		return;

@@ -1,0 +1,144 @@
+commit ec5f180a24cd31ba9d3d7f2abc9dc557fd16602f
+Author: Dan Williams <dcbw@redhat.com>
+Date:   Mon Sep 29 16:45:49 2008 +0300
+
+    Add an optional set_mode() driver_ops handler for setting mode before keys
+    
+    A bug just got reported as a result of this for mac80211 drivers.
+    
+    https://bugzilla.redhat.com/show_bug.cgi?id=459399
+    
+    The basic problem is that since taking the device down clears the keys
+    from the driver on many mac80211-based cards, and since the mode gets
+    set _after_ the keys have been set in the driver, the keys get cleared
+    on a mode switch and the resulting association is wrong.  The report is
+    about ad-hoc mode specifically, but this could happen when switching
+    from adhoc back to managed mode.
+
+diff --git a/src/drivers/driver.h b/src/drivers/driver.h
+index 70dc075..77a2ceb 100644
+--- a/src/drivers/driver.h
++++ b/src/drivers/driver.h
+@@ -929,6 +929,20 @@ struct wpa_driver_ops {
+ 	 * Returns: 0 on success, -1 on failure
+ 	 */
+ 	int (*set_probe_req_ie)(void *, const u8 *ies, size_t ies_len);
++
++ 	/**
++	 * set_mode - Request driver to set the operating mode
++	 * @priv: private driver interface data
++	 * @mode: Operation mode (infra/ibss) IEEE80211_MODE_*
++	 *
++	 * This handler will be called before any key configuration and call to
++	 * associate() handler in order to allow the operation mode to be
++	 * configured as early as possible. This information is also available
++	 * in associate() params and as such, some driver wrappers may not need
++	 * to implement set_mode() handler.
++	 * Returns: 0 on success, -1 on failure
++	 */
++	int (*set_mode)(void *priv, int mode);
+ };
+ 
+ /**
+diff --git a/src/drivers/driver_ndis.c b/src/drivers/driver_ndis.c
+index da4f90f..f55bd2e 100644
+--- a/src/drivers/driver_ndis.c
++++ b/src/drivers/driver_ndis.c
+@@ -2829,5 +2829,7 @@ const struct wpa_driver_ops wpa_driver_ndis_ops = {
+ 	NULL /* mlme_remove_sta */,
+ 	NULL /* update_ft_ies */,
+ 	NULL /* send_ft_action */,
+-	wpa_driver_ndis_get_scan_results
++	wpa_driver_ndis_get_scan_results,
++	NULL /* set_probe_req_ie */,
++	NULL /* set_mode */
+ };
+diff --git a/src/drivers/driver_nl80211.c b/src/drivers/driver_nl80211.c
+index 98dddd6..a207363 100644
+--- a/src/drivers/driver_nl80211.c
++++ b/src/drivers/driver_nl80211.c
+@@ -2226,8 +2226,6 @@ static int wpa_driver_nl80211_associate(
+ 	    wpa_driver_nl80211_set_bssid(drv, NULL) < 0)
+ 		ret = -1;
+ 
+-	if (wpa_driver_nl80211_set_mode(drv, params->mode) < 0)
+-		ret = -1;
+ 	/* TODO: should consider getting wpa version and cipher/key_mgmt suites
+ 	 * from configuration, not from here, where only the selected suite is
+ 	 * available */
+@@ -2859,6 +2857,7 @@ const struct wpa_driver_ops wpa_driver_nl80211_ops = {
+ 	.get_scan_results2 = wpa_driver_nl80211_get_scan_results,
+ 	.deauthenticate = wpa_driver_nl80211_deauthenticate,
+ 	.disassociate = wpa_driver_nl80211_disassociate,
++	.set_mode = wpa_driver_nl80211_set_mode,
+ 	.associate = wpa_driver_nl80211_associate,
+ 	.set_auth_alg = wpa_driver_nl80211_set_auth_alg,
+ 	.init = wpa_driver_nl80211_init,
+diff --git a/src/drivers/driver_test.c b/src/drivers/driver_test.c
+index 5c6e6f1..7f7f129 100644
+--- a/src/drivers/driver_test.c
++++ b/src/drivers/driver_test.c
+@@ -982,5 +982,6 @@ const struct wpa_driver_ops wpa_driver_test_ops = {
+ 	NULL /* update_ft_ies */,
+ 	NULL /* send_ft_action */,
+ 	wpa_driver_test_get_scan_results2,
+-	NULL /* set_probe_req_ie */
++	NULL /* set_probe_req_ie */,
++	NULL /* set_mode */
+ };
+diff --git a/src/drivers/driver_wext.c b/src/drivers/driver_wext.c
+index 6b7f1a7..a618a74 100644
+--- a/src/drivers/driver_wext.c
++++ b/src/drivers/driver_wext.c
+@@ -2206,8 +2206,6 @@ int wpa_driver_wext_associate(void *priv,
+ 	    wpa_driver_wext_set_bssid(drv, NULL) < 0)
+ 		ret = -1;
+ 
+-	if (wpa_driver_wext_set_mode(drv, params->mode) < 0)
+-		ret = -1;
+ 	/* TODO: should consider getting wpa version and cipher/key_mgmt suites
+ 	 * from configuration, not from here, where only the selected suite is
+ 	 * available */
+@@ -2782,6 +2780,7 @@ const struct wpa_driver_ops wpa_driver_wext_ops = {
+ 	.get_scan_results2 = wpa_driver_wext_get_scan_results,
+ 	.deauthenticate = wpa_driver_wext_deauthenticate,
+ 	.disassociate = wpa_driver_wext_disassociate,
++	.set_mode = wpa_driver_wext_set_mode,
+ 	.associate = wpa_driver_wext_associate,
+ 	.set_auth_alg = wpa_driver_wext_set_auth_alg,
+ 	.init = wpa_driver_wext_init,
+diff --git a/wpa_supplicant/wpa_supplicant.c b/wpa_supplicant/wpa_supplicant.c
+index 4c9482f..a36c65b 100644
+--- a/wpa_supplicant/wpa_supplicant.c
++++ b/wpa_supplicant/wpa_supplicant.c
+@@ -937,6 +937,11 @@ void wpa_supplicant_associate(struct wpa_supplicant *wpa_s,
+ 	 * previous association. */
+ 	wpa_sm_set_assoc_wpa_ie(wpa_s->wpa, NULL, 0);
+ 
++	if (wpa_drv_set_mode(wpa_s, ssid->mode)) {
++		wpa_printf(MSG_WARNING, "Failed to set operating mode");
++		assoc_failed = 1;
++	}
++
+ #ifdef IEEE8021X_EAPOL
+ 	if (ssid->key_mgmt & WPA_KEY_MGMT_IEEE8021X_NO_WPA) {
+ 		if (ssid->leap) {
+diff --git a/wpa_supplicant/wpa_supplicant_i.h b/wpa_supplicant/wpa_supplicant_i.h
+index a2e3dd5..9afae2a 100644
+--- a/wpa_supplicant/wpa_supplicant_i.h
++++ b/wpa_supplicant/wpa_supplicant_i.h
+@@ -448,6 +448,14 @@ static inline int wpa_drv_set_wpa(struct wpa_supplicant *wpa_s, int enabled)
+ 	return 0;
+ }
+ 
++static inline int wpa_drv_set_mode(struct wpa_supplicant *wpa_s, int mode)
++{
++	if (wpa_s->driver->set_mode) {
++		return wpa_s->driver->set_mode(wpa_s->drv_priv, mode);
++	}
++	return 0;
++}
++
+ static inline int wpa_drv_associate(struct wpa_supplicant *wpa_s,
+ 				    struct wpa_driver_associate_params *params)
+ {
