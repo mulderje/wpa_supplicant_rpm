@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.6.4
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -17,6 +17,11 @@ Patch1: wpa_supplicant-0.5.7-qmake-location.patch
 Patch2: wpa_supplicant-0.5.7-flush-debug-output.patch
 Patch3: wpa_supplicant-0.5.7-use-IW_ENCODE_TEMP.patch
 Patch4: wpa_supplicant-0.5.10-dbus-service-file.patch
+Patch5: wpa_supplicant-0.6.4-handle-invalid-ies.patch
+Patch6: wpa_supplicant-0.6.4-scan-fixes-1.patch
+Patch7: wpa_supplicant-0.6.4-scan-fixes-2.patch
+Patch8: wpa_supplicant-0.6.4-validate-wext-event.patch
+Patch9: wpa_supplicant-0.6.4-set-mode-handler.patch
 
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -49,6 +54,11 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch2 -p1 -b .flush-debug-output
 %patch3 -p1 -b .use-IW_ENCODE_TEMP
 %patch4 -p1 -b .dbus-service-file
+%patch5 -p1 -b .handle-invalid-ies
+%patch6 -p1 -b .scan-fixes-1
+%patch7 -p1 -b .scan-fixes-2
+%patch8 -p1 -b .validate-wext-event
+%patch9 -p1 -b .set-mode-handler
 
 %build
 pushd wpa_supplicant
@@ -138,6 +148,11 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Mon Oct 15 2008 Dan Williams <dcbw@redhat.com> - 1:0.6.4-2
+- Handle encryption keys correctly when switching 802.11 modes (rh #459399)
+- Better scanning behavior on resume from suspend/hibernate
+- Better interaction with newer kernels and drivers
+
 * Wed Aug 27 2008 Dan Williams <dcbw@redhat.com> - 1:0.6.4-1
 - Update to 0.6.4
 - Remove 'hostap', 'madwifi', and 'prism54' drivers; use standard 'wext' instead
