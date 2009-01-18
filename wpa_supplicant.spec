@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.6.4
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -148,6 +148,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Sun Jan 18 2009 Tomas Mraz <tmraz@redhat.com> - 1:0.6.4-3
+- rebuild with new openssl
+
 * Mon Oct 15 2008 Dan Williams <dcbw@redhat.com> - 1:0.6.4-2
 - Handle encryption keys correctly when switching 802.11 modes (rh #459399)
 - Better scanning behavior on resume from suspend/hibernate
