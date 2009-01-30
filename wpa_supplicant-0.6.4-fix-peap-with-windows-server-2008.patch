@@ -1,0 +1,44 @@
+From: Jouni Malinen <j@w1.fi>
+Date: Sun, 14 Dec 2008 22:15:54 +0000 (+0200)
+Subject: Fixed interoperability issue with PEAPv0 cryptobinding and NPS
+X-Git-Tag: hostap_0_6_7~111
+X-Git-Url: http://w1.fi/gitweb/gitweb.cgi?p=hostap.git;a=commitdiff_plain;h=f4f2774a96d91753811e921380856bc859888153
+
+Fixed interoperability issue with PEAPv0 cryptobinding and NPS
+
+Windows Server 2008 NPS gets very confused if the TLS Message Length is
+not included in the Phase 1 messages even if fragmentation is not used.
+If the TLS Message Length field is not included in ClientHello message,
+NPS seems to decide to use the ClientHello data (excluding first six
+octets, i.e., EAP header, type, Flags) as the OuterTLVs data in
+Cryptobinding Compound_MAC calculation (per PEAPv2; not MS-PEAP)..
+
+Lets add the TLS Message Length to PEAPv0 Phase 1 messages to get rid of
+this issue. This seems to fix Cryptobinding issues with NPS and PEAPv0
+is now using optional Cryptobinding by default (again) since there are
+no known interop issues with it anymore.
+---
+
+diff --git a/src/eap_peer/eap_tls_common.c b/src/eap_peer/eap_tls_common.c
+index 9ff4eed..5db8bf6 100644
+--- a/src/eap_peer/eap_tls_common.c
++++ b/src/eap_peer/eap_tls_common.c
+@@ -501,6 +501,17 @@ static int eap_tls_process_output(struct eap_ssl_data *data, EapType eap_type,
+ 	length_included = data->tls_out_pos == 0 &&
+ 		(data->tls_out_len > data->tls_out_limit ||
+ 		 data->include_tls_length);
++	if (!length_included &&
++	    eap_type == EAP_TYPE_PEAP && peap_version == 0 &&
++	    !tls_connection_established(data->eap->ssl_ctx, data->conn)) {
++		/*
++		 * Windows Server 2008 NPS really wants to have the TLS Message
++		 * length included in phase 0 even for unfragmented frames or
++		 * it will get very confused with Compound MAC calculation and
++		 * Outer TLVs.
++		 */
++		length_included = 1;
++	}
+ 
+ 	*out_data = eap_msg_alloc(EAP_VENDOR_IETF, eap_type,
+ 				  1 + length_included * 4 + len,
+
