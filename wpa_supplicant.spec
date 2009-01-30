@@ -1,8 +1,8 @@
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
-Version: 0.6.4
-Release: 3%{?dist}
+Version: 0.6.7
+Release: 1%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -17,11 +17,7 @@ Patch1: wpa_supplicant-0.5.7-qmake-location.patch
 Patch2: wpa_supplicant-0.5.7-flush-debug-output.patch
 Patch3: wpa_supplicant-0.5.7-use-IW_ENCODE_TEMP.patch
 Patch4: wpa_supplicant-0.5.10-dbus-service-file.patch
-Patch5: wpa_supplicant-0.6.4-handle-invalid-ies.patch
-Patch6: wpa_supplicant-0.6.4-scan-fixes-1.patch
-Patch7: wpa_supplicant-0.6.4-scan-fixes-2.patch
-Patch8: wpa_supplicant-0.6.4-validate-wext-event.patch
-Patch9: wpa_supplicant-0.6.4-set-mode-handler.patch
+Patch5: wpa_supplicant-0.6.7-quiet-scan-results-message.patch
 
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -54,11 +50,7 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch2 -p1 -b .flush-debug-output
 %patch3 -p1 -b .use-IW_ENCODE_TEMP
 %patch4 -p1 -b .dbus-service-file
-%patch5 -p1 -b .handle-invalid-ies
-%patch6 -p1 -b .scan-fixes-1
-%patch7 -p1 -b .scan-fixes-2
-%patch8 -p1 -b .validate-wext-event
-%patch9 -p1 -b .set-mode-handler
+%patch5 -p1 -b .quiet-scan-results-msg
 
 %build
 pushd wpa_supplicant
@@ -122,6 +114,7 @@ fi
 %preun
 if [ $1 = 0 ]; then
 	service %{name} stop > /dev/null 2>&1
+	killall -TERM wpa_supplicant >/dev/null 2>&1
 	/sbin/chkconfig --del %{name}
 fi
 
@@ -148,6 +141,11 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Fri Jan 30 2009 Dan Williams <dcbw@redhat.com> - 1:0.6.7-1
+- Fix PEAP connections to Windows Server 2008 authenticators (rh #465022)
+- Stop supplicant on uninstall (rh #447843)
+- Suppress scan results message in logs (rh #466601)
+
 * Sun Jan 18 2009 Tomas Mraz <tmraz@redhat.com> - 1:0.6.4-3
 - rebuild with new openssl
 
