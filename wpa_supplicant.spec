@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.6.4
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -22,6 +22,8 @@ Patch6: wpa_supplicant-0.6.4-scan-fixes-1.patch
 Patch7: wpa_supplicant-0.6.4-scan-fixes-2.patch
 Patch8: wpa_supplicant-0.6.4-validate-wext-event.patch
 Patch9: wpa_supplicant-0.6.4-set-mode-handler.patch
+Patch10: wpa_supplicant-0.6.4-fix-peap-with-windows-server-2008.patch
+Patch11: wpa_supplicant-0.6.7-quiet-scan-results-message.patch
 
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -59,6 +61,8 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch7 -p1 -b .scan-fixes-2
 %patch8 -p1 -b .validate-wext-event
 %patch9 -p1 -b .set-mode-handler
+%patch10 -p1 -b .fix-peap-windows-server-2008
+%patch11 -p1 -b .quiet-scan-results-msg
 
 %build
 pushd wpa_supplicant
@@ -122,6 +126,7 @@ fi
 %preun
 if [ $1 = 0 ]; then
 	service %{name} stop > /dev/null 2>&1
+	killall -TERM wpa_supplicant >/dev/null 2>&1
 	/sbin/chkconfig --del %{name}
 fi
 
@@ -148,6 +153,11 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Fri Jan 30 2009 Dan Williams <dcbw@redhat.com> - 1:0.6.4-3
+- Fix PEAP connections to Windows Server 2008 authenticators (rh #465022)
+- Stop supplicant on uninstall (rh #447843)
+- Suppress scan results message in logs (rh #466601)
+
 * Mon Oct 15 2008 Dan Williams <dcbw@redhat.com> - 1:0.6.4-2
 - Handle encryption keys correctly when switching 802.11 modes (rh #459399)
 - Better scanning behavior on resume from suspend/hibernate
