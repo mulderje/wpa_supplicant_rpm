@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.6.7
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -19,6 +19,7 @@ Patch3: wpa_supplicant-0.5.7-use-IW_ENCODE_TEMP.patch
 Patch4: wpa_supplicant-0.5.10-dbus-service-file.patch
 Patch5: wpa_supplicant-0.6.7-quiet-scan-results-message.patch
 Patch6: wpa-supplicant-0.6.7-really-disassoc.patch
+Patch7: wpa_supplicant-0.6.7-wext-scan-size.patch
 
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -53,6 +54,7 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch4 -p1 -b .dbus-service-file
 %patch5 -p1 -b .quiet-scan-results-msg
 %patch6 -p1 -b .really-disassociate
+%patch7 -p1 -b .lots-o-scan-results
 
 %build
 pushd wpa_supplicant
@@ -143,6 +145,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Fri Feb  6 2009 Dan Williams <dcbw@redhat.com> - 1:0.6.7-3
+- Fix scan result retrieval in very dense wifi environments
+
 * Fri Feb  6 2009 Dan Williams <dcbw@redhat.com> - 1:0.6.7-2
 - Ensure that drivers don't retry association when they aren't supposed to
 

@@ -1,0 +1,51 @@
+commit 42f1ee7d1fae8a67a2a48adfda19f9aafc3fef32
+Author: Jouni Malinen <jouni.malinen@atheros.com>
+Date:   Thu Feb 5 12:00:23 2009 +0200
+
+    Fixed scan buffer increasing with WEXT
+    
+    We can now handle up to 65535 byte result buffer which is the maximum
+    due to WEXT using 16-bit length field. Previously, this was limited to
+    32768 bytes in practice even through we tried with 65536 and 131072
+    buffers which we just truncated into 0 in the 16-bit variable.
+    
+    This more or less doubles the number of BSSes we can received from scan
+    results.
+
+diff --git a/src/drivers/driver_nl80211.c b/src/drivers/driver_nl80211.c
+index 5e40cd2..2646270 100644
+--- a/src/drivers/driver_nl80211.c
++++ b/src/drivers/driver_nl80211.c
+@@ -1565,10 +1565,12 @@ static u8 * wpa_driver_nl80211_giwscan(struct wpa_driver_nl80211_data *drv,
+ 		if (ioctl(drv->ioctl_sock, SIOCGIWSCAN, &iwr) == 0)
+ 			break;
+ 
+-		if (errno == E2BIG && res_buf_len < 100000) {
++		if (errno == E2BIG && res_buf_len < 65535) {
+ 			os_free(res_buf);
+ 			res_buf = NULL;
+ 			res_buf_len *= 2;
++			if (res_buf_len > 65535)
++				res_buf_len = 65535; /* 16-bit length field */
+ 			wpa_printf(MSG_DEBUG, "Scan results did not fit - "
+ 				   "trying larger buffer (%lu bytes)",
+ 				   (unsigned long) res_buf_len);
+diff --git a/src/drivers/driver_wext.c b/src/drivers/driver_wext.c
+index b6273e5..631c63d 100644
+--- a/src/drivers/driver_wext.c
++++ b/src/drivers/driver_wext.c
+@@ -1140,10 +1140,12 @@ static u8 * wpa_driver_wext_giwscan(struct wpa_driver_wext_data *drv,
+ 		if (ioctl(drv->ioctl_sock, SIOCGIWSCAN, &iwr) == 0)
+ 			break;
+ 
+-		if (errno == E2BIG && res_buf_len < 100000) {
++		if (errno == E2BIG && res_buf_len < 65535) {
+ 			os_free(res_buf);
+ 			res_buf = NULL;
+ 			res_buf_len *= 2;
++			if (res_buf_len > 65535)
++				res_buf_len = 65535; /* 16-bit length field */
+ 			wpa_printf(MSG_DEBUG, "Scan results did not fit - "
+ 				   "trying larger buffer (%lu bytes)",
+ 				   (unsigned long) res_buf_len);
+
