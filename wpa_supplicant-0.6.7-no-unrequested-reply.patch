@@ -1,0 +1,47 @@
+From: Helmut Schaa <helmut.schaa@googlemail.com>
+Date: Mon, 9 Feb 2009 17:45:06 +0000 (+0200)
+Subject: Send a dbus reply only if requested by the caller
+X-Git-Url: http://w1.fi/gitweb/gitweb.cgi?p=hostap.git;a=commitdiff_plain;h=c3f5b1e16d119392ec30e3b5a0d015ee2aa3d664;hp=02a89365abba33fb462f739c325dc9cc3e847dae
+
+Send a dbus reply only if requested by the caller
+
+wpa_supplicant should not send a dbus reply as response to a method call
+if no reply was requested by the caller. Sending a reply even if not
+requested is basically no problem but triggers dbus warnings like the
+one below.
+
+Feb  9 07:31:23 linux-gvjr dbus-daemon: Rejected send message, 2 matched
+rules; type="error", sender=":1.129" (uid=0 pid=30228
+comm="/usr/sbin/wpa_supplicant -c /etc/wpa_supplicant/wp")
+interface="(unset)" member="(unset)" error
+name="fi.epitest.hostap.WPASupplicant.InvalidInterface"
+requested_reply=0 destination=":1.128" (uid=0 pid=30226
+comm="/usr/sbin/NetworkManager "))
+
+Signed-off-by: Helmut Schaa <helmut.schaa@googlemail.com>
+---
+
+diff --git a/wpa_supplicant/ctrl_iface_dbus.c b/wpa_supplicant/ctrl_iface_dbus.c
+index b772247..c4e329c 100644
+--- a/wpa_supplicant/ctrl_iface_dbus.c
++++ b/wpa_supplicant/ctrl_iface_dbus.c
+@@ -548,7 +548,8 @@ static DBusHandlerResult wpas_iface_message_handler(DBusConnection *connection,
+ 
+ 	/* If the message was handled, send back the reply */
+ 	if (reply) {
+-		dbus_connection_send(connection, reply, NULL);
++		if (!dbus_message_get_no_reply(message))
++			dbus_connection_send(connection, reply, NULL);
+ 		dbus_message_unref(reply);
+ 	}
+ 
+@@ -607,7 +608,8 @@ static DBusHandlerResult wpas_message_handler(DBusConnection *connection,
+ 
+ 	/* If the message was handled, send back the reply */
+ 	if (reply) {
+-		dbus_connection_send(connection, reply, NULL);
++		if (!dbus_message_get_no_reply(message))
++			dbus_connection_send(connection, reply, NULL);
+ 		dbus_message_unref(reply);
+ 	}
+ 

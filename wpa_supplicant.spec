@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.6.7
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -20,6 +20,8 @@ Patch4: wpa_supplicant-0.5.10-dbus-service-file.patch
 Patch5: wpa_supplicant-0.6.7-quiet-scan-results-message.patch
 Patch6: wpa-supplicant-0.6.7-really-disassoc.patch
 Patch7: wpa_supplicant-0.6.7-wext-scan-size.patch
+# Upstream: http://w1.fi/gitweb/gitweb.cgi?p=hostap.git;a=commitdiff;h=c3f5b1e16d119392ec30e3b5a0d015ee2aa3d664;hp=02a89365abba33fb462f739c325dc9cc3e847dae#patch1
+Patch8: wpa_supplicant-0.6.7-no-unrequested-reply.patch
 
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -55,6 +57,7 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch5 -p1 -b .quiet-scan-results-msg
 %patch6 -p1 -b .really-disassociate
 %patch7 -p1 -b .lots-o-scan-results
+%patch8 -p1 -b .no-unrequested-reply
 
 %build
 pushd wpa_supplicant
@@ -145,6 +148,10 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Wed Feb 25 2009 Colin Walters <walters@verbum.org> - 1:0.6.7-4
+- Add patch from upstream to suppress unrequested replies, this
+  quiets a dbus warning.
+
 * Fri Feb  6 2009 Dan Williams <dcbw@redhat.com> - 1:0.6.7-3
 - Fix scan result retrieval in very dense wifi environments
 
