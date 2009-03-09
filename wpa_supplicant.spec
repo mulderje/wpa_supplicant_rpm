@@ -1,8 +1,8 @@
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
-Version: 0.6.7
-Release: 4%{?dist}
+Version: 0.6.8
+Release: 1%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -15,11 +15,8 @@ Source6: %{name}.logrotate
 Patch0: wpa_supplicant-assoc-timeout.patch
 Patch1: wpa_supplicant-0.5.7-qmake-location.patch
 Patch2: wpa_supplicant-0.5.7-flush-debug-output.patch
-Patch3: wpa_supplicant-0.5.7-use-IW_ENCODE_TEMP.patch
 Patch4: wpa_supplicant-0.5.10-dbus-service-file.patch
 Patch5: wpa_supplicant-0.6.7-quiet-scan-results-message.patch
-Patch6: wpa-supplicant-0.6.7-really-disassoc.patch
-Patch7: wpa_supplicant-0.6.7-wext-scan-size.patch
 # Upstream: http://w1.fi/gitweb/gitweb.cgi?p=hostap.git;a=commitdiff;h=c3f5b1e16d119392ec30e3b5a0d015ee2aa3d664;hp=02a89365abba33fb462f739c325dc9cc3e847dae#patch1
 Patch8: wpa_supplicant-0.6.7-no-unrequested-reply.patch
 
@@ -52,11 +49,8 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch0 -p1 -b .assoc-timeout
 %patch1 -p1 -b .qmake-location
 %patch2 -p1 -b .flush-debug-output
-%patch3 -p1 -b .use-IW_ENCODE_TEMP
 %patch4 -p1 -b .dbus-service-file
 %patch5 -p1 -b .quiet-scan-results-msg
-%patch6 -p1 -b .really-disassociate
-%patch7 -p1 -b .lots-o-scan-results
 %patch8 -p1 -b .no-unrequested-reply
 
 %build
@@ -148,6 +142,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Mon Mar  9 2009 Dan Williams <dcbw@redhat.com> - 1:0.6.8-1
+- Update to latest upstream release
+
 * Wed Feb 25 2009 Colin Walters <walters@verbum.org> - 1:0.6.7-4
 - Add patch from upstream to suppress unrequested replies, this
   quiets a dbus warning.
