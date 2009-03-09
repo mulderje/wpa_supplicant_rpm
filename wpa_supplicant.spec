@@ -17,8 +17,6 @@ Patch1: wpa_supplicant-0.5.7-qmake-location.patch
 Patch2: wpa_supplicant-0.5.7-flush-debug-output.patch
 Patch4: wpa_supplicant-0.5.10-dbus-service-file.patch
 Patch5: wpa_supplicant-0.6.7-quiet-scan-results-message.patch
-# Upstream: http://w1.fi/gitweb/gitweb.cgi?p=hostap.git;a=commitdiff;h=c3f5b1e16d119392ec30e3b5a0d015ee2aa3d664;hp=02a89365abba33fb462f739c325dc9cc3e847dae#patch1
-Patch8: wpa_supplicant-0.6.7-no-unrequested-reply.patch
 
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -51,7 +49,6 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch2 -p1 -b .flush-debug-output
 %patch4 -p1 -b .dbus-service-file
 %patch5 -p1 -b .quiet-scan-results-msg
-%patch8 -p1 -b .no-unrequested-reply
 
 %build
 pushd wpa_supplicant
