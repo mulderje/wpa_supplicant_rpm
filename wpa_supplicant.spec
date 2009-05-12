@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.6.8
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -17,6 +17,7 @@ Patch1: wpa_supplicant-0.5.7-qmake-location.patch
 Patch2: wpa_supplicant-0.5.7-flush-debug-output.patch
 Patch4: wpa_supplicant-0.5.10-dbus-service-file.patch
 Patch5: wpa_supplicant-0.6.7-quiet-scan-results-message.patch
+Patch6: wpa_supplicant-0.6.8-disconnect-fixes.patch
 
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -49,6 +50,7 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch2 -p1 -b .flush-debug-output
 %patch4 -p1 -b .dbus-service-file
 %patch5 -p1 -b .quiet-scan-results-msg
+%patch6 -p1 -b .really-disassoc
 
 %build
 pushd wpa_supplicant
@@ -139,6 +141,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Tue May 12 2009 Dan Williams <dcbw@redhat.com> - 1:0.6.8-2
+- Avoid creating bogus Ad-Hoc networks when forcing the driver to disconnect (rh #497771)
+
 * Mon Mar  9 2009 Dan Williams <dcbw@redhat.com> - 1:0.6.8-1
 - Update to latest upstream release
 
