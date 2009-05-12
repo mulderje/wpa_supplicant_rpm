@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.6.4
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -24,6 +24,10 @@ Patch8: wpa_supplicant-0.6.4-validate-wext-event.patch
 Patch9: wpa_supplicant-0.6.4-set-mode-handler.patch
 Patch10: wpa_supplicant-0.6.4-fix-peap-with-windows-server-2008.patch
 Patch11: wpa_supplicant-0.6.7-quiet-scan-results-message.patch
+Patch12: wpa_supplicant-0.6.7-really-disassoc.patch
+Patch13: wpa_supplicant-0.6.8-disconnect-init-deinit.patch
+Patch14: wpa_supplicant-0.6.8-handle-driver-disconnect-spam.patch
+Patch15: wpa_supplicant-0.6.8-ap-stability.patch
 
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -63,6 +67,10 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch9 -p1 -b .set-mode-handler
 %patch10 -p1 -b .fix-peap-windows-server-2008
 %patch11 -p1 -b .quiet-scan-results-msg
+%patch12 -p1 -b .really-disassoc
+%patch13 -p1 -b .disconnect-init-deinit
+%patch14 -p1 -b .disconnect-spam
+%patch15 -p1 -b .ap-stability
 
 %build
 pushd wpa_supplicant
@@ -153,6 +161,12 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Tue May 12 2009 Dan Williams <dcbw@redhat.com> - 1:0.6.4-4
+- Ensure that drivers don't retry association when they aren't supposed to
+- Ensure the supplicant starts and ends with clean driver state
+- Handle driver disconnect spammage by forcibly clearing SSID
+- Don't switch access points unless the current association is dire (rh #493745)
+
 * Fri Jan 30 2009 Dan Williams <dcbw@redhat.com> - 1:0.6.4-3
 - Fix PEAP connections to Windows Server 2008 authenticators (rh #465022)
 - Stop supplicant on uninstall (rh #447843)
