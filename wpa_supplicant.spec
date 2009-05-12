@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.6.8
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -18,6 +18,9 @@ Patch2: wpa_supplicant-0.5.7-flush-debug-output.patch
 Patch4: wpa_supplicant-0.5.10-dbus-service-file.patch
 Patch5: wpa_supplicant-0.6.7-quiet-scan-results-message.patch
 Patch6: wpa_supplicant-0.6.8-disconnect-fixes.patch
+Patch7: wpa_supplicant-0.6.8-disconnect-init-deinit.patch
+Patch8: wpa_supplicant-0.6.8-handle-driver-disconnect-spam.patch
+Patch9: wpa_supplicant-0.6.8-ap-stability.patch
 
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -51,6 +54,9 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch4 -p1 -b .dbus-service-file
 %patch5 -p1 -b .quiet-scan-results-msg
 %patch6 -p1 -b .really-disassoc
+%patch7 -p1 -b .disconnect-init-deinit
+%patch8 -p1 -b .disconnect-spam
+%patch9 -p1 -b .ap-stability
 
 %build
 pushd wpa_supplicant
@@ -141,6 +147,11 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Tue May 12 2009 Dan Williams <dcbw@redhat.com> - 1:0.6.8-3
+- Ensure the supplicant starts and ends with clean driver state
+- Handle driver disconnect spammage by forcibly clearing SSID
+- Don't switch access points unless the current association is dire (rh #493745)
+
 * Tue May 12 2009 Dan Williams <dcbw@redhat.com> - 1:0.6.8-2
 - Avoid creating bogus Ad-Hoc networks when forcing the driver to disconnect (rh #497771)
 
