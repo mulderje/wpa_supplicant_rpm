@@ -104,7 +104,7 @@ diff -up wpa_supplicant-0.6.4/src/drivers/driver_wext.h.ap-bouncing wpa_supplica
  #define DRIVER_WEXT_H
  
  #include <net/if.h>
-+#include "wireless.h"
++#include "wireless_copy.h"
  
  struct wpa_driver_wext_data {
  	void *ctx;
