@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.6.8
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -21,6 +21,7 @@ Patch6: wpa_supplicant-0.6.8-disconnect-fixes.patch
 Patch7: wpa_supplicant-0.6.8-disconnect-init-deinit.patch
 Patch8: wpa_supplicant-0.6.8-handle-driver-disconnect-spam.patch
 Patch9: wpa_supplicant-0.6.8-ap-stability.patch
+Patch10: wpa_supplicant-0.6.8-scanning-property.patch
 
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -57,6 +58,7 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch7 -p1 -b .disconnect-init-deinit
 %patch8 -p1 -b .disconnect-spam
 %patch9 -p1 -b .ap-stability
+%patch10 -p1 -b .scanning-property
 
 %build
 pushd wpa_supplicant
@@ -147,6 +149,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Wed May 13 2009 Dan Williams <dcbw@redhat.com> - 1:0.6.8-4
+- Let D-Bus clients know when the supplicant is scanning
+
 * Tue May 12 2009 Dan Williams <dcbw@redhat.com> - 1:0.6.8-3
 - Ensure the supplicant starts and ends with clean driver state
 - Handle driver disconnect spammage by forcibly clearing SSID
