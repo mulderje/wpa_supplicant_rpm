@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.6.8
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -153,8 +153,11 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Sun Nov 29 2009 Dan Williams <dcbw@redhat.com> - 1:0.6.8-6
+- Fix supplicant initscript return value (rh #521807)
+
 * Sun Nov 29 2009 Dan Williams <dcbw@redhat.com> - 1:0.6.8-5
-- Fix race when connecting to WPA-Enterprise/802.1x-enabled access points
+- Fix race when connecting to WPA-Enterprise/802.1x-enabled access points (rh #508509)
 - Don't double-scan when attempting to associate
 
 * Wed May 13 2009 Dan Williams <dcbw@redhat.com> - 1:0.6.8-4
