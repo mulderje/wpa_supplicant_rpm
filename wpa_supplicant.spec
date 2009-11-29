@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.6.8
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -22,6 +22,8 @@ Patch7: wpa_supplicant-0.6.8-disconnect-init-deinit.patch
 Patch8: wpa_supplicant-0.6.8-handle-driver-disconnect-spam.patch
 Patch9: wpa_supplicant-0.6.8-ap-stability.patch
 Patch10: wpa_supplicant-0.6.8-scanning-property.patch
+Patch11: wpa_supplicant-0.6.9-scan-faster.patch
+Patch12: wpa_supplicant-0.6.9-eapol-race-fix.patch
 
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -59,6 +61,8 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch8 -p1 -b .disconnect-spam
 %patch9 -p1 -b .ap-stability
 %patch10 -p1 -b .scanning-property
+%patch11 -p1 -b .scan-faster
+%patch12 -p1 -b .eapol-race-fix
 
 %build
 pushd wpa_supplicant
@@ -149,6 +153,11 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Sun Nov 29 2009 Dan Williams <dcbw@redhat.com> - 1:0.6.8-7
+- Fix supplicant initscript return value (rh #521807)
+- Fix race when connecting to WPA-Enterprise/802.1x-enabled access points (rh #508509)
+- Don't double-scan when attempting to associate
+
 * Fri Aug 21 2009 Tomas Mraz <tmraz@redhat.com> - 1:0.6.8-6
 - rebuilt with new openssl
 
