@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.6.8
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -24,6 +24,7 @@ Patch9: wpa_supplicant-0.6.8-ap-stability.patch
 Patch10: wpa_supplicant-0.6.8-scanning-property.patch
 Patch11: wpa_supplicant-0.6.9-scan-faster.patch
 Patch12: wpa_supplicant-0.6.9-eapol-race-fix.patch
+Patch13: wpa_supplicant-0.6.8-openssl-init.patch
 
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -63,6 +64,7 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch10 -p1 -b .scanning-property
 %patch11 -p1 -b .scan-faster
 %patch12 -p1 -b .eapol-race-fix
+%patch13 -p1 -b .more-openssl-algs
 
 %build
 pushd wpa_supplicant
@@ -153,6 +155,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Wed Jan  6 2010 Dan Williams <dcbw@redhat.com> - 1:0.6.8-8
+- Fix handling of newer PKCS#12 files (rh #541924)
+
 * Sun Nov 29 2009 Dan Williams <dcbw@redhat.com> - 1:0.6.8-7
 - Fix supplicant initscript return value (rh #521807)
 - Fix race when connecting to WPA-Enterprise/802.1x-enabled access points (rh #508509)
