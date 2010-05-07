@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.6.8
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -155,6 +155,9 @@ fi
 %{_bindir}/wpa_gui
 
 %changelog
+* Thu May  6 2010 Dan Williams <dcbw@redhat.com> - 1:0.6.8-9
+- Fix crash when interfaces are removed (like suspend/resume) (rh #589507)
+
 * Wed Jan  6 2010 Dan Williams <dcbw@redhat.com> - 1:0.6.8-8
 - Fix handling of newer PKCS#12 files (rh #541924)
 
