@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.6.8
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -11,6 +11,18 @@ Source2: %{name}.conf
 Source3: %{name}.init.d
 Source4: %{name}.sysconfig
 Source6: %{name}.logrotate
+
+%define build_gui 1
+%if 0%{?rhel} >= 1
+%define build_gui 0
+%endif
+
+%if %{build_gui}
+%define with_qt4 0
+%if 0%{?fedora} >= 14
+%define with_qt4 1
+%endif
+%endif
 
 Patch0: wpa_supplicant-assoc-timeout.patch
 Patch1: wpa_supplicant-0.5.7-qmake-location.patch
@@ -25,16 +37,21 @@ Patch10: wpa_supplicant-0.6.8-scanning-property.patch
 Patch11: wpa_supplicant-0.6.9-scan-faster.patch
 Patch12: wpa_supplicant-0.6.9-eapol-race-fix.patch
 Patch13: wpa_supplicant-0.6.8-openssl-init.patch
+Patch20: wpa_supplicant-0.6.8-gui-qt4.patch
 
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
+%if %{build_gui}
+%if %{with_qt4}
+BuildRequires: qt-devel >= 4.0
+%else
 BuildRequires: qt3-devel
+%endif
+%endif
 BuildRequires: openssl-devel
 BuildRequires: readline-devel
 BuildRequires: dbus-devel
-
-PreReq: chkconfig
 
 %description
 wpa_supplicant is a WPA Supplicant for Linux, BSD and Windows with support 
@@ -43,12 +60,16 @@ component that is used in the client stations. It implements key negotiation
 with a WPA Authenticator and it controls the roaming and IEEE 802.11 
 authentication/association of the wlan driver.
 
+%if %{build_gui}
+
 %package gui
 Summary: Graphical User Interface for %{name}
 Group: Applications/System
 
 %description gui
-Graphical User Interface for wpa_supplicant written using QT3
+Graphical User Interface for wpa_supplicant written using QT
+
+%endif
 
 %prep
 %setup -q
@@ -65,6 +86,7 @@ Graphical User Interface for wpa_supplicant written using QT3
 %patch11 -p1 -b .scan-faster
 %patch12 -p1 -b .eapol-race-fix
 %patch13 -p1 -b .more-openssl-algs
+%patch20 -p1 -b .qt4
 
 %build
 pushd wpa_supplicant
@@ -72,7 +94,13 @@ pushd wpa_supplicant
   CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ;
   CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS ;
   make %{_smp_mflags}
+%if %{build_gui}
+%if %{with_qt4}
+  QTDIR=%{_libdir}/qt4 make wpa_gui-qt4 %{_smp_mflags}
+%else
   QTDIR=%{_libdir}/qt-3.3 make wpa_gui %{_smp_mflags}
+%endif
+%endif
 popd
 
 %install
@@ -100,9 +128,15 @@ install -m 0644 %{name}/dbus-wpa_supplicant.conf %{buildroot}/%{_sysconfdir}/dbu
 install -d %{buildroot}/%{_datadir}/dbus-1/system-services/
 install -m 0644 %{name}/dbus-wpa_supplicant.service %{buildroot}/%{_datadir}/dbus-1/system-services/fi.epitest.hostap.WPASupplicant.service
 
+%if %{build_gui}
 # gui
 install -d %{buildroot}/%{_bindir}
+%if %{with_qt4}
+install -m 0755 %{name}/wpa_gui-qt4/wpa_gui %{buildroot}/%{_bindir}
+%else
 install -m 0755 %{name}/wpa_gui/wpa_gui %{buildroot}/%{_bindir}
+%endif
+%endif
 
 # running
 mkdir -p %{buildroot}/%{_localstatedir}/run/%{name}
@@ -150,11 +184,17 @@ fi
 %{_mandir}/man8/*
 %{_mandir}/man5/*
 
+%if %{build_gui}
 %files gui
 %defattr(-, root, root)
 %{_bindir}/wpa_gui
+%endif
 
 %changelog
+* Thu May 13 2010 Dan Williams <dcbw@redhat.com> - 1:0.6.8-10
+- Remove prereq on chkconfig
+- Build GUI with qt4 for rawhide (rh #537105)
+
 * Thu May  6 2010 Dan Williams <dcbw@redhat.com> - 1:0.6.8-9
 - Fix crash when interfaces are removed (like suspend/resume) (rh #589507)
 
