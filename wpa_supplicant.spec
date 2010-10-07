@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.6.8
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
@@ -24,9 +24,15 @@ Source6: %{name}.logrotate
 %endif
 %endif
 
+# distro specific customization and not suitable for upstream,
+# works around busted drivers
 Patch0: wpa_supplicant-assoc-timeout.patch
+# build fix for Fedora, not suitable for upstream
 Patch1: wpa_supplicant-0.5.7-qmake-location.patch
+# ensures that debug output gets flushed immediately to help diagnose driver
+# bugs, not suitable for upstream
 Patch2: wpa_supplicant-0.5.7-flush-debug-output.patch
+# disto specific customization for log paths, not suitable for upstream
 Patch4: wpa_supplicant-0.5.10-dbus-service-file.patch
 Patch5: wpa_supplicant-0.6.7-quiet-scan-results-message.patch
 Patch6: wpa_supplicant-0.6.8-disconnect-fixes.patch
@@ -54,10 +60,10 @@ BuildRequires: readline-devel
 BuildRequires: dbus-devel
 
 %description
-wpa_supplicant is a WPA Supplicant for Linux, BSD and Windows with support 
-for WPA and WPA2 (IEEE 802.11i / RSN). Supplicant is the IEEE 802.1X/WPA 
-component that is used in the client stations. It implements key negotiation 
-with a WPA Authenticator and it controls the roaming and IEEE 802.11 
+wpa_supplicant is a WPA Supplicant for Linux, BSD and Windows with support
+for WPA and WPA2 (IEEE 802.11i / RSN). Supplicant is the IEEE 802.1X/WPA
+component that is used in the client stations. It implements key negotiation
+with a WPA Authenticator and it controls the roaming and IEEE 802.11
 authentication/association of the wlan driver.
 
 %if %{build_gui}
@@ -107,26 +113,20 @@ popd
 rm -rf %{buildroot}
 
 # init scripts
-install -d %{buildroot}/%{_sysconfdir}/rc.d/init.d
-install -d %{buildroot}/%{_sysconfdir}/sysconfig
-install -m 0755 %{SOURCE3} %{buildroot}/%{_sysconfdir}/rc.d/init.d/%{name}
-install -m 0644 %{SOURCE4} %{buildroot}/%{_sysconfdir}/sysconfig/%{name}
-install -d %{buildroot}/%{_sysconfdir}/logrotate.d
-install -m 0644 %{SOURCE6} %{buildroot}/%{_sysconfdir}/logrotate.d/%{name}
+install -D -m 0755 %{SOURCE3} %{buildroot}/%{_sysconfdir}/rc.d/init.d/%{name}
+install -D -m 0644 %{SOURCE4} %{buildroot}/%{_sysconfdir}/sysconfig/%{name}
+install -D -m 0644 %{SOURCE6} %{buildroot}/%{_sysconfdir}/logrotate.d/%{name}
 
 # config
-install -d %{buildroot}/%{_sysconfdir}/%{name}
-install -m 0600 %{SOURCE2} %{buildroot}/%{_sysconfdir}/%{name}
+install -D -m 0600 %{SOURCE2} %{buildroot}/%{_sysconfdir}/%{name}/%{name}.conf
 
 # binary
 install -d %{buildroot}/%{_sbindir}
 install -m 0755 %{name}/wpa_passphrase %{buildroot}/%{_sbindir}
 install -m 0755 %{name}/wpa_cli %{buildroot}/%{_sbindir}
 install -m 0755 %{name}/wpa_supplicant %{buildroot}/%{_sbindir}
-install -d %{buildroot}/%{_sysconfdir}/dbus-1/system.d/
-install -m 0644 %{name}/dbus-wpa_supplicant.conf %{buildroot}/%{_sysconfdir}/dbus-1/system.d/wpa_supplicant.conf
-install -d %{buildroot}/%{_datadir}/dbus-1/system-services/
-install -m 0644 %{name}/dbus-wpa_supplicant.service %{buildroot}/%{_datadir}/dbus-1/system-services/fi.epitest.hostap.WPASupplicant.service
+install -D -m 0644 %{name}/dbus-wpa_supplicant.conf %{buildroot}/%{_sysconfdir}/dbus-1/system.d/wpa_supplicant.conf
+install -D -m 0644 %{name}/dbus-wpa_supplicant.service %{buildroot}/%{_datadir}/dbus-1/system-services/fi.epitest.hostap.WPASupplicant.service
 
 %if %{build_gui}
 # gui
@@ -191,6 +191,10 @@ fi
 %endif
 
 %changelog
+* Thu Oct  7 2010 Peter Lemenkov <lemenkov@gmail.com> - 1:0.6.8-11
+- Added comments to some patches (see rhbz #226544#c17)
+- Shortened %%install section a bit
+
 * Thu May 13 2010 Dan Williams <dcbw@redhat.com> - 1:0.6.8-10
 - Remove prereq on chkconfig
 - Build GUI with qt4 for rawhide (rh #537105)
