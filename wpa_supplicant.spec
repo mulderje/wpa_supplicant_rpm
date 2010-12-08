@@ -1,12 +1,12 @@
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
-Version: 0.6.8
-Release: 11%{?dist}
+Version: 0.7.3
+Release: 1%{?dist}
 License: BSD
 Group: System Environment/Base
-Source0: http://hostap.epitest.fi/releases/%{name}-%{version}.tar.gz
-Source1: %{name}.config
+Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
+Source1: build-config
 Source2: %{name}.conf
 Source3: %{name}.init.d
 Source4: %{name}.sysconfig
@@ -17,43 +17,30 @@ Source6: %{name}.logrotate
 %define build_gui 0
 %endif
 
-%if %{build_gui}
-%define with_qt4 0
-%if 0%{?fedora} >= 14
-%define with_qt4 1
-%endif
-%endif
-
 # distro specific customization and not suitable for upstream,
 # works around busted drivers
 Patch0: wpa_supplicant-assoc-timeout.patch
-# build fix for Fedora, not suitable for upstream
-Patch1: wpa_supplicant-0.5.7-qmake-location.patch
 # ensures that debug output gets flushed immediately to help diagnose driver
 # bugs, not suitable for upstream
-Patch2: wpa_supplicant-0.5.7-flush-debug-output.patch
+Patch1: wpa_supplicant-flush-debug-output.patch
 # disto specific customization for log paths, not suitable for upstream
-Patch4: wpa_supplicant-0.5.10-dbus-service-file.patch
-Patch5: wpa_supplicant-0.6.7-quiet-scan-results-message.patch
-Patch6: wpa_supplicant-0.6.8-disconnect-fixes.patch
-Patch7: wpa_supplicant-0.6.8-disconnect-init-deinit.patch
-Patch8: wpa_supplicant-0.6.8-handle-driver-disconnect-spam.patch
-Patch9: wpa_supplicant-0.6.8-ap-stability.patch
-Patch10: wpa_supplicant-0.6.8-scanning-property.patch
-Patch11: wpa_supplicant-0.6.9-scan-faster.patch
-Patch12: wpa_supplicant-0.6.9-eapol-race-fix.patch
-Patch13: wpa_supplicant-0.6.8-openssl-init.patch
-Patch20: wpa_supplicant-0.6.8-gui-qt4.patch
+Patch2: wpa_supplicant-dbus-service-file-args.patch
+# quiet an annoying and frequent syslog message
+Patch3: wpa_supplicant-quiet-scan-results-message.patch
+# recover from streams of driver disconnect messages (iwl3945)
+Patch4: wpa_supplicant-squelch-driver-disconnect-spam.patch
+# allow more private key encryption algorithms
+Patch5: wpa_supplicant-openssl-more-algs.patch
+# distro specific customization for Qt4 build tools, not suitable for upstream
+Patch6: wpa_supplicant-gui-qt4.patch
+# Send PropertyChanged notificationes when the BSS list changes
+Patch7: wpa_supplicant-bss-changed-prop-notify.patch
 
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %if %{build_gui}
-%if %{with_qt4}
 BuildRequires: qt-devel >= 4.0
-%else
-BuildRequires: qt3-devel
-%endif
 %endif
 BuildRequires: openssl-devel
 BuildRequires: readline-devel
@@ -80,32 +67,22 @@ Graphical User Interface for wpa_supplicant written using QT
 %prep
 %setup -q
 %patch0 -p1 -b .assoc-timeout
-%patch1 -p1 -b .qmake-location
-%patch2 -p1 -b .flush-debug-output
-%patch4 -p1 -b .dbus-service-file
-%patch5 -p1 -b .quiet-scan-results-msg
-%patch6 -p1 -b .really-disassoc
-%patch7 -p1 -b .disconnect-init-deinit
-%patch8 -p1 -b .disconnect-spam
-%patch9 -p1 -b .ap-stability
-%patch10 -p1 -b .scanning-property
-%patch11 -p1 -b .scan-faster
-%patch12 -p1 -b .eapol-race-fix
-%patch13 -p1 -b .more-openssl-algs
-%patch20 -p1 -b .qt4
+%patch1 -p1 -b .flush-debug-output
+%patch2 -p1 -b .dbus-service-file
+%patch3 -p1 -b .quiet-scan-results-msg
+%patch4 -p1 -b .disconnect-spam
+%patch5 -p1 -b .more-openssl-algs
+%patch6 -p1 -b .qt4
+%patch7 -p1 -b .bss-changed-prop-notify
 
 %build
 pushd wpa_supplicant
-  cp %{SOURCE1} ./.config
+  cp %{SOURCE1} .config
   CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ;
   CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS ;
   make %{_smp_mflags}
 %if %{build_gui}
-%if %{with_qt4}
   QTDIR=%{_libdir}/qt4 make wpa_gui-qt4 %{_smp_mflags}
-%else
-  QTDIR=%{_libdir}/qt-3.3 make wpa_gui %{_smp_mflags}
-%endif
 %endif
 popd
 
@@ -125,17 +102,14 @@ install -d %{buildroot}/%{_sbindir}
 install -m 0755 %{name}/wpa_passphrase %{buildroot}/%{_sbindir}
 install -m 0755 %{name}/wpa_cli %{buildroot}/%{_sbindir}
 install -m 0755 %{name}/wpa_supplicant %{buildroot}/%{_sbindir}
-install -D -m 0644 %{name}/dbus-wpa_supplicant.conf %{buildroot}/%{_sysconfdir}/dbus-1/system.d/wpa_supplicant.conf
-install -D -m 0644 %{name}/dbus-wpa_supplicant.service %{buildroot}/%{_datadir}/dbus-1/system-services/fi.epitest.hostap.WPASupplicant.service
+install -D -m 0644 %{name}/dbus/dbus-wpa_supplicant.conf %{buildroot}/%{_sysconfdir}/dbus-1/system.d/wpa_supplicant.conf
+install -D -m 0644 %{name}/dbus/fi.w1.wpa_supplicant1.service %{buildroot}/%{_datadir}/dbus-1/system-services/fi.w1.wpa_supplicant1.service
+install -D -m 0644 %{name}/dbus/fi.epitest.hostap.WPASupplicant.service %{buildroot}/%{_datadir}/dbus-1/system-services/fi.epitest.hostap.WPASupplicant.service
 
 %if %{build_gui}
 # gui
 install -d %{buildroot}/%{_bindir}
-%if %{with_qt4}
 install -m 0755 %{name}/wpa_gui-qt4/wpa_gui %{buildroot}/%{_bindir}
-%else
-install -m 0755 %{name}/wpa_gui/wpa_gui %{buildroot}/%{_bindir}
-%endif
 %endif
 
 # running
@@ -176,6 +150,7 @@ fi
 %{_sysconfdir}/rc.d/init.d/%{name}
 %{_sysconfdir}/dbus-1/system.d/%{name}.conf
 %{_datadir}/dbus-1/system-services/fi.epitest.hostap.WPASupplicant.service
+%{_datadir}/dbus-1/system-services/fi.w1.wpa_supplicant1.service
 %{_sbindir}/wpa_passphrase
 %{_sbindir}/wpa_supplicant
 %{_sbindir}/wpa_cli
@@ -191,6 +166,11 @@ fi
 %endif
 
 %changelog
+* Wed Dec  8 2010 Dan Williams <dcbw@redhat.com> - 1:0.7.3-1
+- Update to 0.7.3
+- Drop upstreamed and backported patches
+- Drop support for Qt3
+
 * Thu Oct  7 2010 Peter Lemenkov <lemenkov@gmail.com> - 1:0.6.8-11
 - Added comments to some patches (see rhbz #226544#c17)
 - Shortened %%install section a bit
