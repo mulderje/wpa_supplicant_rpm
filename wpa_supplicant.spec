@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.7.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
@@ -166,6 +166,9 @@ fi
 %endif
 
 %changelog
+* Wed Dec 15 2010 Dan Williams <dcbw@redhat.com> - 1:0.7.3-2
+- Enable the bgscan_simple plugin
+
 * Wed Dec  8 2010 Dan Williams <dcbw@redhat.com> - 1:0.7.3-1
 - Update to 0.7.3
 - Drop upstreamed and backported patches
