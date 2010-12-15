@@ -45,6 +45,7 @@ BuildRequires: qt-devel >= 4.0
 BuildRequires: openssl-devel
 BuildRequires: readline-devel
 BuildRequires: dbus-devel
+BuildRequires: libnl-devel
 
 %description
 wpa_supplicant is a WPA Supplicant for Linux, BSD and Windows with support
