@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.7.3
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
@@ -167,6 +167,9 @@ fi
 %endif
 
 %changelog
+* Tue Jan 11 2011 Dan Williams <dcbw@redhat.com> - 1:0.7.3-3
+- Enable EAP-TNC (rh #659038)
+
 * Wed Dec 15 2010 Dan Williams <dcbw@redhat.com> - 1:0.7.3-2
 - Enable the bgscan_simple plugin
 
