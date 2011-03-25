@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.7.3
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
@@ -35,6 +35,9 @@ Patch5: wpa_supplicant-openssl-more-algs.patch
 Patch6: wpa_supplicant-gui-qt4.patch
 # Send PropertyChanged notificationes when the BSS list changes
 Patch7: wpa_supplicant-bss-changed-prop-notify.patch
+# Dirty hack for WiMAX
+# http://linuxwimax.org/Download?action=AttachFile&do=get&target=wpa-1.5-README.txt
+Patch100: wpa_supplicant-0.7.2-generate-libeap-peer.patch
 
 URL: http://w1.fi/wpa_supplicant/
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
@@ -65,6 +68,23 @@ Graphical User Interface for wpa_supplicant written using QT
 
 %endif
 
+%package -n libeap
+Summary: EAP peer library
+Group: System Environment/Libraries
+
+%description -n libeap
+This package contains the runtime EAP peer library. Don't use this
+unless you know what you're doing.
+
+%package -n libeap-devel
+Summary: Header files for EAP peer library
+Group: Development/Libraries
+Requires: libeap = %{epoch}:%{version}-%{release}
+
+%description -n libeap-devel
+This package contains header files for using the EAP peer library.
+Don't use this unless you know what you're doing.
+
 %prep
 %setup -q
 %patch0 -p1 -b .assoc-timeout
@@ -75,6 +95,7 @@ Graphical User Interface for wpa_supplicant written using QT
 %patch5 -p1 -b .more-openssl-algs
 %patch6 -p1 -b .qt4
 %patch7 -p1 -b .bss-changed-prop-notify
+%patch100 -p1 -b .wimax
 
 %build
 pushd wpa_supplicant
@@ -125,6 +146,14 @@ install -m 0644 %{name}/doc/docbook/*.5 %{buildroot}%{_mandir}/man5
 rm -f  %{name}/doc/.cvsignore
 rm -rf %{name}/doc/docbook
 
+# HAAACK
+pushd wpa_supplicant
+  make clean
+  make -C ../src/eap_peer
+  make DESTDIR=%{buildroot} LIB=%{_lib} -C ../src/eap_peer install
+  sed -i -e 's|libdir=/usr/lib|libdir=%{_libdir}|g' %{buildroot}/%{_libdir}/pkgconfig/*.pc
+popd
+
 
 %clean
 rm -rf %{buildroot}
@@ -166,7 +195,24 @@ fi
 %{_bindir}/wpa_gui
 %endif
 
+%files -n libeap
+%defattr(-,root,root)
+%{_libdir}/libeap.so.0*
+
+%files -n libeap-devel
+%defattr(-,root,root)
+%{_includedir}/eap_peer
+%{_libdir}/libeap.so
+%{_libdir}/pkgconfig/*.pc
+
+%post -n libeap -p /sbin/ldconfig
+
+%postun -n libeap -p /sbin/ldconfig
+
 %changelog
+* Fri Mar 25 2011 Bill Nottingham <notting@redhat.com> - 1:0.7.3-5
+- Add libeap/libeap-devel subpackge for WiMAX usage
+
 * Mon Feb 07 2011 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1:0.7.3-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_15_Mass_Rebuild
 
