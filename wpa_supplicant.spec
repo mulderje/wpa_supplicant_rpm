@@ -95,7 +95,6 @@ Don't use this unless you know what you're doing.
 %patch5 -p1 -b .more-openssl-algs
 %patch6 -p1 -b .qt4
 %patch7 -p1 -b .bss-changed-prop-notify
-%patch100 -p1 -b .wimax
 
 %build
 pushd wpa_supplicant
@@ -147,6 +146,7 @@ rm -f  %{name}/doc/.cvsignore
 rm -rf %{name}/doc/docbook
 
 # HAAACK
+patch -p1 -b --suffix .wimax < %{PATCH100}
 pushd wpa_supplicant
   make clean
   make -C ../src/eap_peer
