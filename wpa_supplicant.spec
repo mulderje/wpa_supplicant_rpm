@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.7.3
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
@@ -210,6 +210,9 @@ fi
 %postun -n libeap -p /sbin/ldconfig
 
 %changelog
+* Tue Apr 19 2011 Bill Nottingham <notting@redhat.com> - 1:0.7.3-6
+- Fix EAP patch to only apply when building libeap
+
 * Fri Mar 25 2011 Bill Nottingham <notting@redhat.com> - 1:0.7.3-5
 - Add libeap/libeap-devel subpackge for WiMAX usage
 
