@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.7.3
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
@@ -141,9 +141,10 @@ install -d %{buildroot}%{_mandir}/man{5,8}
 install -m 0644 %{name}/doc/docbook/*.8 %{buildroot}%{_mandir}/man8
 install -m 0644 %{name}/doc/docbook/*.5 %{buildroot}%{_mandir}/man5
 
-# some cleanup in docs
+# some cleanup in docs and examples
 rm -f  %{name}/doc/.cvsignore
 rm -rf %{name}/doc/docbook
+chmod -R 0644 %{name}/examples/*.py
 
 # HAAACK
 patch -p1 -b --suffix .wimax < %{PATCH100}
@@ -210,6 +211,9 @@ fi
 %postun -n libeap -p /sbin/ldconfig
 
 %changelog
+* Mon May  2 2011 Dan Williams <dcbw@redhat.com> - 1:0.7.3-7
+- Make examples read-only to avoid erroneous python dependency (rh #687952)
+
 * Tue Apr 19 2011 Bill Nottingham <notting@redhat.com> - 1:0.7.3-6
 - Fix EAP patch to only apply when building libeap
 
