@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.7.3
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
@@ -35,6 +35,8 @@ Patch5: wpa_supplicant-openssl-more-algs.patch
 Patch6: wpa_supplicant-gui-qt4.patch
 # Send PropertyChanged notificationes when the BSS list changes
 Patch7: wpa_supplicant-bss-changed-prop-notify.patch
+# Don't crash trying to pass NULL to dbus
+Patch8: wpa_supplicant-dbus-null-error.patch
 # Dirty hack for WiMAX
 # http://linuxwimax.org/Download?action=AttachFile&do=get&target=wpa-1.5-README.txt
 Patch100: wpa_supplicant-0.7.2-generate-libeap-peer.patch
@@ -95,6 +97,7 @@ Don't use this unless you know what you're doing.
 %patch5 -p1 -b .more-openssl-algs
 %patch6 -p1 -b .qt4
 %patch7 -p1 -b .bss-changed-prop-notify
+%patch8 -p1 -b .dbus-null
 
 %build
 pushd wpa_supplicant
@@ -211,6 +214,9 @@ fi
 %postun -n libeap -p /sbin/ldconfig
 
 %changelog
+* Tue May  3 2011 Dan Williams <dcbw@redhat.com> - 1:0.7.3-8
+- Don't crash when trying to access invalid properties via D-Bus (rh #678625)
+
 * Mon May  2 2011 Dan Williams <dcbw@redhat.com> - 1:0.7.3-7
 - Make examples read-only to avoid erroneous python dependency (rh #687952)
 
