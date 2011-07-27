@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.7.3
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
@@ -36,7 +36,7 @@ Patch6: wpa_supplicant-gui-qt4.patch
 # Send PropertyChanged notificationes when the BSS list changes
 Patch7: wpa_supplicant-bss-changed-prop-notify.patch
 # Don't crash trying to pass NULL to dbus
-Patch8: wpa_supplicant-dbus-null-error.patch
+Patch8: 0001-dbus-clean-up-new-D-Bus-interface-getters-setters.patch
 # Dirty hack for WiMAX
 # http://linuxwimax.org/Download?action=AttachFile&do=get&target=wpa-1.5-README.txt
 Patch100: wpa_supplicant-0.7.2-generate-libeap-peer.patch
@@ -97,7 +97,7 @@ Don't use this unless you know what you're doing.
 %patch5 -p1 -b .more-openssl-algs
 %patch6 -p1 -b .qt4
 %patch7 -p1 -b .bss-changed-prop-notify
-%patch8 -p1 -b .dbus-null
+%patch8 -p1 -b .dbus-rework
 
 %build
 pushd wpa_supplicant
@@ -214,6 +214,9 @@ fi
 %postun -n libeap -p /sbin/ldconfig
 
 %changelog
+* Wed Jul 27 2011 Dan Williams <dcbw@redhat.com> - 1:0.7.3-9
+- Fix various crashes with D-Bus interface (rh #678625) (rh #725517)
+
 * Tue May  3 2011 Dan Williams <dcbw@redhat.com> - 1:0.7.3-8
 - Don't crash when trying to access invalid properties via D-Bus (rh #678625)
 
