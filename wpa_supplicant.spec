@@ -2,13 +2,13 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.7.3
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: build-config
 Source2: %{name}.conf
-Source3: %{name}.init.d
+Source3: %{name}.service
 Source4: %{name}.sysconfig
 Source6: %{name}.logrotate
 
@@ -42,7 +42,6 @@ Patch8: 0001-dbus-clean-up-new-D-Bus-interface-getters-setters.patch
 Patch100: wpa_supplicant-0.7.2-generate-libeap-peer.patch
 
 URL: http://w1.fi/wpa_supplicant/
-BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 %if %{build_gui}
 BuildRequires: qt-devel >= 4.0
@@ -51,6 +50,8 @@ BuildRequires: openssl-devel
 BuildRequires: readline-devel
 BuildRequires: dbus-devel
 BuildRequires: libnl-devel
+BuildRequires: systemd-units
+Requires(post): systemd-sysv
 
 %description
 wpa_supplicant is a WPA Supplicant for Linux, BSD and Windows with support
@@ -111,10 +112,8 @@ pushd wpa_supplicant
 popd
 
 %install
-rm -rf %{buildroot}
-
 # init scripts
-install -D -m 0755 %{SOURCE3} %{buildroot}/%{_sysconfdir}/rc.d/init.d/%{name}
+install -D -m 0755 %{SOURCE3} %{buildroot}/%{_unitdir}/%{name}.service
 install -D -m 0644 %{SOURCE4} %{buildroot}/%{_sysconfdir}/sysconfig/%{name}
 install -D -m 0644 %{SOURCE6} %{buildroot}/%{_sysconfdir}/logrotate.d/%{name}
 
@@ -159,29 +158,23 @@ pushd wpa_supplicant
 popd
 
 
-%clean
-rm -rf %{buildroot}
+%triggerun -- wpa_supplicant < 0.7.3-10
+# Save the current service runlevel info
+# User must manually run systemd-sysv-convert --apply wpa_supplicant
+# to migrate them to systemd targets
+/usr/bin/systemd-sysv-convert --save wpa_supplicant >/dev/null 2>&1 ||:
 
-%post
-if [ $1 = 1 ]; then
-	chkconfig --add %{name}
-fi
-
-%preun
-if [ $1 = 0 ]; then
-	service %{name} stop > /dev/null 2>&1
-	killall -TERM wpa_supplicant >/dev/null 2>&1
-	/sbin/chkconfig --del %{name}
-fi
+# Run these because the SysV package being removed won't do them
+/sbin/chkconfig --del wpa_supplicant >/dev/null 2>&1 || :
+/bin/systemctl try-restart wpa_supplicant.service >/dev/null 2>&1 || :
 
 
 %files
-%defattr(-, root, root)
 %doc COPYING %{name}/ChangeLog README %{name}/eap_testing.txt %{name}/todo.txt %{name}/wpa_supplicant.conf %{name}/examples
 %config(noreplace) %{_sysconfdir}/%{name}/%{name}.conf
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
-%{_sysconfdir}/rc.d/init.d/%{name}
+%{_unitdir}/%{name}.service
 %{_sysconfdir}/dbus-1/system.d/%{name}.conf
 %{_datadir}/dbus-1/system-services/fi.epitest.hostap.WPASupplicant.service
 %{_datadir}/dbus-1/system-services/fi.w1.wpa_supplicant1.service
@@ -195,16 +188,13 @@ fi
 
 %if %{build_gui}
 %files gui
-%defattr(-, root, root)
 %{_bindir}/wpa_gui
 %endif
 
 %files -n libeap
-%defattr(-,root,root)
 %{_libdir}/libeap.so.0*
 
 %files -n libeap-devel
-%defattr(-,root,root)
 %{_includedir}/eap_peer
 %{_libdir}/libeap.so
 %{_libdir}/pkgconfig/*.pc
@@ -214,6 +204,9 @@ fi
 %postun -n libeap -p /sbin/ldconfig
 
 %changelog
+* Thu Sep  8 2011 Tom Callaway <spot@fedoraproject.org> - 1:0.7.3-10
+- convert to systemd
+
 * Wed Jul 27 2011 Dan Williams <dcbw@redhat.com> - 1:0.7.3-9
 - Fix various crashes with D-Bus interface (rh #678625) (rh #725517)
 
