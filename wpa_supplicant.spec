@@ -2,7 +2,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 0.7.3
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
@@ -52,6 +52,9 @@ BuildRequires: dbus-devel
 BuildRequires: libnl-devel
 BuildRequires: systemd-units
 Requires(post): systemd-sysv
+Requires(post): systemd-units
+Requires(preun): systemd-units
+Requires(postun): systemd-units
 
 %description
 wpa_supplicant is a WPA Supplicant for Linux, BSD and Windows with support
@@ -157,6 +160,25 @@ pushd wpa_supplicant
   sed -i -e 's|libdir=/usr/lib|libdir=%{_libdir}|g' %{buildroot}/%{_libdir}/pkgconfig/*.pc
 popd
 
+%post
+if [ $1 -eq 1 ] ; then 
+    # Initial installation 
+    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
+fi
+
+%preun
+if [ $1 -eq 0 ] ; then
+    # Package removal, not upgrade
+    /bin/systemctl --no-reload disable wpa_supplicant.service > /dev/null 2>&1 || :
+    /bin/systemctl stop wpa_supplicant.service > /dev/null 2>&1 || :
+fi
+
+%postun
+/bin/systemctl daemon-reload >/dev/null 2>&1 || :
+if [ $1 -ge 1 ] ; then
+    # Package upgrade, not uninstall
+    /bin/systemctl try-restart wpa_supplicant.service >/dev/null 2>&1 || :
+fi
 
 %triggerun -- wpa_supplicant < 0.7.3-10
 # Save the current service runlevel info
@@ -204,6 +226,9 @@ popd
 %postun -n libeap -p /sbin/ldconfig
 
 %changelog
+* Fri Sep  9 2011 Tom Callaway <spot@fedoraproject.org> - 1:0.7.3-11
+- add missing systemd scriptlets
+
 * Thu Sep  8 2011 Tom Callaway <spot@fedoraproject.org> - 1:0.7.3-10
 - convert to systemd
 
