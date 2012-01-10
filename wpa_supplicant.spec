@@ -33,6 +33,8 @@ Patch4: wpa_supplicant-squelch-driver-disconnect-spam.patch
 Patch5: wpa_supplicant-openssl-more-algs.patch
 # distro specific customization for Qt4 build tools, not suitable for upstream
 Patch6: wpa_supplicant-gui-qt4.patch
+# Need <unistd.h> for getopt
+Patch7: wpa_supplicant-1.0-wpagui-getopt.patch
 # Dirty hack for WiMAX
 # http://linuxwimax.org/Download?action=AttachFile&do=get&target=wpa-1.5-README.txt
 Patch100: wpa_supplicant-0.7.2-generate-libeap-peer.patch
@@ -96,6 +98,7 @@ Don't use this unless you know what you're doing.
 %patch4 -p1 -b .disconnect-spam
 %patch5 -p1 -b .more-openssl-algs
 %patch6 -p1 -b .qt4
+%patch7 -p1 -b .getopt
 
 %build
 pushd wpa_supplicant
