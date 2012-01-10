@@ -1,11 +1,11 @@
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
-Version: 0.7.3
-Release: 11%{?dist}
+Version: 1.0
+Release: 0.1%{?dist}
 License: BSD
 Group: System Environment/Base
-Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
+Source0: http://w1.fi/releases/%{name}-%{version}-rc1.tar.gz
 Source1: build-config
 Source2: %{name}.conf
 Source3: %{name}.service
@@ -33,10 +33,6 @@ Patch4: wpa_supplicant-squelch-driver-disconnect-spam.patch
 Patch5: wpa_supplicant-openssl-more-algs.patch
 # distro specific customization for Qt4 build tools, not suitable for upstream
 Patch6: wpa_supplicant-gui-qt4.patch
-# Send PropertyChanged notificationes when the BSS list changes
-Patch7: wpa_supplicant-bss-changed-prop-notify.patch
-# Don't crash trying to pass NULL to dbus
-Patch8: 0001-dbus-clean-up-new-D-Bus-interface-getters-setters.patch
 # Dirty hack for WiMAX
 # http://linuxwimax.org/Download?action=AttachFile&do=get&target=wpa-1.5-README.txt
 Patch100: wpa_supplicant-0.7.2-generate-libeap-peer.patch
@@ -92,7 +88,7 @@ This package contains header files for using the EAP peer library.
 Don't use this unless you know what you're doing.
 
 %prep
-%setup -q
+%setup -q -n %{name}-%{version}-rc1
 %patch0 -p1 -b .assoc-timeout
 %patch1 -p1 -b .flush-debug-output
 %patch2 -p1 -b .dbus-service-file
@@ -100,8 +96,6 @@ Don't use this unless you know what you're doing.
 %patch4 -p1 -b .disconnect-spam
 %patch5 -p1 -b .more-openssl-algs
 %patch6 -p1 -b .qt4
-%patch7 -p1 -b .bss-changed-prop-notify
-%patch8 -p1 -b .dbus-rework
 
 %build
 pushd wpa_supplicant
@@ -226,6 +220,9 @@ fi
 %postun -n libeap -p /sbin/ldconfig
 
 %changelog
+* Tue Jan 10 2012 Dan Williams <dcbw@redhat.com> - 1:1.0-0.1
+- Update to 1.0-rc1 + git
+
 * Fri Sep  9 2011 Tom Callaway <spot@fedoraproject.org> - 1:0.7.3-11
 - add missing systemd scriptlets
 

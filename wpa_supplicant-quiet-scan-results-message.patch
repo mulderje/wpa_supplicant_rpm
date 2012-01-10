@@ -4,7 +4,7 @@ diff -up wpa_supplicant-0.6.7/wpa_supplicant/events.c.scan-results-msg wpa_suppl
 @@ -911,7 +911,7 @@ static void wpa_supplicant_event_scan_re
  	}
  
- 	wpa_printf(MSG_DEBUG, "New scan results available");
+ 	wpa_dbg(wpa_s, MSG_DEBUG, "New scan results available");
 -	wpa_msg_ctrl(wpa_s, MSG_INFO, WPA_EVENT_SCAN_RESULTS);
 +	wpa_msg_ctrl(wpa_s, MSG_DEBUG, WPA_EVENT_SCAN_RESULTS);
  	wpas_notify_scan_results(wpa_s);
