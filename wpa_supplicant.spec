@@ -1,11 +1,13 @@
+%define rcver -rc2
+
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 1.0
-Release: 0.1%{?dist}
+Release: 0.2%{?dist}
 License: BSD
 Group: System Environment/Base
-Source0: http://w1.fi/releases/%{name}-%{version}-rc1.tar.gz
+Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}.tar.gz
 Source1: build-config
 Source2: %{name}.conf
 Source3: %{name}.service
@@ -35,6 +37,7 @@ Patch5: wpa_supplicant-openssl-more-algs.patch
 Patch6: wpa_supplicant-gui-qt4.patch
 # Need <unistd.h> for getopt
 Patch7: wpa_supplicant-1.0-wpagui-getopt.patch
+Patch8: 0001-Fall-back-to-other-drivers-if-global-init-for-one-dr.patch
 # Dirty hack for WiMAX
 # http://linuxwimax.org/Download?action=AttachFile&do=get&target=wpa-1.5-README.txt
 Patch100: wpa_supplicant-0.7.2-generate-libeap-peer.patch
@@ -90,7 +93,7 @@ This package contains header files for using the EAP peer library.
 Don't use this unless you know what you're doing.
 
 %prep
-%setup -q -n %{name}-%{version}-rc1
+%setup -q -n %{name}-%{version}%{rcver}
 %patch0 -p1 -b .assoc-timeout
 %patch1 -p1 -b .flush-debug-output
 %patch2 -p1 -b .dbus-service-file
@@ -99,6 +102,7 @@ Don't use this unless you know what you're doing.
 %patch5 -p1 -b .more-openssl-algs
 %patch6 -p1 -b .qt4
 %patch7 -p1 -b .getopt
+%patch8 -p1 -b .drv-fallback
 
 %build
 pushd wpa_supplicant
@@ -223,6 +227,9 @@ fi
 %postun -n libeap -p /sbin/ldconfig
 
 %changelog
+* Thu Feb  2 2012 Dan Williams <dcbw@redhat.com> - 1:1.0-0.2
+- Fix driver fallback for non nl80211-based drivers (rh #783712)
+
 * Tue Jan 10 2012 Dan Williams <dcbw@redhat.com> - 1:1.0-0.1
 - Update to 1.0-rc1 + git
 
