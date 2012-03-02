@@ -1,13 +1,14 @@
 %define rcver -rc2
+%define snapshot .git20120302
 
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 1.0
-Release: 0.2%{?dist}
+Release: 0.3%{?dist}
 License: BSD
 Group: System Environment/Base
-Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}.tar.gz
+Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
 Source1: build-config
 Source2: %{name}.conf
 Source3: %{name}.service
@@ -37,7 +38,8 @@ Patch5: wpa_supplicant-openssl-more-algs.patch
 Patch6: wpa_supplicant-gui-qt4.patch
 # Need <unistd.h> for getopt
 Patch7: wpa_supplicant-1.0-wpagui-getopt.patch
-Patch8: 0001-Fall-back-to-other-drivers-if-global-init-for-one-dr.patch
+# Fix libnl3 includes path
+Patch8: libnl3-includes.patch
 # Dirty hack for WiMAX
 # http://linuxwimax.org/Download?action=AttachFile&do=get&target=wpa-1.5-README.txt
 Patch100: wpa_supplicant-0.7.2-generate-libeap-peer.patch
@@ -50,7 +52,7 @@ BuildRequires: qt-devel >= 4.0
 BuildRequires: openssl-devel
 BuildRequires: readline-devel
 BuildRequires: dbus-devel
-BuildRequires: libnl-devel
+BuildRequires: libnl3-devel
 BuildRequires: systemd-units
 Requires(post): systemd-sysv
 Requires(post): systemd-units
@@ -102,7 +104,7 @@ Don't use this unless you know what you're doing.
 %patch5 -p1 -b .more-openssl-algs
 %patch6 -p1 -b .qt4
 %patch7 -p1 -b .getopt
-%patch8 -p1 -b .drv-fallback
+%patch8 -p1 -b .libnl3
 
 %build
 pushd wpa_supplicant
@@ -227,6 +229,10 @@ fi
 %postun -n libeap -p /sbin/ldconfig
 
 %changelog
+* Fri Mar  2 2012 Dan Williams <dcbw@redhat.com> - 1:1.0-0.3
+- Update to latest 1.0 git snapshot
+- Rebuild against libnl3
+
 * Thu Feb  2 2012 Dan Williams <dcbw@redhat.com> - 1:1.0-0.2
 - Fix driver fallback for non nl80211-based drivers (rh #783712)
 
