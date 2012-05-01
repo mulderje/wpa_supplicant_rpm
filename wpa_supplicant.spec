@@ -1,11 +1,11 @@
-%define rcver -rc2
-%define snapshot .git20120302
+%define rcver -rc3
+%define snapshot %{nil}
 
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 1.0
-Release: 0.3%{?dist}
+Release: 0.4%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -111,6 +111,9 @@ pushd wpa_supplicant
   cp %{SOURCE1} .config
   CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ;
   CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS ;
+  # yes, BINDIR=_sbindir
+  BINDIR="%{_sbindir}" ; export BINDIR ;
+  LIBDIR="%{_libdir}" ; export LIBDIR ;
   make %{_smp_mflags}
 %if %{build_gui}
   QTDIR=%{_libdir}/qt4 make wpa_gui-qt4 %{_smp_mflags}
@@ -229,6 +232,10 @@ fi
 %postun -n libeap -p /sbin/ldconfig
 
 %changelog
+* Tue May  1 2012 Dan Williams <dcbw@redhat.com> - 1:1.0-0.4
+- Update to wpa_supplicant 1.0-rc3
+- Fix systemd target dependencies (rh #815091)
+
 * Fri Mar  2 2012 Dan Williams <dcbw@redhat.com> - 1:1.0-0.3
 - Update to latest 1.0 git snapshot
 - Rebuild against libnl3
