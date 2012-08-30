@@ -5,7 +5,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 1.0
-Release: 0.5%{?dist}
+Release: 1%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -232,7 +232,7 @@ fi
 %postun -n libeap -p /sbin/ldconfig
 
 %changelog
-* Thu Aug 29 2012 Dan Williams <dcbw@redhat.com> - 1:1.0-0.5
+* Thu Aug 29 2012 Dan Williams <dcbw@redhat.com> - 1:1.0-1
 - Enable lightweight AP mode support
 - Enable P2P (WiFi Direct) support
 - Enable RSN IBSS/AdHoc support
