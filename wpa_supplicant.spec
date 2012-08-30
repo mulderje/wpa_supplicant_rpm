@@ -232,6 +232,11 @@ fi
 %postun -n libeap -p /sbin/ldconfig
 
 %changelog
+* Thu Aug 29 2012 Dan Williams <dcbw@redhat.com> - 1:1.0-0.5
+- Enable lightweight AP mode support
+- Enable P2P (WiFi Direct) support
+- Enable RSN IBSS/AdHoc support
+
 * Sun Jul 22 2012 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1:1.0-0.5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_18_Mass_Rebuild
 
