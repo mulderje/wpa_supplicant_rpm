@@ -5,7 +5,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 1.0
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -232,6 +232,9 @@ fi
 %postun -n libeap -p /sbin/ldconfig
 
 %changelog
+* Fri Feb 15 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1:1.0-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
+
 * Sun Jan 20 2013 Dan Horák <dan@danny.cz> - 1:1.0-3
 - rebuilt again for fixed soname in libnl3
 
