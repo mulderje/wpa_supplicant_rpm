@@ -1,11 +1,11 @@
-%define rcver -rc3
+%define rcver %{nil}
 %define snapshot %{nil}
 
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
-Version: 1.0
-Release: 4%{?dist}
+Version: 1.1
+Release: 1%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -36,10 +36,10 @@ Patch4: wpa_supplicant-squelch-driver-disconnect-spam.patch
 Patch5: wpa_supplicant-openssl-more-algs.patch
 # distro specific customization for Qt4 build tools, not suitable for upstream
 Patch6: wpa_supplicant-gui-qt4.patch
-# Need <unistd.h> for getopt
-Patch7: wpa_supplicant-1.0-wpagui-getopt.patch
 # Fix libnl3 includes path
-Patch8: libnl3-includes.patch
+Patch7: libnl3-includes.patch
+# Less aggressive roaming; signal strength is wildly variable
+Patch8: rh837402-less-aggressive-roaming.patch
 # Dirty hack for WiMAX
 # http://linuxwimax.org/Download?action=AttachFile&do=get&target=wpa-1.5-README.txt
 Patch100: wpa_supplicant-0.7.2-generate-libeap-peer.patch
@@ -103,8 +103,8 @@ Don't use this unless you know what you're doing.
 %patch4 -p1 -b .disconnect-spam
 %patch5 -p1 -b .more-openssl-algs
 %patch6 -p1 -b .qt4
-%patch7 -p1 -b .getopt
-%patch8 -p1 -b .libnl3
+%patch7 -p1 -b .libnl3
+%patch8 -p1 -b .rh837402-less-aggressive-roaming
 
 %build
 pushd wpa_supplicant
@@ -232,6 +232,10 @@ fi
 %postun -n libeap -p /sbin/ldconfig
 
 %changelog
+* Mon Apr  1 2013 Dan Williams <dcbw@redhat.com> - 1:1.1-1
+- Update to 1.1
+- Be less aggressive when roaming due to signal strength changes
+
 * Fri Feb 15 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1:1.0-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_19_Mass_Rebuild
 
