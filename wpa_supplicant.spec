@@ -1,11 +1,13 @@
 %define rcver %{nil}
 %define snapshot %{nil}
 
+%global _hardened_build 1
+
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.0
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -108,6 +110,7 @@ pushd wpa_supplicant
   cp %{SOURCE1} .config
   CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ;
   CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS ;
+  LDFLAGS="${LDFLAGS:-%optflags}" ; export LDFLAGS ;
   # yes, BINDIR=_sbindir
   BINDIR="%{_sbindir}" ; export BINDIR ;
   LIBDIR="%{_libdir}" ; export LIBDIR ;
@@ -158,7 +161,15 @@ chmod -R 0644 %{name}/examples/*.py
 patch -p1 -b --suffix .wimax < %{PATCH100}
 pushd wpa_supplicant
   make clean
-  make -C ../src/eap_peer
+
+  CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ;
+  CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS ;
+  LDFLAGS="${LDFLAGS:-%optflags}" ; export LDFLAGS ;
+  # yes, BINDIR=_sbindir
+  BINDIR="%{_sbindir}" ; export BINDIR ;
+  LIBDIR="%{_libdir}" ; export LIBDIR ;
+
+  make V=1 -C ../src/eap_peer
   make DESTDIR=%{buildroot} LIB=%{_lib} -C ../src/eap_peer install
   sed -i -e 's|libdir=/usr/lib|libdir=%{_libdir}|g' %{buildroot}/%{_libdir}/pkgconfig/*.pc
 popd
@@ -229,6 +240,9 @@ fi
 %postun -n libeap -p /sbin/ldconfig
 
 %changelog
+* Tue May  7 2013 Dan Williams <dcbw@redhat.com> - 1:2.0-2
+- Use hardened build macros and ensure they apply to libeap too
+
 * Mon May  6 2013 Dan Williams <dcbw@redhat.com> - 1:2.0-1
 - Update to 2.0
 - Be less aggressive when roaming due to signal strength changes (rh #837402)
