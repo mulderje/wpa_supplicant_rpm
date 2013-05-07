@@ -4,7 +4,7 @@
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
-Version: 1.1
+Version: 2.0
 Release: 1%{?dist}
 License: BSD
 Group: System Environment/Base
@@ -30,8 +30,6 @@ Patch1: wpa_supplicant-flush-debug-output.patch
 Patch2: wpa_supplicant-dbus-service-file-args.patch
 # quiet an annoying and frequent syslog message
 Patch3: wpa_supplicant-quiet-scan-results-message.patch
-# recover from streams of driver disconnect messages (iwl3945)
-Patch4: wpa_supplicant-squelch-driver-disconnect-spam.patch
 # allow more private key encryption algorithms
 Patch5: wpa_supplicant-openssl-more-algs.patch
 # distro specific customization for Qt4 build tools, not suitable for upstream
@@ -42,7 +40,7 @@ Patch7: libnl3-includes.patch
 Patch8: rh837402-less-aggressive-roaming.patch
 # Dirty hack for WiMAX
 # http://linuxwimax.org/Download?action=AttachFile&do=get&target=wpa-1.5-README.txt
-Patch100: wpa_supplicant-0.7.2-generate-libeap-peer.patch
+Patch100: wpa_supplicant-2.0-generate-libeap-peer.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -100,7 +98,6 @@ Don't use this unless you know what you're doing.
 %patch1 -p1 -b .flush-debug-output
 %patch2 -p1 -b .dbus-service-file
 %patch3 -p1 -b .quiet-scan-results-msg
-%patch4 -p1 -b .disconnect-spam
 %patch5 -p1 -b .more-openssl-algs
 %patch6 -p1 -b .qt4
 %patch7 -p1 -b .libnl3
@@ -232,6 +229,10 @@ fi
 %postun -n libeap -p /sbin/ldconfig
 
 %changelog
+* Mon May  6 2013 Dan Williams <dcbw@redhat.com> - 1:2.0-1
+- Update to 2.0
+- Be less aggressive when roaming due to signal strength changes (rh #837402)
+
 * Mon Apr  1 2013 Dan Williams <dcbw@redhat.com> - 1:1.1-1
 - Update to 1.1
 - Be less aggressive when roaming due to signal strength changes
