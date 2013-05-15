@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.0
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -240,6 +240,9 @@ fi
 %postun -n libeap -p /sbin/ldconfig
 
 %changelog
+* Wed May 15 2013 Dan Williams <dcbw@redhat.com> - 1:2.0-3
+- Enable HT (802.11n) for AP mode
+
 * Tue May  7 2013 Dan Williams <dcbw@redhat.com> - 1:2.0-2
 - Use hardened build macros and ensure they apply to libeap too
 
