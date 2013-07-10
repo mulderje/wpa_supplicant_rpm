@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.0
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -18,8 +18,10 @@ Source4: %{name}.sysconfig
 Source6: %{name}.logrotate
 
 %define build_gui 1
+%define build_libeap 1
 %if 0%{?rhel} >= 1
 %define build_gui 0
+%define build_libeap 0
 %endif
 
 # distro specific customization and not suitable for upstream,
@@ -40,9 +42,11 @@ Patch6: wpa_supplicant-gui-qt4.patch
 Patch7: libnl3-includes.patch
 # Less aggressive roaming; signal strength is wildly variable
 Patch8: rh837402-less-aggressive-roaming.patch
+%if %{build_libeap}
 # Dirty hack for WiMAX
 # http://linuxwimax.org/Download?action=AttachFile&do=get&target=wpa-1.5-README.txt
 Patch100: wpa_supplicant-2.0-generate-libeap-peer.patch
+%endif
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -77,6 +81,7 @@ Graphical User Interface for wpa_supplicant written using QT
 
 %endif
 
+%if %{build_libeap}
 %package -n libeap
 Summary: EAP peer library
 Group: System Environment/Libraries
@@ -93,6 +98,7 @@ Requires: libeap = %{epoch}:%{version}-%{release}
 %description -n libeap-devel
 This package contains header files for using the EAP peer library.
 Don't use this unless you know what you're doing.
+%endif
 
 %prep
 %setup -q -n %{name}-%{version}%{rcver}
@@ -157,6 +163,7 @@ rm -f  %{name}/doc/.cvsignore
 rm -rf %{name}/doc/docbook
 chmod -R 0644 %{name}/examples/*.py
 
+%if %{build_libeap}
 # HAAACK
 patch -p1 -b --suffix .wimax < %{PATCH100}
 pushd wpa_supplicant
@@ -173,6 +180,7 @@ pushd wpa_supplicant
   make DESTDIR=%{buildroot} LIB=%{_lib} -C ../src/eap_peer install
   sed -i -e 's|libdir=/usr/lib|libdir=%{_libdir}|g' %{buildroot}/%{_libdir}/pkgconfig/*.pc
 popd
+%endif
 
 %post
 if [ $1 -eq 1 ] ; then 
@@ -227,6 +235,7 @@ fi
 %{_bindir}/wpa_gui
 %endif
 
+%if %{build_libeap}
 %files -n libeap
 %{_libdir}/libeap.so.0*
 
@@ -238,8 +247,12 @@ fi
 %post -n libeap -p /sbin/ldconfig
 
 %postun -n libeap -p /sbin/ldconfig
+%endif
 
 %changelog
+* Wed Jul 10 2013 Dan Williams <dcbw@redhat.com> - 1:2.0-4
+- Disable WiMAX libeap hack for RHEL
+
 * Wed May 15 2013 Dan Williams <dcbw@redhat.com> - 1:2.0-3
 - Enable HT (802.11n) for AP mode
 
