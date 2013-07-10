@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.0
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -124,6 +124,7 @@ pushd wpa_supplicant
 %if %{build_gui}
   QTDIR=%{_libdir}/qt4 make wpa_gui-qt4 %{_smp_mflags}
 %endif
+  make eapol_test
 popd
 
 %install
@@ -140,6 +141,7 @@ install -d %{buildroot}/%{_sbindir}
 install -m 0755 %{name}/wpa_passphrase %{buildroot}/%{_sbindir}
 install -m 0755 %{name}/wpa_cli %{buildroot}/%{_sbindir}
 install -m 0755 %{name}/wpa_supplicant %{buildroot}/%{_sbindir}
+install -m 0755 %{name}/eapol_test %{buildroot}/%{_sbindir}
 install -D -m 0644 %{name}/dbus/dbus-wpa_supplicant.conf %{buildroot}/%{_sysconfdir}/dbus-1/system.d/wpa_supplicant.conf
 install -D -m 0644 %{name}/dbus/fi.w1.wpa_supplicant1.service %{buildroot}/%{_datadir}/dbus-1/system-services/fi.w1.wpa_supplicant1.service
 install -D -m 0644 %{name}/dbus/fi.epitest.hostap.WPASupplicant.service %{buildroot}/%{_datadir}/dbus-1/system-services/fi.epitest.hostap.WPASupplicant.service
@@ -225,6 +227,7 @@ fi
 %{_sbindir}/wpa_passphrase
 %{_sbindir}/wpa_supplicant
 %{_sbindir}/wpa_cli
+%{_sbindir}/eapol_test
 %dir %{_localstatedir}/run/%{name}
 %dir %{_sysconfdir}/%{name}
 %{_mandir}/man8/*
@@ -250,6 +253,9 @@ fi
 %endif
 
 %changelog
+* Wed Jul 10 2013 Dan Williams <dcbw@redhat.com> - 1:2.0-5
+- Build and package eapol_test (rh #638218)
+
 * Wed Jul 10 2013 Dan Williams <dcbw@redhat.com> - 1:2.0-4
 - Disable WiMAX libeap hack for RHEL
 
