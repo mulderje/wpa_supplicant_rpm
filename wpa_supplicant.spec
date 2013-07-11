@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.0
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -114,9 +114,9 @@ Don't use this unless you know what you're doing.
 %build
 pushd wpa_supplicant
   cp %{SOURCE1} .config
-  CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ;
-  CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS ;
-  LDFLAGS="${LDFLAGS:-%optflags}" ; export LDFLAGS ;
+  CFLAGS="${CFLAGS:-%optflags} -fPIE -DPIE" ; export CFLAGS ;
+  CXXFLAGS="${CXXFLAGS:-%optflags} -fPIE -DPIE" ; export CXXFLAGS ;
+  LDFLAGS="${LDFLAGS:-%optflags} -pie -Wl,-z,now" ; export LDFLAGS ;
   # yes, BINDIR=_sbindir
   BINDIR="%{_sbindir}" ; export BINDIR ;
   LIBDIR="%{_libdir}" ; export LIBDIR ;
@@ -171,9 +171,9 @@ patch -p1 -b --suffix .wimax < %{PATCH100}
 pushd wpa_supplicant
   make clean
 
-  CFLAGS="${CFLAGS:-%optflags}" ; export CFLAGS ;
-  CXXFLAGS="${CXXFLAGS:-%optflags}" ; export CXXFLAGS ;
-  LDFLAGS="${LDFLAGS:-%optflags}" ; export LDFLAGS ;
+  CFLAGS="${CFLAGS:-%optflags} -fPIC -DPIC" ; export CFLAGS ;
+  CXXFLAGS="${CXXFLAGS:-%optflags} -fPIC -DPIC" ; export CXXFLAGS ;
+  LDFLAGS="${LDFLAGS:-%optflags} -Wl,-z,now" ; export LDFLAGS ;
   # yes, BINDIR=_sbindir
   BINDIR="%{_sbindir}" ; export BINDIR ;
   LIBDIR="%{_libdir}" ; export LIBDIR ;
@@ -253,6 +253,10 @@ fi
 %endif
 
 %changelog
+* Wed Jul 10 2013 Dan Williams <dcbw@redhat.com> - 1:2.0-6
+- Enable full RELRO/PIE/PIC for wpa_supplicant and libeap
+- Fix changelog dates
+
 * Wed Jul 10 2013 Dan Williams <dcbw@redhat.com> - 1:2.0-5
 - Build and package eapol_test (rh #638218)
 
@@ -282,7 +286,7 @@ fi
 * Sun Jan 20 2013 Kalev Lember <kalevlember@gmail.com> - 1:1.0-2
 - Rebuilt for libnl3
 
-* Thu Aug 29 2012 Dan Williams <dcbw@redhat.com> - 1:1.0-1
+* Wed Aug 29 2012 Dan Williams <dcbw@redhat.com> - 1:1.0-1
 - Enable lightweight AP mode support
 - Enable P2P (WiFi Direct) support
 - Enable RSN IBSS/AdHoc support
@@ -396,7 +400,7 @@ fi
 * Sun Jan 18 2009 Tomas Mraz <tmraz@redhat.com> - 1:0.6.4-3
 - rebuild with new openssl
 
-* Mon Oct 15 2008 Dan Williams <dcbw@redhat.com> - 1:0.6.4-2
+* Wed Oct 15 2008 Dan Williams <dcbw@redhat.com> - 1:0.6.4-2
 - Handle encryption keys correctly when switching 802.11 modes (rh #459399)
 - Better scanning behavior on resume from suspend/hibernate
 - Better interaction with newer kernels and drivers
@@ -519,7 +523,7 @@ fi
 * Thu Mar 15 2007 Dan Williams <dcbw@redhat.com> - 0.5.7-1
 - Update to 0.5.7 stable release
 
-* Mon Oct 27 2006 Dan Williams <dcbw@redhat.com> - 0.4.9-1
+* Fri Oct 27 2006 Dan Williams <dcbw@redhat.com> - 0.4.9-1
 - Update to 0.4.9 for WE-21 fixes, remove upstreamed patches
 - Don't package doc/ because they aren't actually wpa_supplicant user documentation,
     and becuase it pulls in perl
