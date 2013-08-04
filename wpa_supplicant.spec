@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.0
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -253,6 +253,9 @@ fi
 %endif
 
 %changelog
+* Sun Aug 04 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1:2.0-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
 * Wed Jul 10 2013 Dan Williams <dcbw@redhat.com> - 1:2.0-6
 - Enable full RELRO/PIE/PIC for wpa_supplicant and libeap
 - Fix changelog dates
