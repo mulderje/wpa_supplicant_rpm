@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.0
-Release: 11%{?dist}
+Release: 12%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -42,8 +42,13 @@ Patch6: wpa_supplicant-gui-qt4.patch
 Patch7: libnl3-includes.patch
 # Less aggressive roaming; signal strength is wildly variable
 Patch8: rh837402-less-aggressive-roaming.patch
+# Add missing command-line options to man page, also filed upstream
+Patch9: rh948453-man-page.patch
 # Don't evict current AP from PMKSA cache when it's large
-Patch9: 0001-Fix-OKC-based-PMKSA-cache-entry-clearing.patch
+Patch10: rh1032758-fix-pmksa-cache-entry-clearing.patch
+# CVE-2014-3686
+Patch11: 0001-Add-os_exec-helper-to-run-external-programs.patch
+Patch12: 0002-wpa_cli-Use-os_exec-for-action-script-execution.patch
 
 %if %{build_libeap}
 # Dirty hack for WiMAX
@@ -61,6 +66,7 @@ BuildRequires: readline-devel
 BuildRequires: dbus-devel
 BuildRequires: libnl3-devel
 BuildRequires: systemd-units
+BuildRequires: docbook-utils
 Requires(post): systemd-sysv
 Requires(post): systemd-units
 Requires(preun): systemd-units
@@ -113,7 +119,10 @@ Don't use this unless you know what you're doing.
 %patch6 -p1 -b .qt4
 %patch7 -p1 -b .libnl3
 %patch8 -p1 -b .rh837402-less-aggressive-roaming
-%patch9 -p1 -b .okc-current-fix
+%patch9 -p1 -b .man-page
+%patch10 -p1 -b .pmksa-clear-fix
+%patch11 -p1 -b .CVE-2014-3686-1
+%patch12 -p1 -b .CVE-2014-3686-2
 
 %build
 pushd wpa_supplicant
@@ -129,6 +138,10 @@ pushd wpa_supplicant
   QTDIR=%{_libdir}/qt4 make wpa_gui-qt4 %{_smp_mflags}
 %endif
   make eapol_test
+popd
+
+pushd wpa_supplicant/doc/docbook
+  make
 popd
 
 %install
@@ -257,6 +270,9 @@ fi
 %endif
 
 %changelog
+* Wed Oct 22 2014 Dan Williams <dcbw@redhat.com> - 1:2.0-12
+- Use os_exec() for action script execution (CVE-2014-3686)
+
 * Thu Aug 21 2014 Kevin Fenzi <kevin@scrye.com> - 1:2.0-11
 - Rebuild for rpm bug 1131960
 
