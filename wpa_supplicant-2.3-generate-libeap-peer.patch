@@ -1,7 +1,8 @@
-From 3de5e59b291b6f58317bb16736f8c0271754378e Mon Sep 17 00:00:00 2001
+From 818ac0e07c9eaf4bc0026bda7d42718afcf1f92d Mon Sep 17 00:00:00 2001
 From: Inaky Perez-Gonzalez <inaky.perez-gonzalez@intel.com>
 Date: Sat, 2 Oct 2010 00:11:51 -0700
-Subject: [PATCH] eap_peer: create a libeap library, with header files and pkg-config [v2]
+Subject: [PATCH] eap_peer: create a libeap library, with header files and
+ pkg-config [v2]
 
 This adds infrastructe in src/eap_peer to make libeap.so and install
 the needed header files and pkg-config files.
@@ -30,16 +31,15 @@ term, but serves as an starting point:
 
 Signed-off-by: Inaky Perez-Gonzalez <inaky.perez-gonzalez@intel.com>
 ---
- build_release              |   12 +++
- src/eap_peer/Makefile      |  191 ++++++++++++++++++++++++++++++++++++++++++--
- src/eap_peer/eap_methods.c |  114 ++++++++++++++++++++++++++
- src/eap_peer/eap_methods.h |    1 +
- src/eap_peer/libeap0.pc    |   10 +++
- 5 files changed, 320 insertions(+), 8 deletions(-)
+ src/eap_peer/Makefile      | 198 +++++++++++++++++++++++++++++++++++++++++++--
+ src/eap_peer/eap_methods.c | 114 ++++++++++++++++++++++++++
+ src/eap_peer/eap_methods.h |   1 +
+ src/eap_peer/libeap0.pc    |  10 +++
+ 4 files changed, 315 insertions(+), 8 deletions(-)
  create mode 100644 src/eap_peer/libeap0.pc
 
 diff --git a/src/eap_peer/Makefile b/src/eap_peer/Makefile
-index 3651056..58c067a 100644
+index f79519b..cedd89f 100644
 --- a/src/eap_peer/Makefile
 +++ b/src/eap_peer/Makefile
 @@ -1,11 +1,193 @@
@@ -235,8 +235,8 @@ index 3651056..58c067a 100644
 +	rm -f $(DESTDIR)/usr/$(LIB)/pkgconfig/libeap0.pc
  
  clean:
--	rm -f *~ *.o *.so *.d
-+	rm -f *~ *.o *.so *.d libeap.a $(LIBEAP) $(OBJS_lib)
+-	rm -f *~ *.o *.so *.d *.gcno *.gcda *.gcov
++	rm -f *~ *.o *.so *.d *.gcno *.gcda *.gcov libeap.a $(LIBEAP) $(OBJS_lib)
  
 -install:
 -	if ls *.so >/dev/null 2>&1; then \
@@ -245,10 +245,10 @@ index 3651056..58c067a 100644
 -	; fi
 +-include $(OBJS:%.o=%.d)
 diff --git a/src/eap_peer/eap_methods.c b/src/eap_peer/eap_methods.c
-index 3b0af05..092f266 100644
+index 83a1457..95a41e6 100644
 --- a/src/eap_peer/eap_methods.c
 +++ b/src/eap_peer/eap_methods.c
-@@ -340,6 +340,120 @@ int eap_peer_method_register(struct eap_method *method)
+@@ -336,6 +336,120 @@ int eap_peer_method_register(struct eap_method *method)
  
  
  /**
@@ -370,10 +370,10 @@ index 3b0af05..092f266 100644
   *
   * This function is called at program termination to unregister all EAP peer
 diff --git a/src/eap_peer/eap_methods.h b/src/eap_peer/eap_methods.h
-index 384c61b..b83a46f 100644
+index e35c919..da14e42 100644
 --- a/src/eap_peer/eap_methods.h
 +++ b/src/eap_peer/eap_methods.h
-@@ -32,6 +32,7 @@ EapType eap_peer_get_type(const char *name, int *vendor);
+@@ -26,6 +26,7 @@ EapType eap_peer_get_type(const char *name, int *vendor);
  const char * eap_get_name(int vendor, EapType type);
  size_t eap_get_names(char *buf, size_t buflen);
  char ** eap_get_names_as_string_array(size_t *num);
@@ -383,7 +383,7 @@ index 384c61b..b83a46f 100644
  #else /* IEEE8021X_EAPOL */
 diff --git a/src/eap_peer/libeap0.pc b/src/eap_peer/libeap0.pc
 new file mode 100644
-index 0000000..2f8463a
+index 0000000..594fa2c
 --- /dev/null
 +++ b/src/eap_peer/libeap0.pc
 @@ -0,0 +1,10 @@
@@ -398,5 +398,5 @@ index 0000000..2f8463a
 +Libs: -L${libdir} -leap
 +Cflags: -I${includedir}
 -- 
-1.6.6.1
+1.9.3
 

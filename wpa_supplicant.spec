@@ -6,8 +6,8 @@
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
-Version: 2.0
-Release: 12%{?dist}
+Version: 2.3
+Release: 1%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -53,7 +53,7 @@ Patch12: 0002-wpa_cli-Use-os_exec-for-action-script-execution.patch
 %if %{build_libeap}
 # Dirty hack for WiMAX
 # http://linuxwimax.org/Download?action=AttachFile&do=get&target=wpa-1.5-README.txt
-Patch100: wpa_supplicant-2.0-generate-libeap-peer.patch
+Patch100: wpa_supplicant-2.3-generate-libeap-peer.patch
 %endif
 
 URL: http://w1.fi/wpa_supplicant/
@@ -119,10 +119,6 @@ Don't use this unless you know what you're doing.
 %patch6 -p1 -b .qt4
 %patch7 -p1 -b .libnl3
 %patch8 -p1 -b .rh837402-less-aggressive-roaming
-%patch9 -p1 -b .man-page
-%patch10 -p1 -b .pmksa-clear-fix
-%patch11 -p1 -b .CVE-2014-3686-1
-%patch12 -p1 -b .CVE-2014-3686-2
 
 %build
 pushd wpa_supplicant
@@ -141,7 +137,7 @@ pushd wpa_supplicant
 popd
 
 pushd wpa_supplicant/doc/docbook
-  make
+  make man
 popd
 
 %install
@@ -270,6 +266,9 @@ fi
 %endif
 
 %changelog
+* Thu Oct 30 2014 Lubomir Rintel <lkundrak@v3.sk> - 1:2.3-1
+- Update to 2.3
+
 * Wed Oct 22 2014 Dan Williams <dcbw@redhat.com> - 1:2.0-12
 - Use os_exec() for action script execution (CVE-2014-3686)
 
