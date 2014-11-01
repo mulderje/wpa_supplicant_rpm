@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.3
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -142,7 +142,7 @@ popd
 
 %install
 # init scripts
-install -D -m 0755 %{SOURCE3} %{buildroot}/%{_unitdir}/%{name}.service
+install -D -m 0644 %{SOURCE3} %{buildroot}/%{_unitdir}/%{name}.service
 install -D -m 0644 %{SOURCE4} %{buildroot}/%{_sysconfdir}/sysconfig/%{name}
 install -D -m 0644 %{SOURCE6} %{buildroot}/%{_sysconfdir}/logrotate.d/%{name}
 
@@ -266,6 +266,9 @@ fi
 %endif
 
 %changelog
+* Mon Nov 01 2014 Orion Poplawski <orion@cora.nwra.com> - 1:2.3-2
+- Do not install wpa_supplicant.service as executable (bug #803980)
+
 * Thu Oct 30 2014 Lubomir Rintel <lkundrak@v3.sk> - 1:2.3-1
 - Update to 2.3
 
