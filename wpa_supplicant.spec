@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.4
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -29,9 +29,6 @@ Patch1: wpa_supplicant-flush-debug-output.patch
 Patch2: wpa_supplicant-dbus-service-file-args.patch
 # quiet an annoying and frequent syslog message
 Patch3: wpa_supplicant-quiet-scan-results-message.patch
-# allow more private key encryption algorithms. is this really a good idea?
-# seems to be related to RHBZ #538851, see comment #12
-Patch5: wpa_supplicant-openssl-more-algs.patch
 # distro specific customization for Qt4 build tools, not suitable for upstream
 Patch6: wpa_supplicant-gui-qt4.patch
 # Less aggressive roaming; signal strength is wildly variable
@@ -89,7 +86,6 @@ Graphical User Interface for wpa_supplicant written using QT
 %patch1 -p1 -b .flush-debug-output
 %patch2 -p1 -b .dbus-service-file
 %patch3 -p1 -b .quiet-scan-results-msg
-%patch5 -p1 -b .more-openssl-algs
 %patch6 -p1 -b .qt4
 %patch8 -p1 -b .rh837402-less-aggressive-roaming
 %patch9 -p1 -b .cve-2015-1863
@@ -207,6 +203,9 @@ fi
 %endif
 
 %changelog
+* Thu Apr 23 2015 Dan Williams <dcbw@redhat.com> - 1:2.4-2
+- Remove obsolete wpa_supplicant-openssl-more-algs.patch
+
 * Thu Apr 23 2015 Adam Williamson <awilliam@redhat.com> - 1:2.4-1
 - new release 2.4
 - add some info on a couple of patches
