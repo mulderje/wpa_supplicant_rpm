@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.4
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -41,6 +41,9 @@ Patch9: 0001-P2P-Validate-SSID-element-length-before-copying-it-C.patch
 # Fix a crash - rh #1231973
 # http://w1.fi/cgit/hostap/commit/wpa_supplicant/dbus/dbus_new_handlers.c?id=8a78e227df1ead19be8e12a4108e448887e64d6f
 Patch10: rh1231973-dbus-fix-operations-for-p2p-mgmt.patch
+# Fix a security issue - rh #rh1241907
+# http://w1.fi/security/2015-5/0001-NFC-Fix-payload-length-validation-in-NDEF-record-par.patch
+Patch11: rh1241907-NFC-Fix-payload-length-validation-in-NDEF-record-par.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -93,6 +96,7 @@ Graphical User Interface for wpa_supplicant written using QT
 %patch8 -p1 -b .rh837402-less-aggressive-roaming
 %patch9 -p1 -b .cve-2015-1863
 %patch10 -p1 -b .rh1231973-dbus-fix-operations-for-p2p-mgmt
+%patch11 -p1 -b .rh1241907-ndef-length
 
 %build
 pushd wpa_supplicant
@@ -207,6 +211,9 @@ fi
 %endif
 
 %changelog
+* Wed Jul 15 2015 Jiří Klimeš <jklimes@redhat.com> - 1:2.4-4
+- Fix for NDEF record payload length checking (rh #1241907)
+
 * Tue Jun 16 2015 Jiří Klimeš <jklimes@redhat.com> - 1:2.4-3
 - Fix a crash if P2P management interface is used (rh #1231973)
 
