@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.4
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -188,7 +188,8 @@ fi
 
 
 %files
-%doc COPYING %{name}/ChangeLog README %{name}/eap_testing.txt %{name}/todo.txt %{name}/wpa_supplicant.conf %{name}/examples
+%license COPYING
+%doc %{name}/ChangeLog README %{name}/eap_testing.txt %{name}/todo.txt %{name}/wpa_supplicant.conf %{name}/examples
 %config(noreplace) %{_sysconfdir}/%{name}/%{name}.conf
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
@@ -211,6 +212,10 @@ fi
 %endif
 
 %changelog
+* Sat Oct  3 2015 Ville Skyttä <ville.skytta@iki.fi> - 1:2.4-5
+- Don't order service after syslog.target (rh #1055197)
+- Mark COPYING as %%license
+
 * Wed Jul 15 2015 Jiří Klimeš <jklimes@redhat.com> - 1:2.4-4
 - Fix for NDEF record payload length checking (rh #1241907)
 
