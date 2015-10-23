@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.4
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -44,6 +44,9 @@ Patch10: rh1231973-dbus-fix-operations-for-p2p-mgmt.patch
 # Fix a security issue - rh #rh1241907
 # http://w1.fi/security/2015-5/0001-NFC-Fix-payload-length-validation-in-NDEF-record-par.patch
 Patch11: rh1241907-NFC-Fix-payload-length-validation-in-NDEF-record-par.patch
+# Don't override D-Bus policy for other daemons
+# http://lists.infradead.org/pipermail/hostap/2015-October/034036.html
+Patch12: 0001-wpa_supplicant-don-t-do-deny-send_interface-.-in-dbu.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -97,6 +100,7 @@ Graphical User Interface for wpa_supplicant written using QT
 %patch9 -p1 -b .cve-2015-1863
 %patch10 -p1 -b .rh1231973-dbus-fix-operations-for-p2p-mgmt
 %patch11 -p1 -b .rh1241907-ndef-length
+%patch12 -p1 -b .dbus-policy
 
 %build
 pushd wpa_supplicant
@@ -212,6 +216,9 @@ fi
 %endif
 
 %changelog
+* Fri Oct 23 2015 Lubomir Rintel <lkundrak@v3.sk> - 1:2.4-6
+- Fix the D-Bus policy
+
 * Sat Oct  3 2015 Ville Skyttä <ville.skytta@iki.fi> - 1:2.4-5
 - Don't order service after syslog.target (rh #1055197)
 - Mark COPYING as %%license
