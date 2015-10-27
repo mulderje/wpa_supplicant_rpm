@@ -6,8 +6,8 @@
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
-Version: 2.4
-Release: 6%{?dist}
+Version: 2.5
+Release: 1%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -35,12 +35,6 @@ Patch6: wpa_supplicant-gui-qt4.patch
 # dcbw states (2015-04):
 # "upstream doesn't like that patch so it's been discussed and I think rejected"
 Patch8: rh837402-less-aggressive-roaming.patch
-# CVE-2015-1863, backport from upstream master, will be in 2.5
-# http://w1.fi/cgit/hostap/commit/?id=9ed4eee345f85e3025c33c6e20aa25696e341ccd
-Patch9: 0001-P2P-Validate-SSID-element-length-before-copying-it-C.patch
-# Fix a crash - rh #1231973
-# http://w1.fi/cgit/hostap/commit/wpa_supplicant/dbus/dbus_new_handlers.c?id=8a78e227df1ead19be8e12a4108e448887e64d6f
-Patch10: rh1231973-dbus-fix-operations-for-p2p-mgmt.patch
 # Fix a security issue - rh #rh1241907
 # http://w1.fi/security/2015-5/0001-NFC-Fix-payload-length-validation-in-NDEF-record-par.patch
 Patch11: rh1241907-NFC-Fix-payload-length-validation-in-NDEF-record-par.patch
@@ -97,9 +91,6 @@ Graphical User Interface for wpa_supplicant written using QT
 %patch3 -p1 -b .quiet-scan-results-msg
 %patch6 -p1 -b .qt4
 %patch8 -p1 -b .rh837402-less-aggressive-roaming
-%patch9 -p1 -b .cve-2015-1863
-%patch10 -p1 -b .rh1231973-dbus-fix-operations-for-p2p-mgmt
-%patch11 -p1 -b .rh1241907-ndef-length
 %patch12 -p1 -b .dbus-policy
 
 %build
@@ -113,7 +104,7 @@ pushd wpa_supplicant
   LIBDIR="%{_libdir}" ; export LIBDIR ;
   make %{_smp_mflags}
 %if %{build_gui}
-  QTDIR=%{_libdir}/qt4 make wpa_gui-qt4 %{_smp_mflags}
+  QTDIR=%{_libdir}/qt4 make wpa_gui-qt4 %{_smp_mflags} QMAKE='%{qmake_qt4}' LRELEASE='%{_qt4_bindir}/lrelease'
 %endif
   make eapol_test
 popd
@@ -216,6 +207,9 @@ fi
 %endif
 
 %changelog
+* Tue Oct 27 2015 Lubomir Rintel <lkundrak@v3.sk> - 1:2.5-1
+- Update to version 2.5
+
 * Fri Oct 23 2015 Lubomir Rintel <lkundrak@v3.sk> - 1:2.4-6
 - Fix the D-Bus policy
 
