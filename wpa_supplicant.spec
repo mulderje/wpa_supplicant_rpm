@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.5
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -207,6 +207,10 @@ fi
 %endif
 
 %changelog
+* Sat Oct 31 2015 Lubomir Rintel <lkundrak@v3.sk> - 1:2.5-2
+- Enable syslog by default
+- Drop writing a pid and log file
+
 * Tue Oct 27 2015 Lubomir Rintel <lkundrak@v3.sk> - 1:2.5-1
 - Update to version 2.5
 
