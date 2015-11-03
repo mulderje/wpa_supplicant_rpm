@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.5
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -54,9 +54,9 @@ BuildRequires: libnl3-devel
 BuildRequires: systemd-units
 BuildRequires: docbook-utils
 Requires(post): systemd-sysv
-Requires(post): systemd-units
-Requires(preun): systemd-units
-Requires(postun): systemd-units
+Requires(post): systemd
+Requires(preun): systemd
+Requires(postun): systemd
 # libeap used to be built from wpa_supplicant with some fairly horrible
 # hackery, solely for use by WiMAX. We dropped all WiMAX support around
 # F21. This is here so people don't wind up with obsolete libeap packages
@@ -152,24 +152,13 @@ rm -rf %{name}/doc/docbook
 chmod -R 0644 %{name}/examples/*.py
 
 %post
-if [ $1 -eq 1 ] ; then 
-    # Initial installation 
-    /bin/systemctl daemon-reload >/dev/null 2>&1 || :
-fi
+%systemd_post wpa_supplicant.service
 
 %preun
-if [ $1 -eq 0 ] ; then
-    # Package removal, not upgrade
-    /bin/systemctl --no-reload disable wpa_supplicant.service > /dev/null 2>&1 || :
-    /bin/systemctl stop wpa_supplicant.service > /dev/null 2>&1 || :
-fi
+%systemd_preun wpa_supplicant.service
 
 %postun
-/bin/systemctl daemon-reload >/dev/null 2>&1 || :
-if [ $1 -ge 1 ] ; then
-    # Package upgrade, not uninstall
-    /bin/systemctl try-restart wpa_supplicant.service >/dev/null 2>&1 || :
-fi
+%systemd_postun_with_restart wpa_supplicant.service
 
 %triggerun -- wpa_supplicant < 0.7.3-10
 # Save the current service runlevel info
@@ -207,6 +196,9 @@ fi
 %endif
 
 %changelog
+* Tue Nov 03 2015 Lukáš Nykrýn <lnykryn@redhat.com> - 1:2.5-3
+- Scriptlets replaced with new systemd macros (rh #850369)
+
 * Sat Oct 31 2015 Lubomir Rintel <lkundrak@v3.sk> - 1:2.5-2
 - Enable syslog by default
 - Drop writing a pid and log file
