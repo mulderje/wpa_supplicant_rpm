@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.5
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -196,6 +196,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Mon Nov 16 2015 Lubomir Rintel <lkundrak@v3.sk> - 1:2.5-4
+- Really synchronize the service file with upstream
+
 * Tue Nov 03 2015 Lukáš Nykrýn <lnykryn@redhat.com> - 1:2.5-3
 - Scriptlets replaced with new systemd macros (rh #850369)
 
