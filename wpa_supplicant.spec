@@ -138,9 +138,6 @@ install -d %{buildroot}/%{_bindir}
 install -m 0755 %{name}/wpa_gui-qt4/wpa_gui %{buildroot}/%{_bindir}
 %endif
 
-# running
-mkdir -p %{buildroot}/%{_localstatedir}/run/%{name}
-
 # man pages
 install -d %{buildroot}%{_mandir}/man{5,8}
 install -m 0644 %{name}/doc/docbook/*.8 %{buildroot}%{_mandir}/man8
@@ -185,7 +182,6 @@ chmod -R 0644 %{name}/examples/*.py
 %{_sbindir}/wpa_supplicant
 %{_sbindir}/wpa_cli
 %{_sbindir}/eapol_test
-%dir %{_localstatedir}/run/%{name}
 %dir %{_sysconfdir}/%{name}
 %{_mandir}/man8/*
 %{_mandir}/man5/*
