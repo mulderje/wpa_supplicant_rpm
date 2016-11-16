@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.6
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -185,6 +185,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Fri Jan 27 2017 Jiří Klimeš <blueowl@centrum.cz> - 1:2.6-2
+- Enable Wi-Fi Display support for Miracast (rh #1395682)
+
 * Tue Nov 22 2016 Lubomir Rintel <lkundrak@v3.sk> - 1:2.6-1
 - Update to version 2.6
 
