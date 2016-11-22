@@ -6,8 +6,8 @@
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
-Version: 2.5
-Release: 5%{?dist}
+Version: 2.6
+Release: 1%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -35,12 +35,6 @@ Patch6: wpa_supplicant-gui-qt4.patch
 # dcbw states (2015-04):
 # "upstream doesn't like that patch so it's been discussed and I think rejected"
 Patch8: rh837402-less-aggressive-roaming.patch
-# Fix a security issue - rh #rh1241907
-# http://w1.fi/security/2015-5/0001-NFC-Fix-payload-length-validation-in-NDEF-record-par.patch
-Patch11: rh1241907-NFC-Fix-payload-length-validation-in-NDEF-record-par.patch
-# Don't override D-Bus policy for other daemons
-# http://lists.infradead.org/pipermail/hostap/2015-October/034036.html
-Patch12: 0001-wpa_supplicant-don-t-do-deny-send_interface-.-in-dbu.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -91,7 +85,6 @@ Graphical User Interface for wpa_supplicant written using QT
 %patch3 -p1 -b .quiet-scan-results-msg
 %patch6 -p1 -b .qt4
 %patch8 -p1 -b .rh837402-less-aggressive-roaming
-%patch12 -p1 -b .dbus-policy
 
 %build
 pushd wpa_supplicant
@@ -192,6 +185,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Tue Nov 22 2016 Lubomir Rintel <lkundrak@v3.sk> - 1:2.6-1
+- Update to version 2.6
+
 * Fri Feb 05 2016 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.5-5
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
 
