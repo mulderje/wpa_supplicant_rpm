@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.6
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -35,6 +35,43 @@ Patch6: wpa_supplicant-gui-qt4.patch
 # dcbw states (2015-04):
 # "upstream doesn't like that patch so it's been discussed and I think rejected"
 Patch8: rh837402-less-aggressive-roaming.patch
+# backport of macsec series
+Patch9: macsec-0001-mka-Move-structs-transmit-receive-_-sa-sc-to-a-commo.patch
+Patch10: macsec-0002-mka-Pass-full-structures-down-to-macsec-drivers-pack.patch
+Patch11: macsec-0003-mka-Pass-full-structures-down-to-macsec-drivers-tran.patch
+Patch12: macsec-0004-mka-Pass-full-structures-down-to-macsec-drivers-rece.patch
+Patch13: macsec-0005-mka-Pass-full-structures-down-to-macsec-drivers-tran.patch
+Patch14: macsec-0006-mka-Pass-full-structures-down-to-macsec-drivers-rece.patch
+Patch15: macsec-0007-mka-Add-driver-op-to-get-macsec-capabilities.patch
+Patch16: macsec-0008-mka-Remove-channel-hacks-from-the-stack-and-the-macs.patch
+Patch17: macsec-0009-mka-Sync-structs-definitions-with-IEEE-Std-802.1X-20.patch
+Patch18: macsec-0010-mka-Add-support-for-removing-SAs.patch
+Patch19: macsec-0011-mka-Implement-reference-counting-on-data_key.patch
+Patch20: macsec-0012-mka-Fix-getting-capabilities-from-the-driver.patch
+Patch21: macsec-0013-wpa_supplicant-Allow-pre-shared-CAK-CKN-pair-for-MKA.patch
+Patch22: macsec-0014-mka-Disable-peer-detection-timeout-for-PSK-mode.patch
+Patch23: macsec-0015-wpa_supplicant-Add-macsec_integ_only-setting-for-MKA.patch
+Patch24: macsec-0016-mka-Add-enable_encrypt-op-and-call-it-from-CP-state-.patch
+Patch25: macsec-0017-wpa_supplicant-Allow-configuring-the-MACsec-port-for.patch
+Patch26: macsec-0018-drivers-Move-common-definitions-for-wired-drivers-ou.patch
+Patch27: macsec-0019-drivers-Move-wired_multicast_membership-to-a-common-.patch
+Patch28: macsec-0020-drivers-Move-driver_wired_multi-to-a-common-file.patch
+Patch29: macsec-0021-drivers-Move-driver_wired_get_ifflags-to-a-common-fi.patch
+Patch30: macsec-0022-drivers-Move-driver_wired_set_ifflags-to-a-common-fi.patch
+Patch31: macsec-0023-drivers-Move-driver_wired_get_ifstatus-to-a-common-f.patch
+Patch32: macsec-0024-drivers-Move-driver_wired_init_common-to-a-common-fi.patch
+Patch33: macsec-0025-drivers-Move-driver_wired_deinit_common-to-a-common-.patch
+Patch34: macsec-0026-drivers-Move-driver_wired_get_capa-to-a-common-file.patch
+Patch35: macsec-0027-drivers-Move-driver_wired_get_bssid-to-a-common-file.patch
+Patch36: macsec-0028-drivers-Move-driver_wired_get_ssid-to-a-common-file.patch
+Patch37: macsec-0029-macsec_linux-Add-a-driver-for-macsec-on-Linux-kernel.patch
+Patch38: macsec-0030-mka-Remove-references-to-macsec_qca-from-wpa_supplic.patch
+Patch39: macsec-0031-PAE-Make-KaY-specific-details-available-via-control-.patch
+Patch40: macsec-0032-mka-Make-MKA-actor-priority-configurable.patch
+Patch41: macsec-0033-mka-Fix-an-incorrect-update-of-participant-to_use_sa.patch
+Patch42: macsec-0034-mka-Some-bug-fixes-for-MACsec-in-PSK-mode.patch
+Patch43: macsec-0035-mka-Send-MKPDUs-forever-if-mode-is-PSK.patch
+Patch44: macsec-0036-mka-Fix-the-order-of-operations-in-secure-channel-de.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -85,6 +122,42 @@ Graphical User Interface for wpa_supplicant written using QT
 %patch3 -p1 -b .quiet-scan-results-msg
 %patch6 -p1 -b .qt4
 %patch8 -p1 -b .rh837402-less-aggressive-roaming
+%patch9 -p1 -b .macsec-0001
+%patch10 -p1 -b .macsec-0002
+%patch11 -p1 -b .macsec-0003
+%patch12 -p1 -b .macsec-0004
+%patch13 -p1 -b .macsec-0005
+%patch14 -p1 -b .macsec-0006
+%patch15 -p1 -b .macsec-0007
+%patch16 -p1 -b .macsec-0008
+%patch17 -p1 -b .macsec-0009
+%patch18 -p1 -b .macsec-0010
+%patch19 -p1 -b .macsec-0011
+%patch20 -p1 -b .macsec-0012
+%patch21 -p1 -b .macsec-0013
+%patch22 -p1 -b .macsec-0014
+%patch23 -p1 -b .macsec-0015
+%patch24 -p1 -b .macsec-0016
+%patch25 -p1 -b .macsec-0017
+%patch26 -p1 -b .macsec-0018
+%patch27 -p1 -b .macsec-0019
+%patch28 -p1 -b .macsec-0020
+%patch29 -p1 -b .macsec-0021
+%patch30 -p1 -b .macsec-0022
+%patch31 -p1 -b .macsec-0023
+%patch32 -p1 -b .macsec-0024
+%patch33 -p1 -b .macsec-0025
+%patch34 -p1 -b .macsec-0026
+%patch35 -p1 -b .macsec-0027
+%patch36 -p1 -b .macsec-0028
+%patch37 -p1 -b .macsec-0029
+%patch38 -p1 -b .macsec-0030
+%patch39 -p1 -b .macsec-0031
+%patch40 -p1 -b .macsec-0032
+%patch41 -p1 -b .macsec-0033
+%patch42 -p1 -b .macsec-0034
+%patch43 -p1 -b .macsec-0035
+%patch44 -p1 -b .macsec-0036
 
 %build
 pushd wpa_supplicant
@@ -185,6 +258,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Thu Mar  2 2017 Davide Caratti <dcaratti@redhat.com> - 1:2.6-4
+- Backport support for IEEE 802.1AE (macsec)
+
 * Sat Feb 11 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.6-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 

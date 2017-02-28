@@ -1,0 +1,239 @@
+From b0906ef770ec5a74221bcb4e63dbbc8682f49d5a Mon Sep 17 00:00:00 2001
+Message-Id: <b0906ef770ec5a74221bcb4e63dbbc8682f49d5a.1488376602.git.dcaratti@redhat.com>
+From: Sabrina Dubroca <sd@queasysnail.net>
+Date: Sun, 27 Nov 2016 20:08:45 +0100
+Subject: [PATCH] drivers: Move wired_multicast_membership() to a common file
+
+This continues refactoring of the common parts of wired drivers code
+into a shared file, so that they can be reused by other drivers.
+
+Signed-off-by: Sabrina Dubroca <sd@queasysnail.net>
+---
+ src/drivers/driver_macsec_qca.c   | 40 +++++----------------------
+ src/drivers/driver_wired.c        | 28 -------------------
+ src/drivers/driver_wired_common.c | 57 +++++++++++++++++++++++++++++++++++++++
+ src/drivers/driver_wired_common.h |  2 ++
+ src/drivers/drivers.mak           |  6 +++++
+ src/drivers/drivers.mk            |  5 ++++
+ 6 files changed, 76 insertions(+), 62 deletions(-)
+ create mode 100644 src/drivers/driver_wired_common.c
+
+diff --git a/src/drivers/driver_macsec_qca.c b/src/drivers/driver_macsec_qca.c
+index 6391e08..e04fb0f 100644
+--- a/src/drivers/driver_macsec_qca.c
++++ b/src/drivers/driver_macsec_qca.c
+@@ -76,34 +76,6 @@ struct macsec_qca_data {
+ };
+ 
+ 
+-static int macsec_qca_multicast_membership(int sock, int ifindex,
+-					   const u8 *addr, int add)
+-{
+-#ifdef __linux__
+-	struct packet_mreq mreq;
+-
+-	if (sock < 0)
+-		return -1;
+-
+-	os_memset(&mreq, 0, sizeof(mreq));
+-	mreq.mr_ifindex = ifindex;
+-	mreq.mr_type = PACKET_MR_MULTICAST;
+-	mreq.mr_alen = ETH_ALEN;
+-	os_memcpy(mreq.mr_address, addr, ETH_ALEN);
+-
+-	if (setsockopt(sock, SOL_PACKET,
+-		       add ? PACKET_ADD_MEMBERSHIP : PACKET_DROP_MEMBERSHIP,
+-		       &mreq, sizeof(mreq)) < 0) {
+-		wpa_printf(MSG_ERROR, "setsockopt: %s", strerror(errno));
+-		return -1;
+-	}
+-	return 0;
+-#else /* __linux__ */
+-	return -1;
+-#endif /* __linux__ */
+-}
+-
+-
+ static int macsec_qca_get_ssid(void *priv, u8 *ssid)
+ {
+ 	ssid[0] = 0;
+@@ -341,9 +313,9 @@ static void * macsec_qca_init(void *ctx, const char *ifname)
+ 		drv->common.iff_up = 1;
+ 	}
+ 
+-	if (macsec_qca_multicast_membership(drv->common.pf_sock,
+-					    if_nametoindex(drv->common.ifname),
+-					    pae_group_addr, 1) == 0) {
++	if (wired_multicast_membership(drv->common.pf_sock,
++				       if_nametoindex(drv->common.ifname),
++				       pae_group_addr, 1) == 0) {
+ 		wpa_printf(MSG_DEBUG,
+ 			   "%s: Added multicast membership with packet socket",
+ 			   __func__);
+@@ -392,9 +364,9 @@ static void macsec_qca_deinit(void *priv)
+ 	int flags;
+ 
+ 	if (drv->common.membership &&
+-	    macsec_qca_multicast_membership(drv->common.pf_sock,
+-					    if_nametoindex(drv->common.ifname),
+-					    pae_group_addr, 0) < 0) {
++	    wired_multicast_membership(drv->common.pf_sock,
++				       if_nametoindex(drv->common.ifname),
++				       pae_group_addr, 0) < 0) {
+ 		wpa_printf(MSG_DEBUG,
+ 			   "%s: Failed to remove PAE multicast group (PACKET)",
+ 			   __func__);
+diff --git a/src/drivers/driver_wired.c b/src/drivers/driver_wired.c
+index b6f79e3..68c55fd 100644
+--- a/src/drivers/driver_wired.c
++++ b/src/drivers/driver_wired.c
+@@ -76,34 +76,6 @@ struct dhcp_message {
+ };
+ 
+ 
+-static int wired_multicast_membership(int sock, int ifindex,
+-				      const u8 *addr, int add)
+-{
+-#ifdef __linux__
+-	struct packet_mreq mreq;
+-
+-	if (sock < 0)
+-		return -1;
+-
+-	os_memset(&mreq, 0, sizeof(mreq));
+-	mreq.mr_ifindex = ifindex;
+-	mreq.mr_type = PACKET_MR_MULTICAST;
+-	mreq.mr_alen = ETH_ALEN;
+-	os_memcpy(mreq.mr_address, addr, ETH_ALEN);
+-
+-	if (setsockopt(sock, SOL_PACKET,
+-		       add ? PACKET_ADD_MEMBERSHIP : PACKET_DROP_MEMBERSHIP,
+-		       &mreq, sizeof(mreq)) < 0) {
+-		wpa_printf(MSG_ERROR, "setsockopt: %s", strerror(errno));
+-		return -1;
+-	}
+-	return 0;
+-#else /* __linux__ */
+-	return -1;
+-#endif /* __linux__ */
+-}
+-
+-
+ #ifdef __linux__
+ static void handle_data(void *ctx, unsigned char *buf, size_t len)
+ {
+diff --git a/src/drivers/driver_wired_common.c b/src/drivers/driver_wired_common.c
+new file mode 100644
+index 0000000..3969880
+--- /dev/null
++++ b/src/drivers/driver_wired_common.c
+@@ -0,0 +1,57 @@
++/*
++ * Common functions for Wired Ethernet driver interfaces
++ * Copyright (c) 2005-2009, Jouni Malinen <j@w1.fi>
++ * Copyright (c) 2004, Gunter Burchardt <tira@isx.de>
++ *
++ * This software may be distributed under the terms of the BSD license.
++ * See README for more details.
++ */
++
++#include "includes.h"
++
++#include "common.h"
++#include "eloop.h"
++#include "driver.h"
++#include "driver_wired_common.h"
++
++#include <sys/ioctl.h>
++#include <net/if.h>
++#ifdef __linux__
++#include <netpacket/packet.h>
++#include <net/if_arp.h>
++#include <net/if.h>
++#endif /* __linux__ */
++#if defined(__FreeBSD__) || defined(__DragonFly__) || defined(__FreeBSD_kernel__)
++#include <net/if_dl.h>
++#include <net/if_media.h>
++#endif /* defined(__FreeBSD__) || defined(__DragonFly__) || defined(__FreeBSD_kernel__) */
++#ifdef __sun__
++#include <sys/sockio.h>
++#endif /* __sun__ */
++
++
++int wired_multicast_membership(int sock, int ifindex, const u8 *addr, int add)
++{
++#ifdef __linux__
++	struct packet_mreq mreq;
++
++	if (sock < 0)
++		return -1;
++
++	os_memset(&mreq, 0, sizeof(mreq));
++	mreq.mr_ifindex = ifindex;
++	mreq.mr_type = PACKET_MR_MULTICAST;
++	mreq.mr_alen = ETH_ALEN;
++	os_memcpy(mreq.mr_address, addr, ETH_ALEN);
++
++	if (setsockopt(sock, SOL_PACKET,
++		       add ? PACKET_ADD_MEMBERSHIP : PACKET_DROP_MEMBERSHIP,
++		       &mreq, sizeof(mreq)) < 0) {
++		wpa_printf(MSG_ERROR, "setsockopt: %s", strerror(errno));
++		return -1;
++	}
++	return 0;
++#else /* __linux__ */
++	return -1;
++#endif /* __linux__ */
++}
+diff --git a/src/drivers/driver_wired_common.h b/src/drivers/driver_wired_common.h
+index 8d9dd37..39a57a6 100644
+--- a/src/drivers/driver_wired_common.h
++++ b/src/drivers/driver_wired_common.h
+@@ -22,4 +22,6 @@ struct driver_wired_common_data {
+ static const u8 pae_group_addr[ETH_ALEN] =
+ { 0x01, 0x80, 0xc2, 0x00, 0x00, 0x03 };
+ 
++int wired_multicast_membership(int sock, int ifindex, const u8 *addr, int add);
++
+ #endif /* DRIVER_WIRED_COMMON_H */
+diff --git a/src/drivers/drivers.mak b/src/drivers/drivers.mak
+index c6d3f81..282da50 100644
+--- a/src/drivers/drivers.mak
++++ b/src/drivers/drivers.mak
+@@ -15,11 +15,17 @@ DRV_AP_LIBS =
+ ifdef CONFIG_DRIVER_WIRED
+ DRV_CFLAGS += -DCONFIG_DRIVER_WIRED
+ DRV_OBJS += ../src/drivers/driver_wired.o
++NEED_DRV_WIRED_COMMON=1
+ endif
+ 
+ ifdef CONFIG_DRIVER_MACSEC_QCA
+ DRV_CFLAGS += -DCONFIG_DRIVER_MACSEC_QCA
+ DRV_OBJS += ../src/drivers/driver_macsec_qca.o
++NEED_DRV_WIRED_COMMON=1
++endif
++
++ifdef NEED_DRV_WIRED_COMMON
++DRV_OBJS += ../src/drivers/driver_wired_common.o
+ endif
+ 
+ ifdef CONFIG_DRIVER_NL80211
+diff --git a/src/drivers/drivers.mk b/src/drivers/drivers.mk
+index c6fe4c2..508f834 100644
+--- a/src/drivers/drivers.mk
++++ b/src/drivers/drivers.mk
+@@ -15,6 +15,11 @@ DRV_AP_LIBS =
+ ifdef CONFIG_DRIVER_WIRED
+ DRV_CFLAGS += -DCONFIG_DRIVER_WIRED
+ DRV_OBJS += src/drivers/driver_wired.c
++NEED_DRV_WIRED_COMMON=1
++endif
++
++ifdef NEED_DRV_WIRED_COMMON
++DRV_OBJS += src/drivers/driver_wired_common.c
+ endif
+ 
+ ifdef CONFIG_DRIVER_NL80211
+-- 
+2.7.4
+

@@ -1,0 +1,66 @@
+From 088d53dd15b14a1868b70fd0b8d695ac6b68f642 Mon Sep 17 00:00:00 2001
+Message-Id: <088d53dd15b14a1868b70fd0b8d695ac6b68f642.1488376601.git.dcaratti@redhat.com>
+From: Sabrina Dubroca <sd@queasysnail.net>
+Date: Tue, 15 Nov 2016 18:06:23 +0100
+Subject: [PATCH] mka: Fix getting capabilities from the driver
+
+In commit a25e4efc9e428d968e83398bd8c9c94698ba5851 ('mka: Add driver op
+to get macsec capabilities') I added some code to check the driver's
+capabilities. This commit has two problems:
+ - wrong enum type set in kay->macsec_confidentiality
+ - ignores that drivers could report MACSEC_CAP_NOT_IMPLEMENTED, in
+   which case the MKA would claim that MACsec is supported.
+
+Fix this by interpreting MACSEC_CAP_NOT_IMPLEMENTED in the same way as a
+DO_NOT_SECURE policy, and set the correct value in
+kay->macsec_confidentiality.
+
+Signed-off-by: Sabrina Dubroca <sd@queasysnail.net>
+---
+ src/pae/ieee802_1x_kay.c | 16 +++++++++-------
+ 1 file changed, 9 insertions(+), 7 deletions(-)
+
+diff --git a/src/pae/ieee802_1x_kay.c b/src/pae/ieee802_1x_kay.c
+index 63bbd13..2841b10 100644
+--- a/src/pae/ieee802_1x_kay.c
++++ b/src/pae/ieee802_1x_kay.c
+@@ -3111,7 +3111,14 @@ ieee802_1x_kay_init(struct ieee802_1x_kay_ctx *ctx, enum macsec_policy policy,
+ 
+ 	dl_list_init(&kay->participant_list);
+ 
+-	if (policy == DO_NOT_SECURE) {
++	if (policy != DO_NOT_SECURE &&
++	    secy_get_capability(kay, &kay->macsec_capable) < 0) {
++		os_free(kay);
++		return NULL;
++	}
++
++	if (policy == DO_NOT_SECURE ||
++	    kay->macsec_capable == MACSEC_CAP_NOT_IMPLEMENTED) {
+ 		kay->macsec_capable = MACSEC_CAP_NOT_IMPLEMENTED;
+ 		kay->macsec_desired = FALSE;
+ 		kay->macsec_protect = FALSE;
+@@ -3120,11 +3127,6 @@ ieee802_1x_kay_init(struct ieee802_1x_kay_ctx *ctx, enum macsec_policy policy,
+ 		kay->macsec_replay_window = 0;
+ 		kay->macsec_confidentiality = CONFIDENTIALITY_NONE;
+ 	} else {
+-		if (secy_get_capability(kay, &kay->macsec_capable) < 0) {
+-			os_free(kay);
+-			return NULL;
+-		}
+-
+ 		kay->macsec_desired = TRUE;
+ 		kay->macsec_protect = TRUE;
+ 		kay->macsec_validate = Strict;
+@@ -3133,7 +3135,7 @@ ieee802_1x_kay_init(struct ieee802_1x_kay_ctx *ctx, enum macsec_policy policy,
+ 		if (kay->macsec_capable >= MACSEC_CAP_INTEG_AND_CONF)
+ 			kay->macsec_confidentiality = CONFIDENTIALITY_OFFSET_0;
+ 		else
+-			kay->macsec_confidentiality = MACSEC_CAP_INTEGRITY;
++			kay->macsec_confidentiality = CONFIDENTIALITY_NONE;
+ 	}
+ 
+ 	wpa_printf(MSG_DEBUG, "KaY: state machine created");
+-- 
+2.7.4
+

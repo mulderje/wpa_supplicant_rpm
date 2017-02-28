@@ -1,0 +1,42 @@
+From 008e224dbb518f44aac46b0c8e55448bd907e43d Mon Sep 17 00:00:00 2001
+Message-Id: <008e224dbb518f44aac46b0c8e55448bd907e43d.1488376601.git.dcaratti@redhat.com>
+From: Sabrina Dubroca <sd@queasysnail.net>
+Date: Wed, 2 Nov 2016 16:38:36 +0100
+Subject: [PATCH] mka: Disable peer detection timeout for PSK mode
+
+The first peer may take a long time to come up. In PSK mode we are
+basically in a p2p system, and we cannot know when a peer will join the
+key exchange. Wait indefinitely, and let the administrator decide if
+they want to abort.
+
+Signed-off-by: Sabrina Dubroca <sd@queasysnail.net>
+---
+ src/pae/ieee802_1x_kay.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/src/pae/ieee802_1x_kay.c b/src/pae/ieee802_1x_kay.c
+index 2841b10..19b2c2f 100644
+--- a/src/pae/ieee802_1x_kay.c
++++ b/src/pae/ieee802_1x_kay.c
+@@ -3339,8 +3339,16 @@ ieee802_1x_kay_create_mka(struct ieee802_1x_kay *kay, struct mka_key_name *ckn,
+ 	usecs = os_random() % (MKA_HELLO_TIME * 1000);
+ 	eloop_register_timeout(0, usecs, ieee802_1x_participant_timer,
+ 			       participant, NULL);
+-	participant->mka_life = MKA_LIFE_TIME / 1000 + time(NULL) +
+-		usecs / 1000000;
++
++	/* Disable MKA lifetime for PSK mode.
++	 * The peer(s) can take a long time to come up, because we
++	 * create a "standby" MKA, and we need it to remain live until
++	 * some peer appears.
++	 */
++	if (mode != PSK) {
++		participant->mka_life = MKA_LIFE_TIME / 1000 + time(NULL) +
++			usecs / 1000000;
++	}
+ 
+ 	return participant;
+ 
+-- 
+2.7.4
+

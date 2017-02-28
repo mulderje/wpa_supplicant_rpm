@@ -1,0 +1,145 @@
+From e0d9fd344d20bb35efcd5c37ece0a5d67632439d Mon Sep 17 00:00:00 2001
+Message-Id: <e0d9fd344d20bb35efcd5c37ece0a5d67632439d.1488376602.git.dcaratti@redhat.com>
+From: Sabrina Dubroca <sd@queasysnail.net>
+Date: Wed, 2 Nov 2016 16:38:39 +0100
+Subject: [PATCH] wpa_supplicant: Allow configuring the MACsec port for MKA
+
+Previously, wpa_supplicant only supported hardcoded port == 1 in the
+SCI, but users may want to choose a different port.
+
+Signed-off-by: Sabrina Dubroca <sd@queasysnail.net>
+---
+ src/pae/ieee802_1x_kay.c           | 4 ++--
+ src/pae/ieee802_1x_kay.h           | 2 +-
+ wpa_supplicant/config.c            | 1 +
+ wpa_supplicant/config_file.c       | 1 +
+ wpa_supplicant/config_ssid.h       | 9 +++++++++
+ wpa_supplicant/wpa_cli.c           | 1 +
+ wpa_supplicant/wpa_supplicant.conf | 4 ++++
+ wpa_supplicant/wpas_kay.c          | 4 ++--
+ 8 files changed, 21 insertions(+), 5 deletions(-)
+
+diff --git a/src/pae/ieee802_1x_kay.c b/src/pae/ieee802_1x_kay.c
+index 7664e2d..3a495ca 100644
+--- a/src/pae/ieee802_1x_kay.c
++++ b/src/pae/ieee802_1x_kay.c
+@@ -3071,7 +3071,7 @@ static void kay_l2_receive(void *ctx, const u8 *src_addr, const u8 *buf,
+  */
+ struct ieee802_1x_kay *
+ ieee802_1x_kay_init(struct ieee802_1x_kay_ctx *ctx, enum macsec_policy policy,
+-		    const char *ifname, const u8 *addr)
++		    u16 port, const char *ifname, const u8 *addr)
+ {
+ 	struct ieee802_1x_kay *kay;
+ 
+@@ -3093,7 +3093,7 @@ ieee802_1x_kay_init(struct ieee802_1x_kay_ctx *ctx, enum macsec_policy policy,
+ 
+ 	os_strlcpy(kay->if_name, ifname, IFNAMSIZ);
+ 	os_memcpy(kay->actor_sci.addr, addr, ETH_ALEN);
+-	kay->actor_sci.port = host_to_be16(0x0001);
++	kay->actor_sci.port = host_to_be16(port ? port : 0x0001);
+ 	kay->actor_priority = DEFAULT_PRIO_NOT_KEY_SERVER;
+ 
+ 	/* While actor acts as a key server, shall distribute sakey */
+diff --git a/src/pae/ieee802_1x_kay.h b/src/pae/ieee802_1x_kay.h
+index fb49f62..ea5a0dd 100644
+--- a/src/pae/ieee802_1x_kay.h
++++ b/src/pae/ieee802_1x_kay.h
+@@ -233,7 +233,7 @@ struct ieee802_1x_kay {
+ 
+ struct ieee802_1x_kay *
+ ieee802_1x_kay_init(struct ieee802_1x_kay_ctx *ctx, enum macsec_policy policy,
+-		    const char *ifname, const u8 *addr);
++		    u16 port, const char *ifname, const u8 *addr);
+ void ieee802_1x_kay_deinit(struct ieee802_1x_kay *kay);
+ 
+ struct ieee802_1x_mka_participant *
+diff --git a/wpa_supplicant/config.c b/wpa_supplicant/config.c
+index afb631e..2120a6e 100644
+--- a/wpa_supplicant/config.c
++++ b/wpa_supplicant/config.c
+@@ -2126,6 +2126,7 @@ static const struct parse_data ssid_fields[] = {
+ #ifdef CONFIG_MACSEC
+ 	{ INT_RANGE(macsec_policy, 0, 1) },
+ 	{ INT_RANGE(macsec_integ_only, 0, 1) },
++	{ INT_RANGE(macsec_port, 1, 65534) },
+ 	{ FUNC_KEY(mka_cak) },
+ 	{ FUNC_KEY(mka_ckn) },
+ #endif /* CONFIG_MACSEC */
+diff --git a/wpa_supplicant/config_file.c b/wpa_supplicant/config_file.c
+index f605fa9..2e3d57e 100644
+--- a/wpa_supplicant/config_file.c
++++ b/wpa_supplicant/config_file.c
+@@ -809,6 +809,7 @@ static void wpa_config_write_network(FILE *f, struct wpa_ssid *ssid)
+ 	write_mka_cak(f, ssid);
+ 	write_mka_ckn(f, ssid);
+ 	INT(macsec_integ_only);
++	INT(macsec_port);
+ #endif /* CONFIG_MACSEC */
+ #ifdef CONFIG_HS20
+ 	INT(update_identifier);
+diff --git a/wpa_supplicant/config_ssid.h b/wpa_supplicant/config_ssid.h
+index b8c3192..fe0f7fa 100644
+--- a/wpa_supplicant/config_ssid.h
++++ b/wpa_supplicant/config_ssid.h
+@@ -742,6 +742,15 @@ struct wpa_ssid {
+ 	int macsec_integ_only;
+ 
+ 	/**
++	 * macsec_port - MACsec port (in SCI)
++	 *
++	 * Port component of the SCI.
++	 *
++	 * Range: 1-65534 (default: 1)
++	 */
++	int macsec_port;
++
++	/**
+ 	 * mka_ckn - MKA pre-shared CKN
+ 	 */
+ #define MACSEC_CKN_LEN 32
+diff --git a/wpa_supplicant/wpa_cli.c b/wpa_supplicant/wpa_cli.c
+index aed95e6..f11028a 100644
+--- a/wpa_supplicant/wpa_cli.c
++++ b/wpa_supplicant/wpa_cli.c
+@@ -1391,6 +1391,7 @@ static const char *network_fields[] = {
+ #ifdef CONFIG_MACSEC
+ 	"macsec_policy",
+ 	"macsec_integ_only",
++	"macsec_port",
+ #endif /* CONFIG_MACSEC */
+ #ifdef CONFIG_HS20
+ 	"update_identifier",
+diff --git a/wpa_supplicant/wpa_supplicant.conf b/wpa_supplicant/wpa_supplicant.conf
+index b23c5e6..82aa24e 100644
+--- a/wpa_supplicant/wpa_supplicant.conf
++++ b/wpa_supplicant/wpa_supplicant.conf
+@@ -899,6 +899,10 @@ fast_reauth=1
+ # 0: Encrypt traffic (default)
+ # 1: Integrity only
+ #
++# macsec_port: IEEE 802.1X/MACsec port
++# Port component of the SCI
++# Range: 1-65534 (default: 1)
++#
+ # mka_cak and mka_ckn: IEEE 802.1X/MACsec pre-shared authentication mode
+ # This allows to configure MACsec with a pre-shared key using a (CAK,CKN) pair.
+ # In this mode, instances of wpa_supplicant can act as peers, one of
+diff --git a/wpa_supplicant/wpas_kay.c b/wpa_supplicant/wpas_kay.c
+index 2ff4895..d3fefda 100644
+--- a/wpa_supplicant/wpas_kay.c
++++ b/wpa_supplicant/wpas_kay.c
+@@ -232,8 +232,8 @@ int ieee802_1x_alloc_kay_sm(struct wpa_supplicant *wpa_s, struct wpa_ssid *ssid)
+ 	kay_ctx->enable_transmit_sa = wpas_enable_transmit_sa;
+ 	kay_ctx->disable_transmit_sa = wpas_disable_transmit_sa;
+ 
+-	res = ieee802_1x_kay_init(kay_ctx, policy, wpa_s->ifname,
+-				  wpa_s->own_addr);
++	res = ieee802_1x_kay_init(kay_ctx, policy, ssid->macsec_port,
++				  wpa_s->ifname, wpa_s->own_addr);
+ 	if (res == NULL) {
+ 		os_free(kay_ctx);
+ 		return -1;
+-- 
+2.7.4
+

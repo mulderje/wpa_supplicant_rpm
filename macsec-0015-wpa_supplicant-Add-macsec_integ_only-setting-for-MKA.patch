@@ -1,0 +1,165 @@
+From 7b4d546e3dae57a39e50a91e47b8fcf3447b4978 Mon Sep 17 00:00:00 2001
+Message-Id: <7b4d546e3dae57a39e50a91e47b8fcf3447b4978.1488376601.git.dcaratti@redhat.com>
+From: Sabrina Dubroca <sd@queasysnail.net>
+Date: Wed, 2 Nov 2016 16:38:37 +0100
+Subject: [PATCH] wpa_supplicant: Add macsec_integ_only setting for MKA
+
+So that the user can turn encryption on (MACsec provides
+confidentiality+integrity) or off (MACsec provides integrity only). This
+commit adds the configuration parameter while the actual behavior change
+to disable encryption in the driver is handled in the following commit.
+
+Signed-off-by: Sabrina Dubroca <sd@queasysnail.net>
+---
+ src/common/ieee802_1x_defs.h       |  6 ++++++
+ src/pae/ieee802_1x_kay.c           |  1 +
+ src/pae/ieee802_1x_kay.h           |  1 +
+ wpa_supplicant/config.c            |  1 +
+ wpa_supplicant/config_file.c       |  1 +
+ wpa_supplicant/config_ssid.h       | 12 ++++++++++++
+ wpa_supplicant/wpa_cli.c           |  1 +
+ wpa_supplicant/wpa_supplicant.conf |  7 +++++++
+ wpa_supplicant/wpas_kay.c          |  9 ++++++++-
+ 9 files changed, 38 insertions(+), 1 deletion(-)
+
+diff --git a/src/common/ieee802_1x_defs.h b/src/common/ieee802_1x_defs.h
+index a0c1d1b..280c439 100644
+--- a/src/common/ieee802_1x_defs.h
++++ b/src/common/ieee802_1x_defs.h
+@@ -25,6 +25,12 @@ enum macsec_policy {
+ 	 * Disabled MACsec - do not secure sessions.
+ 	 */
+ 	DO_NOT_SECURE,
++
++	/**
++	 * Should secure sessions, and try to use encryption.
++	 * Like @SHOULD_SECURE, this follows the key server's decision.
++	 */
++	SHOULD_ENCRYPT,
+ };
+ 
+ 
+diff --git a/src/pae/ieee802_1x_kay.c b/src/pae/ieee802_1x_kay.c
+index 19b2c2f..7664e2d 100644
+--- a/src/pae/ieee802_1x_kay.c
++++ b/src/pae/ieee802_1x_kay.c
+@@ -3129,6 +3129,7 @@ ieee802_1x_kay_init(struct ieee802_1x_kay_ctx *ctx, enum macsec_policy policy,
+ 	} else {
+ 		kay->macsec_desired = TRUE;
+ 		kay->macsec_protect = TRUE;
++		kay->macsec_encrypt = policy == SHOULD_ENCRYPT;
+ 		kay->macsec_validate = Strict;
+ 		kay->macsec_replay_protect = FALSE;
+ 		kay->macsec_replay_window = 0;
+diff --git a/src/pae/ieee802_1x_kay.h b/src/pae/ieee802_1x_kay.h
+index 576a8a0..618e45b 100644
+--- a/src/pae/ieee802_1x_kay.h
++++ b/src/pae/ieee802_1x_kay.h
+@@ -181,6 +181,7 @@ struct ieee802_1x_kay {
+ 	enum macsec_cap macsec_capable;
+ 	Boolean macsec_desired;
+ 	Boolean macsec_protect;
++	Boolean macsec_encrypt;
+ 	Boolean macsec_replay_protect;
+ 	u32 macsec_replay_window;
+ 	enum validate_frames macsec_validate;
+diff --git a/wpa_supplicant/config.c b/wpa_supplicant/config.c
+index 9011389..afb631e 100644
+--- a/wpa_supplicant/config.c
++++ b/wpa_supplicant/config.c
+@@ -2125,6 +2125,7 @@ static const struct parse_data ssid_fields[] = {
+ 	{ INT(beacon_int) },
+ #ifdef CONFIG_MACSEC
+ 	{ INT_RANGE(macsec_policy, 0, 1) },
++	{ INT_RANGE(macsec_integ_only, 0, 1) },
+ 	{ FUNC_KEY(mka_cak) },
+ 	{ FUNC_KEY(mka_ckn) },
+ #endif /* CONFIG_MACSEC */
+diff --git a/wpa_supplicant/config_file.c b/wpa_supplicant/config_file.c
+index 172508e..f605fa9 100644
+--- a/wpa_supplicant/config_file.c
++++ b/wpa_supplicant/config_file.c
+@@ -808,6 +808,7 @@ static void wpa_config_write_network(FILE *f, struct wpa_ssid *ssid)
+ 	INT(macsec_policy);
+ 	write_mka_cak(f, ssid);
+ 	write_mka_ckn(f, ssid);
++	INT(macsec_integ_only);
+ #endif /* CONFIG_MACSEC */
+ #ifdef CONFIG_HS20
+ 	INT(update_identifier);
+diff --git a/wpa_supplicant/config_ssid.h b/wpa_supplicant/config_ssid.h
+index a530cda..b8c3192 100644
+--- a/wpa_supplicant/config_ssid.h
++++ b/wpa_supplicant/config_ssid.h
+@@ -730,6 +730,18 @@ struct wpa_ssid {
+ 	int macsec_policy;
+ 
+ 	/**
++	 * macsec_integ_only - Determines how MACsec are transmitted
++	 *
++	 * This setting applies only when MACsec is in use, i.e.,
++	 *  - macsec_policy is enabled
++	 *  - the key server has decided to enable MACsec
++	 *
++	 * 0: Encrypt traffic (default)
++	 * 1: Integrity only
++	 */
++	int macsec_integ_only;
++
++	/**
+ 	 * mka_ckn - MKA pre-shared CKN
+ 	 */
+ #define MACSEC_CKN_LEN 32
+diff --git a/wpa_supplicant/wpa_cli.c b/wpa_supplicant/wpa_cli.c
+index 4877989..aed95e6 100644
+--- a/wpa_supplicant/wpa_cli.c
++++ b/wpa_supplicant/wpa_cli.c
+@@ -1390,6 +1390,7 @@ static const char *network_fields[] = {
+ 	"ap_max_inactivity", "dtim_period", "beacon_int",
+ #ifdef CONFIG_MACSEC
+ 	"macsec_policy",
++	"macsec_integ_only",
+ #endif /* CONFIG_MACSEC */
+ #ifdef CONFIG_HS20
+ 	"update_identifier",
+diff --git a/wpa_supplicant/wpa_supplicant.conf b/wpa_supplicant/wpa_supplicant.conf
+index 8fa740b..b23c5e6 100644
+--- a/wpa_supplicant/wpa_supplicant.conf
++++ b/wpa_supplicant/wpa_supplicant.conf
+@@ -892,6 +892,13 @@ fast_reauth=1
+ # 1: MACsec enabled - Should secure, accept key server's advice to
+ #    determine whether to use a secure session or not.
+ #
++# macsec_integ_only: IEEE 802.1X/MACsec transmit mode
++# This setting applies only when MACsec is in use, i.e.,
++#  - macsec_policy is enabled
++#  - the key server has decided to enable MACsec
++# 0: Encrypt traffic (default)
++# 1: Integrity only
++#
+ # mka_cak and mka_ckn: IEEE 802.1X/MACsec pre-shared authentication mode
+ # This allows to configure MACsec with a pre-shared key using a (CAK,CKN) pair.
+ # In this mode, instances of wpa_supplicant can act as peers, one of
+diff --git a/wpa_supplicant/wpas_kay.c b/wpa_supplicant/wpas_kay.c
+index 80b98d9..6343154 100644
+--- a/wpa_supplicant/wpas_kay.c
++++ b/wpa_supplicant/wpas_kay.c
+@@ -187,7 +187,14 @@ int ieee802_1x_alloc_kay_sm(struct wpa_supplicant *wpa_s, struct wpa_ssid *ssid)
+ 	if (!ssid || ssid->macsec_policy == 0)
+ 		return 0;
+ 
+-	policy = ssid->macsec_policy == 1 ? SHOULD_SECURE : DO_NOT_SECURE;
++	if (ssid->macsec_policy == 1) {
++		if (ssid->macsec_integ_only == 1)
++			policy = SHOULD_SECURE;
++		else
++			policy = SHOULD_ENCRYPT;
++	} else {
++		policy = DO_NOT_SECURE;
++	}
+ 
+ 	kay_ctx = os_zalloc(sizeof(*kay_ctx));
+ 	if (!kay_ctx)
+-- 
+2.7.4
+

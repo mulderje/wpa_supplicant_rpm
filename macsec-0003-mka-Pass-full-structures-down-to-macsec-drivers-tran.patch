@@ -1,0 +1,290 @@
+From 909c1b9835ecc9c115980e9827a9313c17dab22b Mon Sep 17 00:00:00 2001
+Message-Id: <909c1b9835ecc9c115980e9827a9313c17dab22b.1488376601.git.dcaratti@redhat.com>
+From: Sabrina Dubroca <sd@queasysnail.net>
+Date: Tue, 20 Sep 2016 09:43:07 +0200
+Subject: [PATCH] mka: Pass full structures down to macsec drivers' transmit SA
+ ops
+
+Clean up the driver interface by passing pointers to struct transmit_sa
+down the stack to the {create,enable,disable}_transmit_sa ops, instead
+of passing the individual properties of the SA.
+
+Signed-off-by: Sabrina Dubroca <sd@queasysnail.net>
+---
+ src/drivers/driver.h            | 20 ++++++--------------
+ src/drivers/driver_macsec_qca.c | 39 +++++++++++++++++++++++----------------
+ src/pae/ieee802_1x_kay.h        |  7 +++----
+ src/pae/ieee802_1x_secy_ops.c   |  8 +++-----
+ wpa_supplicant/driver_i.h       | 16 ++++++----------
+ wpa_supplicant/wpas_kay.c       | 15 ++++++---------
+ 6 files changed, 47 insertions(+), 58 deletions(-)
+
+diff --git a/src/drivers/driver.h b/src/drivers/driver.h
+index 2c7ce6c..bb2d1d2 100644
+--- a/src/drivers/driver.h
++++ b/src/drivers/driver.h
+@@ -3448,34 +3448,26 @@ struct wpa_driver_ops {
+ 	/**
+ 	 * create_transmit_sa - create secure association for transmit
+ 	 * @priv: private driver interface data from init()
+-	 * @channel: secure channel index
+-	 * @an: association number
+-	 * @next_pn: the packet number used as next transmit packet
+-	 * @confidentiality: True if the SA is to provide confidentiality
+-	 *                   as well as integrity
+-	 * @sak: the secure association key
++	 * @sa: secure association
+ 	 * Returns: 0 on success, -1 on failure
+ 	 */
+-	int (*create_transmit_sa)(void *priv, u32 channel, u8 an, u32 next_pn,
+-				  Boolean confidentiality, const u8 *sak);
++	int (*create_transmit_sa)(void *priv, struct transmit_sa *sa);
+ 
+ 	/**
+ 	 * enable_transmit_sa - enable SA for transmit
+ 	 * @priv: private driver interface data from init()
+-	 * @channel: secure channel
+-	 * @an: association number
++	 * @sa: secure association
+ 	 * Returns: 0 on success, -1 on failure
+ 	 */
+-	int (*enable_transmit_sa)(void *priv, u32 channel, u8 an);
++	int (*enable_transmit_sa)(void *priv, struct transmit_sa *sa);
+ 
+ 	/**
+ 	 * disable_transmit_sa - disable SA for transmit
+ 	 * @priv: private driver interface data from init()
+-	 * @channel: secure channel
+-	 * @an: association number
++	 * @sa: secure association
+ 	 * Returns: 0 on success, -1 on failure
+ 	 */
+-	int (*disable_transmit_sa)(void *priv, u32 channel, u8 an);
++	int (*disable_transmit_sa)(void *priv, struct transmit_sa *sa);
+ #endif /* CONFIG_MACSEC */
+ 
+ 	/**
+diff --git a/src/drivers/driver_macsec_qca.c b/src/drivers/driver_macsec_qca.c
+index 95f1e27..9bfc9a4 100644
+--- a/src/drivers/driver_macsec_qca.c
++++ b/src/drivers/driver_macsec_qca.c
+@@ -794,19 +794,18 @@ static int macsec_qca_delete_transmit_sc(void *priv, u32 channel)
+ }
+ 
+ 
+-static int macsec_qca_create_transmit_sa(void *priv, u32 channel, u8 an,
+-					 u32 next_pn, Boolean confidentiality,
+-					 const u8 *sak)
++static int macsec_qca_create_transmit_sa(void *priv, struct transmit_sa *sa)
+ {
+ 	struct macsec_qca_data *drv = priv;
+ 	int ret = 0;
+ 	u8 tci = 0;
+ 	fal_tx_sak_t tx_sak;
+ 	int i;
++	u32 channel = sa->sc->channel;
+ 
+ 	wpa_printf(MSG_DEBUG,
+ 		   "%s: channel=%d, an=%d, next_pn=0x%x, confidentiality=%d",
+-		   __func__, channel, an, next_pn, confidentiality);
++		   __func__, channel, sa->an, sa->next_pn, sa->confidentiality);
+ 
+ 	if (drv->always_include_sci)
+ 		tci |= TCI_SC;
+@@ -815,45 +814,53 @@ static int macsec_qca_create_transmit_sa(void *priv, u32 channel, u8 an,
+ 	else if (drv->use_scb)
+ 		tci |= TCI_SCB;
+ 
+-	if (confidentiality)
++	if (sa->confidentiality)
+ 		tci |= TCI_E | TCI_C;
+ 
+ 	os_memset(&tx_sak, 0, sizeof(tx_sak));
+ 	for (i = 0; i < 16; i++)
+-		tx_sak.sak[i] = sak[15 - i];
++		tx_sak.sak[i] = sa->pkey->key[15 - i];
+ 
+-	ret += nss_macsec_secy_tx_sa_next_pn_set(drv->secy_id, channel, an,
+-						 next_pn);
+-	ret += nss_macsec_secy_tx_sak_set(drv->secy_id, channel, an, &tx_sak);
++	ret += nss_macsec_secy_tx_sa_next_pn_set(drv->secy_id, channel, sa->an,
++						 sa->next_pn);
++	ret += nss_macsec_secy_tx_sak_set(drv->secy_id, channel, sa->an,
++					  &tx_sak);
+ 	ret += nss_macsec_secy_tx_sc_tci_7_2_set(drv->secy_id, channel,
+ 						 (tci >> 2));
+-	ret += nss_macsec_secy_tx_sc_an_set(drv->secy_id, channel, an);
++	ret += nss_macsec_secy_tx_sc_an_set(drv->secy_id, channel, sa->an);
+ 
+ 	return ret;
+ }
+ 
+ 
+-static int macsec_qca_enable_transmit_sa(void *priv, u32 channel, u8 an)
++static int macsec_qca_enable_transmit_sa(void *priv, struct transmit_sa *sa)
+ {
+ 	struct macsec_qca_data *drv = priv;
+ 	int ret = 0;
++	u32 channel = sa->sc->channel;
+ 
+-	wpa_printf(MSG_DEBUG, "%s: channel=%d, an=%d", __func__, channel, an);
+ 
+-	ret += nss_macsec_secy_tx_sa_en_set(drv->secy_id, channel, an, TRUE);
++	wpa_printf(MSG_DEBUG, "%s: channel=%d, an=%d", __func__, channel,
++		   sa->an);
++
++	ret += nss_macsec_secy_tx_sa_en_set(drv->secy_id, channel, sa->an,
++					    TRUE);
+ 
+ 	return ret;
+ }
+ 
+ 
+-static int macsec_qca_disable_transmit_sa(void *priv, u32 channel, u8 an)
++static int macsec_qca_disable_transmit_sa(void *priv, struct transmit_sa *sa)
+ {
+ 	struct macsec_qca_data *drv = priv;
+ 	int ret = 0;
++	u32 channel = sa->sc->channel;
+ 
+-	wpa_printf(MSG_DEBUG, "%s: channel=%d, an=%d", __func__, channel, an);
++	wpa_printf(MSG_DEBUG, "%s: channel=%d, an=%d", __func__, channel,
++		   sa->an);
+ 
+-	ret += nss_macsec_secy_tx_sa_en_set(drv->secy_id, channel, an, FALSE);
++	ret += nss_macsec_secy_tx_sa_en_set(drv->secy_id, channel, sa->an,
++					    FALSE);
+ 
+ 	return ret;
+ }
+diff --git a/src/pae/ieee802_1x_kay.h b/src/pae/ieee802_1x_kay.h
+index a747b11..36a7bd6 100644
+--- a/src/pae/ieee802_1x_kay.h
++++ b/src/pae/ieee802_1x_kay.h
+@@ -160,10 +160,9 @@ struct ieee802_1x_kay_ctx {
+ 				  const struct ieee802_1x_mka_sci *sci,
+ 				  enum confidentiality_offset co);
+ 	int (*delete_transmit_sc)(void *ctx, u32 channel);
+-	int (*create_transmit_sa)(void *ctx, u32 channel, u8 an, u32 next_pn,
+-				  Boolean confidentiality, const u8 *sak);
+-	int (*enable_transmit_sa)(void *ctx, u32 channel, u8 an);
+-	int (*disable_transmit_sa)(void *ctx, u32 channel, u8 an);
++	int (*create_transmit_sa)(void *ctx, struct transmit_sa *sa);
++	int (*enable_transmit_sa)(void *ctx, struct transmit_sa *sa);
++	int (*disable_transmit_sa)(void *ctx, struct transmit_sa *sa);
+ };
+ 
+ struct ieee802_1x_kay {
+diff --git a/src/pae/ieee802_1x_secy_ops.c b/src/pae/ieee802_1x_secy_ops.c
+index d05e00f..8c31ca9 100644
+--- a/src/pae/ieee802_1x_secy_ops.c
++++ b/src/pae/ieee802_1x_secy_ops.c
+@@ -382,9 +382,7 @@ int secy_create_transmit_sa(struct ieee802_1x_kay *kay,
+ 		return -1;
+ 	}
+ 
+-	return ops->create_transmit_sa(ops->ctx, txsa->sc->channel, txsa->an,
+-					txsa->next_pn, txsa->confidentiality,
+-					txsa->pkey->key);
++	return ops->create_transmit_sa(ops->ctx, txsa);
+ }
+ 
+ 
+@@ -407,7 +405,7 @@ int secy_enable_transmit_sa(struct ieee802_1x_kay *kay,
+ 
+ 	txsa->enable_transmit = TRUE;
+ 
+-	return ops->enable_transmit_sa(ops->ctx, txsa->sc->channel, txsa->an);
++	return ops->enable_transmit_sa(ops->ctx, txsa);
+ }
+ 
+ 
+@@ -430,7 +428,7 @@ int secy_disable_transmit_sa(struct ieee802_1x_kay *kay,
+ 
+ 	txsa->enable_transmit = FALSE;
+ 
+-	return ops->disable_transmit_sa(ops->ctx, txsa->sc->channel, txsa->an);
++	return ops->disable_transmit_sa(ops->ctx, txsa);
+ }
+ 
+ 
+diff --git a/wpa_supplicant/driver_i.h b/wpa_supplicant/driver_i.h
+index 639bb83..e2c2bd7 100644
+--- a/wpa_supplicant/driver_i.h
++++ b/wpa_supplicant/driver_i.h
+@@ -857,31 +857,27 @@ static inline int wpa_drv_delete_transmit_sc(struct wpa_supplicant *wpa_s,
+ }
+ 
+ static inline int wpa_drv_create_transmit_sa(struct wpa_supplicant *wpa_s,
+-					     u32 channel, u8 an,
+-					     u32 next_pn,
+-					     Boolean confidentiality,
+-					     const u8 *sak)
++					     struct transmit_sa *sa)
+ {
+ 	if (!wpa_s->driver->create_transmit_sa)
+ 		return -1;
+-	return wpa_s->driver->create_transmit_sa(wpa_s->drv_priv, channel, an,
+-						 next_pn, confidentiality, sak);
++	return wpa_s->driver->create_transmit_sa(wpa_s->drv_priv, sa);
+ }
+ 
+ static inline int wpa_drv_enable_transmit_sa(struct wpa_supplicant *wpa_s,
+-					     u32 channel, u8 an)
++					     struct transmit_sa *sa)
+ {
+ 	if (!wpa_s->driver->enable_transmit_sa)
+ 		return -1;
+-	return wpa_s->driver->enable_transmit_sa(wpa_s->drv_priv, channel, an);
++	return wpa_s->driver->enable_transmit_sa(wpa_s->drv_priv, sa);
+ }
+ 
+ static inline int wpa_drv_disable_transmit_sa(struct wpa_supplicant *wpa_s,
+-					      u32 channel, u8 an)
++					      struct transmit_sa *sa)
+ {
+ 	if (!wpa_s->driver->disable_transmit_sa)
+ 		return -1;
+-	return wpa_s->driver->disable_transmit_sa(wpa_s->drv_priv, channel, an);
++	return wpa_s->driver->disable_transmit_sa(wpa_s->drv_priv, sa);
+ }
+ #endif /* CONFIG_MACSEC */
+ 
+diff --git a/wpa_supplicant/wpas_kay.c b/wpa_supplicant/wpas_kay.c
+index 306d9f1..4b74112 100644
+--- a/wpa_supplicant/wpas_kay.c
++++ b/wpa_supplicant/wpas_kay.c
+@@ -159,24 +159,21 @@ static int wpas_delete_transmit_sc(void *wpa_s, u32 channel)
+ }
+ 
+ 
+-static int wpas_create_transmit_sa(void *wpa_s, u32 channel, u8 an,
+-				   u32 next_pn, Boolean confidentiality,
+-				   const u8 *sak)
++static int wpas_create_transmit_sa(void *wpa_s, struct transmit_sa *sa)
+ {
+-	return wpa_drv_create_transmit_sa(wpa_s, channel, an, next_pn,
+-					  confidentiality, sak);
++	return wpa_drv_create_transmit_sa(wpa_s, sa);
+ }
+ 
+ 
+-static int wpas_enable_transmit_sa(void *wpa_s, u32 channel, u8 an)
++static int wpas_enable_transmit_sa(void *wpa_s, struct transmit_sa *sa)
+ {
+-	return wpa_drv_enable_transmit_sa(wpa_s, channel, an);
++	return wpa_drv_enable_transmit_sa(wpa_s, sa);
+ }
+ 
+ 
+-static int wpas_disable_transmit_sa(void *wpa_s, u32 channel, u8 an)
++static int wpas_disable_transmit_sa(void *wpa_s, struct transmit_sa *sa)
+ {
+-	return wpa_drv_disable_transmit_sa(wpa_s, channel, an);
++	return wpa_drv_disable_transmit_sa(wpa_s, sa);
+ }
+ 
+ 
+-- 
+2.7.4
+

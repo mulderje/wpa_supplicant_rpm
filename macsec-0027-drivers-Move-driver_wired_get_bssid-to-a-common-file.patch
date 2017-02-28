@@ -1,0 +1,107 @@
+From d27c42baea5d52f3f4fdc36ed98c7d10289ad973 Mon Sep 17 00:00:00 2001
+Message-Id: <d27c42baea5d52f3f4fdc36ed98c7d10289ad973.1488376602.git.dcaratti@redhat.com>
+From: Sabrina Dubroca <sd@queasysnail.net>
+Date: Sun, 27 Nov 2016 20:08:53 +0100
+Subject: [PATCH] drivers: Move driver_wired_get_bssid() to a common file
+
+This continues refactoring of the common parts of wired drivers code
+into a shared file, so that they can be reused by other drivers.
+
+Signed-off-by: Sabrina Dubroca <sd@queasysnail.net>
+---
+ src/drivers/driver_macsec_qca.c   | 10 +---------
+ src/drivers/driver_wired.c        | 10 +---------
+ src/drivers/driver_wired_common.c |  8 ++++++++
+ src/drivers/driver_wired_common.h |  1 +
+ 4 files changed, 11 insertions(+), 18 deletions(-)
+
+diff --git a/src/drivers/driver_macsec_qca.c b/src/drivers/driver_macsec_qca.c
+index 15ea4bd..4bbc59f 100644
+--- a/src/drivers/driver_macsec_qca.c
++++ b/src/drivers/driver_macsec_qca.c
+@@ -83,14 +83,6 @@ static int macsec_qca_get_ssid(void *priv, u8 *ssid)
+ }
+ 
+ 
+-static int macsec_qca_get_bssid(void *priv, u8 *bssid)
+-{
+-	/* Report PAE group address as the "BSSID" for macsec connection. */
+-	os_memcpy(bssid, pae_group_addr, ETH_ALEN);
+-	return 0;
+-}
+-
+-
+ static void __macsec_drv_init(struct macsec_qca_data *drv)
+ {
+ 	int ret = 0;
+@@ -749,7 +741,7 @@ const struct wpa_driver_ops wpa_driver_macsec_qca_ops = {
+ 	.name = "macsec_qca",
+ 	.desc = "QCA MACsec Ethernet driver",
+ 	.get_ssid = macsec_qca_get_ssid,
+-	.get_bssid = macsec_qca_get_bssid,
++	.get_bssid = driver_wired_get_bssid,
+ 	.get_capa = driver_wired_get_capa,
+ 	.init = macsec_qca_init,
+ 	.deinit = macsec_qca_deinit,
+diff --git a/src/drivers/driver_wired.c b/src/drivers/driver_wired.c
+index fd8a7e3..ad34627 100644
+--- a/src/drivers/driver_wired.c
++++ b/src/drivers/driver_wired.c
+@@ -374,14 +374,6 @@ static int wpa_driver_wired_get_ssid(void *priv, u8 *ssid)
+ }
+ 
+ 
+-static int wpa_driver_wired_get_bssid(void *priv, u8 *bssid)
+-{
+-	/* Report PAE group address as the "BSSID" for wired connection. */
+-	os_memcpy(bssid, pae_group_addr, ETH_ALEN);
+-	return 0;
+-}
+-
+-
+ static void * wpa_driver_wired_init(void *ctx, const char *ifname)
+ {
+ 	struct wpa_driver_wired_data *drv;
+@@ -415,7 +407,7 @@ const struct wpa_driver_ops wpa_driver_wired_ops = {
+ 	.hapd_deinit = wired_driver_hapd_deinit,
+ 	.hapd_send_eapol = wired_send_eapol,
+ 	.get_ssid = wpa_driver_wired_get_ssid,
+-	.get_bssid = wpa_driver_wired_get_bssid,
++	.get_bssid = driver_wired_get_bssid,
+ 	.get_capa = driver_wired_get_capa,
+ 	.init = wpa_driver_wired_init,
+ 	.deinit = wpa_driver_wired_deinit,
+diff --git a/src/drivers/driver_wired_common.c b/src/drivers/driver_wired_common.c
+index b31474d..d30d3a4 100644
+--- a/src/drivers/driver_wired_common.c
++++ b/src/drivers/driver_wired_common.c
+@@ -164,6 +164,14 @@ int wired_multicast_membership(int sock, int ifindex, const u8 *addr, int add)
+ }
+ 
+ 
++int driver_wired_get_bssid(void *priv, u8 *bssid)
++{
++	/* Report PAE group address as the "BSSID" for wired connection. */
++	os_memcpy(bssid, pae_group_addr, ETH_ALEN);
++	return 0;
++}
++
++
+ int driver_wired_get_capa(void *priv, struct wpa_driver_capa *capa)
+ {
+ 	os_memset(capa, 0, sizeof(*capa));
+diff --git a/src/drivers/driver_wired_common.h b/src/drivers/driver_wired_common.h
+index b926d83..493987a 100644
+--- a/src/drivers/driver_wired_common.h
++++ b/src/drivers/driver_wired_common.h
+@@ -26,6 +26,7 @@ int driver_wired_get_ifflags(const char *ifname, int *flags);
+ int driver_wired_set_ifflags(const char *ifname, int flags);
+ int driver_wired_multi(const char *ifname, const u8 *addr, int add);
+ int wired_multicast_membership(int sock, int ifindex, const u8 *addr, int add);
++int driver_wired_get_bssid(void *priv, u8 *bssid);
+ int driver_wired_get_capa(void *priv, struct wpa_driver_capa *capa);
+ int driver_wired_get_ifstatus(const char *ifname, int *status);
+ 
+-- 
+2.7.4
+

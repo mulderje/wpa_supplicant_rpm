@@ -1,0 +1,219 @@
+From a25e4efc9e428d968e83398bd8c9c94698ba5851 Mon Sep 17 00:00:00 2001
+Message-Id: <a25e4efc9e428d968e83398bd8c9c94698ba5851.1488376601.git.dcaratti@redhat.com>
+From: Sabrina Dubroca <sd@queasysnail.net>
+Date: Fri, 7 Oct 2016 12:08:12 +0200
+Subject: [PATCH] mka: Add driver op to get macsec capabilities
+
+This also implements the macsec_get_capability for the macsec_qca
+driver to maintain the existing behavior.
+
+Signed-off-by: Sabrina Dubroca <sd@queasysnail.net>
+---
+ src/drivers/driver.h            |  8 ++++++++
+ src/drivers/driver_macsec_qca.c | 11 +++++++++++
+ src/pae/ieee802_1x_kay.c        | 18 ++++++++++++++++--
+ src/pae/ieee802_1x_kay.h        |  1 +
+ src/pae/ieee802_1x_secy_ops.c   | 20 ++++++++++++++++++++
+ src/pae/ieee802_1x_secy_ops.h   |  1 +
+ wpa_supplicant/driver_i.h       |  8 ++++++++
+ wpa_supplicant/wpas_kay.c       |  7 +++++++
+ 8 files changed, 72 insertions(+), 2 deletions(-)
+
+diff --git a/src/drivers/driver.h b/src/drivers/driver.h
+index a57aa53..ea4a41f 100644
+--- a/src/drivers/driver.h
++++ b/src/drivers/driver.h
+@@ -3298,6 +3298,14 @@ struct wpa_driver_ops {
+ 	int (*macsec_deinit)(void *priv);
+ 
+ 	/**
++	 * macsec_get_capability - Inform MKA of this driver's capability
++	 * @priv: Private driver interface data
++	 * @cap: Driver's capability
++	 * Returns: 0 on success, -1 on failure
++	 */
++	int (*macsec_get_capability)(void *priv, enum macsec_cap *cap);
++
++	/**
+ 	 * enable_protect_frames - Set protect frames status
+ 	 * @priv: Private driver interface data
+ 	 * @enabled: TRUE = protect frames enabled
+diff --git a/src/drivers/driver_macsec_qca.c b/src/drivers/driver_macsec_qca.c
+index 385f7c5..041bcf5 100644
+--- a/src/drivers/driver_macsec_qca.c
++++ b/src/drivers/driver_macsec_qca.c
+@@ -458,6 +458,16 @@ static int macsec_qca_macsec_deinit(void *priv)
+ }
+ 
+ 
++static int macsec_qca_get_capability(void *priv, enum macsec_cap *cap)
++{
++	wpa_printf(MSG_DEBUG, "%s", __func__);
++
++	*cap = MACSEC_CAP_INTEG_AND_CONF_0_30_50;
++
++	return 0;
++}
++
++
+ static int macsec_qca_enable_protect_frames(void *priv, Boolean enabled)
+ {
+ 	struct macsec_qca_data *drv = priv;
+@@ -889,6 +899,7 @@ const struct wpa_driver_ops wpa_driver_macsec_qca_ops = {
+ 
+ 	.macsec_init = macsec_qca_macsec_init,
+ 	.macsec_deinit = macsec_qca_macsec_deinit,
++	.macsec_get_capability = macsec_qca_get_capability,
+ 	.enable_protect_frames = macsec_qca_enable_protect_frames,
+ 	.set_replay_protect = macsec_qca_set_replay_protect,
+ 	.set_current_cipher_suite = macsec_qca_set_current_cipher_suite,
+diff --git a/src/pae/ieee802_1x_kay.c b/src/pae/ieee802_1x_kay.c
+index a8e7efc..52eeeff 100644
+--- a/src/pae/ieee802_1x_kay.c
++++ b/src/pae/ieee802_1x_kay.c
+@@ -3069,13 +3069,20 @@ ieee802_1x_kay_init(struct ieee802_1x_kay_ctx *ctx, enum macsec_policy policy,
+ 		kay->macsec_replay_window = 0;
+ 		kay->macsec_confidentiality = CONFIDENTIALITY_NONE;
+ 	} else {
+-		kay->macsec_capable = MACSEC_CAP_INTEG_AND_CONF_0_30_50;
++		if (secy_get_capability(kay, &kay->macsec_capable) < 0) {
++			os_free(kay);
++			return NULL;
++		}
++
+ 		kay->macsec_desired = TRUE;
+ 		kay->macsec_protect = TRUE;
+ 		kay->macsec_validate = Strict;
+ 		kay->macsec_replay_protect = FALSE;
+ 		kay->macsec_replay_window = 0;
+-		kay->macsec_confidentiality = CONFIDENTIALITY_OFFSET_0;
++		if (kay->macsec_capable >= MACSEC_CAP_INTEG_AND_CONF)
++			kay->macsec_confidentiality = CONFIDENTIALITY_OFFSET_0;
++		else
++			kay->macsec_confidentiality = MACSEC_CAP_INTEGRITY;
+ 	}
+ 
+ 	wpa_printf(MSG_DEBUG, "KaY: state machine created");
+@@ -3409,6 +3416,7 @@ ieee802_1x_kay_change_cipher_suite(struct ieee802_1x_kay *kay,
+ 				   unsigned int cs_index)
+ {
+ 	struct ieee802_1x_mka_participant *participant;
++	enum macsec_cap secy_cap;
+ 
+ 	if (!kay)
+ 		return -1;
+@@ -3427,6 +3435,12 @@ ieee802_1x_kay_change_cipher_suite(struct ieee802_1x_kay *kay,
+ 	kay->macsec_csindex = cs_index;
+ 	kay->macsec_capable = cipher_suite_tbl[kay->macsec_csindex].capable;
+ 
++	if (secy_get_capability(kay, &secy_cap) < 0)
++		return -3;
++
++	if (kay->macsec_capable > secy_cap)
++		kay->macsec_capable = secy_cap;
++
+ 	participant = ieee802_1x_kay_get_principal_participant(kay);
+ 	if (participant) {
+ 		wpa_printf(MSG_INFO, "KaY: Cipher Suite changed");
+diff --git a/src/pae/ieee802_1x_kay.h b/src/pae/ieee802_1x_kay.h
+index 144ee90..bf6fbe5 100644
+--- a/src/pae/ieee802_1x_kay.h
++++ b/src/pae/ieee802_1x_kay.h
+@@ -138,6 +138,7 @@ struct ieee802_1x_kay_ctx {
+ 	/* abstract wpa driver interface */
+ 	int (*macsec_init)(void *ctx, struct macsec_init_params *params);
+ 	int (*macsec_deinit)(void *ctx);
++	int (*macsec_get_capability)(void *priv, enum macsec_cap *cap);
+ 	int (*enable_protect_frames)(void *ctx, Boolean enabled);
+ 	int (*set_replay_protect)(void *ctx, Boolean enabled, u32 window);
+ 	int (*set_current_cipher_suite)(void *ctx, u64 cs);
+diff --git a/src/pae/ieee802_1x_secy_ops.c b/src/pae/ieee802_1x_secy_ops.c
+index b8fcf05..32ee816 100644
+--- a/src/pae/ieee802_1x_secy_ops.c
++++ b/src/pae/ieee802_1x_secy_ops.c
+@@ -113,6 +113,26 @@ int secy_cp_control_enable_port(struct ieee802_1x_kay *kay, Boolean enabled)
+ }
+ 
+ 
++int secy_get_capability(struct ieee802_1x_kay *kay, enum macsec_cap *cap)
++{
++	struct ieee802_1x_kay_ctx *ops;
++
++	if (!kay) {
++		wpa_printf(MSG_ERROR, "KaY: %s params invalid", __func__);
++		return -1;
++	}
++
++	ops = kay->ctx;
++	if (!ops || !ops->macsec_get_capability) {
++		wpa_printf(MSG_ERROR,
++			   "KaY: secy macsec_get_capability operation not supported");
++		return -1;
++	}
++
++	return ops->macsec_get_capability(ops->ctx, cap);
++}
++
++
+ int secy_get_receive_lowest_pn(struct ieee802_1x_kay *kay,
+ 			       struct receive_sa *rxsa)
+ {
+diff --git a/src/pae/ieee802_1x_secy_ops.h b/src/pae/ieee802_1x_secy_ops.h
+index 120ca3c..bfd5737 100644
+--- a/src/pae/ieee802_1x_secy_ops.h
++++ b/src/pae/ieee802_1x_secy_ops.h
+@@ -28,6 +28,7 @@ int secy_cp_control_confidentiality_offset(struct ieee802_1x_kay *kay,
+ int secy_cp_control_enable_port(struct ieee802_1x_kay *kay, Boolean flag);
+ 
+ /****** KaY -> SecY *******/
++int secy_get_capability(struct ieee802_1x_kay *kay, enum macsec_cap *cap);
+ int secy_get_receive_lowest_pn(struct ieee802_1x_kay *kay,
+ 			       struct receive_sa *rxsa);
+ int secy_get_transmit_next_pn(struct ieee802_1x_kay *kay,
+diff --git a/wpa_supplicant/driver_i.h b/wpa_supplicant/driver_i.h
+index d47395c..5d5dcf0 100644
+--- a/wpa_supplicant/driver_i.h
++++ b/wpa_supplicant/driver_i.h
+@@ -715,6 +715,14 @@ static inline int wpa_drv_macsec_deinit(struct wpa_supplicant *wpa_s)
+ 	return wpa_s->driver->macsec_deinit(wpa_s->drv_priv);
+ }
+ 
++static inline int wpa_drv_macsec_get_capability(struct wpa_supplicant *wpa_s,
++						enum macsec_cap *cap)
++{
++	if (!wpa_s->driver->macsec_get_capability)
++		return -1;
++	return wpa_s->driver->macsec_get_capability(wpa_s->drv_priv, cap);
++}
++
+ static inline int wpa_drv_enable_protect_frames(struct wpa_supplicant *wpa_s,
+ 						Boolean enabled)
+ {
+diff --git a/wpa_supplicant/wpas_kay.c b/wpa_supplicant/wpas_kay.c
+index 4163b61..29b7b56 100644
+--- a/wpa_supplicant/wpas_kay.c
++++ b/wpa_supplicant/wpas_kay.c
+@@ -38,6 +38,12 @@ static int wpas_macsec_deinit(void *priv)
+ }
+ 
+ 
++static int wpas_macsec_get_capability(void *priv, enum macsec_cap *cap)
++{
++	return wpa_drv_macsec_get_capability(priv, cap);
++}
++
++
+ static int wpas_enable_protect_frames(void *wpa_s, Boolean enabled)
+ {
+ 	return wpa_drv_enable_protect_frames(wpa_s, enabled);
+@@ -191,6 +197,7 @@ int ieee802_1x_alloc_kay_sm(struct wpa_supplicant *wpa_s, struct wpa_ssid *ssid)
+ 
+ 	kay_ctx->macsec_init = wpas_macsec_init;
+ 	kay_ctx->macsec_deinit = wpas_macsec_deinit;
++	kay_ctx->macsec_get_capability = wpas_macsec_get_capability;
+ 	kay_ctx->enable_protect_frames = wpas_enable_protect_frames;
+ 	kay_ctx->set_replay_protect = wpas_set_replay_protect;
+ 	kay_ctx->set_current_cipher_suite = wpas_set_current_cipher_suite;
+-- 
+2.7.4
+

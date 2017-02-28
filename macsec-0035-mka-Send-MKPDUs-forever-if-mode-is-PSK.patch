@@ -1,0 +1,70 @@
+From 37e9f511eb0072dbce190cb21e2d48f022173b03 Mon Sep 17 00:00:00 2001
+Message-Id: <37e9f511eb0072dbce190cb21e2d48f022173b03.1488376602.git.dcaratti@redhat.com>
+From: Badrish Adiga H R <badrish.adigahr@gmail.com>
+Date: Tue, 7 Feb 2017 14:28:31 +0530
+Subject: [PATCH] mka: Send MKPDUs forever if mode is PSK
+
+Issue: When 2 peers are running MACsec in PSK mode with CA
+established, if the interface goes down and comes up after
+time > 10 seconds, CA does not get re-established.
+
+Root cause: This is because retry_count of both the peers
+would have reached MAX_RETRY_CNT and stays idle for other to
+respond. This is clear deadlock situation where peer A waits
+for MKA packets from peer B to wake up and vice-versa.
+
+Fix: If MACsec is running in PSK mode, we should send MKPDUs
+forever for every 2 seconds.
+
+Signed-off-by: Badrish Adiga H R <badrish.adigahr@gmail.com>
+---
+ src/pae/ieee802_1x_kay.c   | 6 ++++--
+ src/pae/ieee802_1x_kay_i.h | 1 +
+ 2 files changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/src/pae/ieee802_1x_kay.c b/src/pae/ieee802_1x_kay.c
+index 92fd7ba..e420fc1 100644
+--- a/src/pae/ieee802_1x_kay.c
++++ b/src/pae/ieee802_1x_kay.c
+@@ -2428,7 +2428,8 @@ static void ieee802_1x_participant_timer(void *eloop_ctx, void *timeout_ctx)
+ 		participant->new_sak = FALSE;
+ 	}
+ 
+-	if (participant->retry_count < MAX_RETRY_CNT) {
++	if (participant->retry_count < MAX_RETRY_CNT ||
++	    participant->mode == PSK) {
+ 		ieee802_1x_participant_send_mkpdu(participant);
+ 		participant->retry_count++;
+ 	}
+@@ -2828,7 +2829,7 @@ int ieee802_1x_kay_enable_new_info(struct ieee802_1x_kay *kay)
+ 	if (!principal)
+ 		return -1;
+ 
+-	if (principal->retry_count < MAX_RETRY_CNT) {
++	if (principal->retry_count < MAX_RETRY_CNT || principal->mode == PSK) {
+ 		ieee802_1x_participant_send_mkpdu(principal);
+ 		principal->retry_count++;
+ 	}
+@@ -3368,6 +3369,7 @@ ieee802_1x_kay_create_mka(struct ieee802_1x_kay *kay, struct mka_key_name *ckn,
+ 		participant->mka_life = MKA_LIFE_TIME / 1000 + time(NULL) +
+ 			usecs / 1000000;
+ 	}
++	participant->mode = mode;
+ 
+ 	return participant;
+ 
+diff --git a/src/pae/ieee802_1x_kay_i.h b/src/pae/ieee802_1x_kay_i.h
+index 0c4bb8e..bc522d8 100644
+--- a/src/pae/ieee802_1x_kay_i.h
++++ b/src/pae/ieee802_1x_kay_i.h
+@@ -93,6 +93,7 @@ struct ieee802_1x_mka_participant {
+ 	Boolean active;
+ 	Boolean participant;
+ 	Boolean retain;
++	enum mka_created_mode mode;
+ 
+ 	enum { DEFAULT, DISABLED, ON_OPER_UP, ALWAYS } activate;
+ 
+-- 
+2.7.4
+
