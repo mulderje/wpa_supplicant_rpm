@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.6
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -258,6 +258,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Mon Mar 13 2017 Thomas Haller <thaller@redhat.com> - 1:2.6-5
+- Enable IEEE 802.11w (management frame protection, PMF) (rh#909499)
+
 * Thu Mar  2 2017 Davide Caratti <dcaratti@redhat.com> - 1:2.6-4
 - Backport support for IEEE 802.1AE (macsec)
 
