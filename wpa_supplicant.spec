@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.6
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -72,6 +72,9 @@ Patch41: macsec-0033-mka-Fix-an-incorrect-update-of-participant-to_use_sa.patch
 Patch42: macsec-0034-mka-Some-bug-fixes-for-MACsec-in-PSK-mode.patch
 Patch43: macsec-0035-mka-Send-MKPDUs-forever-if-mode-is-PSK.patch
 Patch44: macsec-0036-mka-Fix-the-order-of-operations-in-secure-channel-de.patch
+Patch45: macsec-0037-mka-Fix-use-after-free-when-receive-secure-channels-.patch
+Patch46: macsec-0038-mka-Fix-use-after-free-when-transmit-secure-channels.patch
+Patch47: macsec-0039-macsec_linux-Fix-NULL-pointer-dereference-on-error-c.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -158,6 +161,9 @@ Graphical User Interface for wpa_supplicant written using QT
 %patch42 -p1 -b .macsec-0034
 %patch43 -p1 -b .macsec-0035
 %patch44 -p1 -b .macsec-0036
+%patch45 -p1 -b .macsec-0037
+%patch46 -p1 -b .macsec-0038
+%patch47 -p1 -b .macsec-0039
 
 %build
 pushd wpa_supplicant
@@ -258,6 +264,10 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Wed Apr 11 2017 Davide Caratti <dcaratti@redhat.com> - 1:2.6-6
+- Fix use-after-free when macsec secure channels are deleted
+- Fix segmentation fault in case macsec module is not loaded (rh#1428937)
+
 * Mon Mar 13 2017 Thomas Haller <thaller@redhat.com> - 1:2.6-5
 - Enable IEEE 802.11w (management frame protection, PMF) (rh#909499)
 

@@ -1,0 +1,74 @@
+From 5db86df6a849684fda6a7ee53978a1ba931848cb Mon Sep 17 00:00:00 2001
+Message-Id: <5db86df6a849684fda6a7ee53978a1ba931848cb.1491601565.git.davide.caratti@gmail.com>
+From: Davide Caratti <davide.caratti@gmail.com>
+Date: Fri, 24 Mar 2017 10:25:24 +0100
+Subject: [PATCH] macsec_linux: Fix NULL pointer dereference on error cases
+
+In case wpa_supplicant is using driver_macsec_linux, but macsec module
+is not (yet) loaded in the kernel, nl_socket_alloc() fails and drv->sk
+is NULL. In this case, don't call libnl functions rntl_link_add() or
+rtnl_link_change() using such NULL pointer, to prevent program from
+getting segmentation faults like:
+
+ Program received signal SIGSEGV, Segmentation fault.
+ nl_socket_get_local_port (sk=sk@entry=0x0) at socket.c:365
+ 365             if (sk->s_local.nl_pid == 0) {
+ (gdb) p sk
+ $1 = (const struct nl_sock *) 0x0
+ (gdb) bt
+ #0  nl_socket_get_local_port (sk=sk@entry=0x0) at socket.c:365
+ #1  0x00007ffff79c56a0 in nl_complete_msg (sk=sk@entry=0x0,
+  msg=msg@entry=0x55555595a1f0) at nl.c:491
+ #2  0x00007ffff79c56d1 in nl_send_auto (sk=sk@entry=0x0,
+  msg=msg@entry=0x55555595a1f0) at nl.c:522
+ #3  0x00007ffff79c652f in nl_send_sync (sk=sk@entry=0x0,
+  msg=0x55555595a1f0) at nl.c:556
+ #4  0x00007ffff755faf5 in rtnl_link_add (sk=0x0,
+  link=link@entry=0x55555595b0f0, flags=flags@entry=1024) at route/link.c:1548
+ #5  0x000055555567a298 in macsec_drv_create_transmit_sc (priv=0x55555593b130,
+  sc=0x55555593b320, conf_offset=<optimized out>) at ../src/drivers/driver_macsec_linux.c:998
+
+Signed-off-by: Davide Caratti <davide.caratti@gmail.com>
+---
+ src/drivers/driver_macsec_linux.c | 11 +++++++++++
+ 1 file changed, 11 insertions(+)
+
+diff --git a/src/drivers/driver_macsec_linux.c b/src/drivers/driver_macsec_linux.c
+index 5dab77a..0694e60 100644
+--- a/src/drivers/driver_macsec_linux.c
++++ b/src/drivers/driver_macsec_linux.c
+@@ -168,6 +168,9 @@ static int try_commit(struct macsec_drv_data *drv)
+ {
+ 	int err;
+ 
++	if (!drv->sk)
++		return 0;
++
+ 	if (!drv->link)
+ 		return 0;
+ 
+@@ -982,6 +985,11 @@ static int macsec_drv_create_transmit_sc(
+ 
+ 	wpa_printf(MSG_DEBUG, "%s", __func__);
+ 
++	if (!drv->sk) {
++		wpa_printf(MSG_ERROR, DRV_PREFIX "NULL rtnl socket");
++		return -1;
++	}
++
+ 	link = rtnl_link_macsec_alloc();
+ 	if (!link) {
+ 		wpa_printf(MSG_ERROR, DRV_PREFIX "couldn't allocate link");
+@@ -1048,6 +1056,9 @@ static int macsec_drv_delete_transmit_sc(void *priv, struct transmit_sc *sc)
+ 
+ 	wpa_printf(MSG_DEBUG, "%s", __func__);
+ 
++	if (!drv->sk)
++		return 0;
++
+ 	if (!drv->created_link) {
+ 		rtnl_link_put(drv->link);
+ 		drv->link = NULL;
+-- 
+2.7.4
+
