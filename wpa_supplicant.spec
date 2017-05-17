@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.6
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -75,6 +75,8 @@ Patch44: macsec-0036-mka-Fix-the-order-of-operations-in-secure-channel-de.patch
 Patch45: macsec-0037-mka-Fix-use-after-free-when-receive-secure-channels-.patch
 Patch46: macsec-0038-mka-Fix-use-after-free-when-transmit-secure-channels.patch
 Patch47: macsec-0039-macsec_linux-Fix-NULL-pointer-dereference-on-error-c.patch
+# upstream patch not in 2.6
+Patch48: rh1451834-nl80211-Fix-race-condition-in-detecting-MAC-change.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -164,6 +166,7 @@ Graphical User Interface for wpa_supplicant written using QT
 %patch45 -p1 -b .macsec-0037
 %patch46 -p1 -b .macsec-0038
 %patch47 -p1 -b .macsec-0039
+%patch48 -p1 -b .rh1447073-detect-mac-change
 
 %build
 pushd wpa_supplicant
@@ -264,6 +267,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Wed May 17 2017 Beniamino Galvani <bgalvani@redhat.com> - 1:2.6-7
+- nl80211: Fix race condition in detecting MAC change (rh #1451834)
+
 * Wed Apr 11 2017 Davide Caratti <dcaratti@redhat.com> - 1:2.6-6
 - Fix use-after-free when macsec secure channels are deleted
 - Fix segmentation fault in case macsec module is not loaded (rh#1428937)
