@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.6
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -77,6 +77,7 @@ Patch46: macsec-0038-mka-Fix-use-after-free-when-transmit-secure-channels.patch
 Patch47: macsec-0039-macsec_linux-Fix-NULL-pointer-dereference-on-error-c.patch
 # upstream patch not in 2.6
 Patch48: rh1451834-nl80211-Fix-race-condition-in-detecting-MAC-change.patch
+Patch49: rh1462262-use-system-openssl-ciphers.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -167,6 +168,7 @@ Graphical User Interface for wpa_supplicant written using QT
 %patch46 -p1 -b .macsec-0038
 %patch47 -p1 -b .macsec-0039
 %patch48 -p1 -b .rh1447073-detect-mac-change
+%patch49 -p1 -b .rh1462262-system-ciphers
 
 %build
 pushd wpa_supplicant
@@ -267,6 +269,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Mon Jun 26 2017 Beniamino Galvani <bgalvani@redhat.com> - 1:2.6-8
+- OpenSSL: use system ciphers by default (rh #1462262)
+
 * Wed May 17 2017 Beniamino Galvani <bgalvani@redhat.com> - 1:2.6-7
 - nl80211: Fix race condition in detecting MAC change (rh #1451834)
 
