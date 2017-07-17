@@ -75,9 +75,10 @@ Patch44: macsec-0036-mka-Fix-the-order-of-operations-in-secure-channel-de.patch
 Patch45: macsec-0037-mka-Fix-use-after-free-when-receive-secure-channels-.patch
 Patch46: macsec-0038-mka-Fix-use-after-free-when-transmit-secure-channels.patch
 Patch47: macsec-0039-macsec_linux-Fix-NULL-pointer-dereference-on-error-c.patch
-# upstream patch not in 2.6
+# upstream patches not in 2.6
 Patch48: rh1451834-nl80211-Fix-race-condition-in-detecting-MAC-change.patch
 Patch49: rh1462262-use-system-openssl-ciphers.patch
+Patch50: rh1465138-openssl-Fix-openssl-1-1-private-key-callback.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -169,6 +170,7 @@ Graphical User Interface for wpa_supplicant written using QT
 %patch47 -p1 -b .macsec-0039
 %patch48 -p1 -b .rh1447073-detect-mac-change
 %patch49 -p1 -b .rh1462262-system-ciphers
+%patch50 -p1 -b .rh1465138-openssl-cb
 
 %build
 pushd wpa_supplicant
@@ -269,8 +271,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
-* Mon Jun 26 2017 Beniamino Galvani <bgalvani@redhat.com> - 1:2.6-8
+* Mon Jul 17 2017 Beniamino Galvani <bgalvani@redhat.com> - 1:2.6-8
 - OpenSSL: use system ciphers by default (rh #1462262)
+- OpenSSL: fix private key password callback (rh #1465138)
 
 * Wed May 17 2017 Beniamino Galvani <bgalvani@redhat.com> - 1:2.6-7
 - nl80211: Fix race condition in detecting MAC change (rh #1451834)
