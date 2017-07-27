@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.6
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -271,6 +271,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Thu Jul 27 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.6-9
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
+
 * Mon Jul 17 2017 Beniamino Galvani <bgalvani@redhat.com> - 1:2.6-8
 - OpenSSL: use system ciphers by default (rh #1462262)
 - OpenSSL: fix private key password callback (rh #1465138)
