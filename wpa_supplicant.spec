@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.6
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -75,10 +75,25 @@ Patch44: macsec-0036-mka-Fix-the-order-of-operations-in-secure-channel-de.patch
 Patch45: macsec-0037-mka-Fix-use-after-free-when-receive-secure-channels-.patch
 Patch46: macsec-0038-mka-Fix-use-after-free-when-transmit-secure-channels.patch
 Patch47: macsec-0039-macsec_linux-Fix-NULL-pointer-dereference-on-error-c.patch
+
+# hostapd and replayed FT reassociation request frame (CVE-2017-13082)
+Patch48: https://w1.fi/security/2017-1/rebased-v2.6-0001-hostapd-Avoid-key-reinstallation-in-FT-handshake.patch
+
+# wpa_supplicant and GTK/IGTK rekeying (CVE-2017-13078, CVE-2017-13079,
+# CVE-2017-13080, CVE-2017-13081, CVE-2017-13087, CVE-2017-13088):
+Patch49: https://w1.fi/security/2017-1/rebased-v2.6-0002-Prevent-reinstallation-of-an-already-in-use-group-ke.patch
+Patch50: https://w1.fi/security/2017-1/rebased-v2.6-0003-Extend-protection-of-GTK-IGTK-reinstallation-of-WNM-.patch
+
+Patch51: https://w1.fi/security/2017-1/rebased-v2.6-0004-Prevent-installation-of-an-all-zero-TK.patch
+Patch52: https://w1.fi/security/2017-1/rebased-v2.6-0005-Fix-PTK-rekeying-to-generate-a-new-ANonce.patch
+Patch53: https://w1.fi/security/2017-1/rebased-v2.6-0006-TDLS-Reject-TPK-TK-reconfiguration.patch
+Patch54: https://w1.fi/security/2017-1/rebased-v2.6-0007-WNM-Ignore-WNM-Sleep-Mode-Response-without-pending-r.patch
+Patch55: https://w1.fi/security/2017-1/rebased-v2.6-0008-FT-Do-not-allow-multiple-Reassociation-Response-fram.patch
+
 # upstream patches not in 2.6
-Patch48: rh1451834-nl80211-Fix-race-condition-in-detecting-MAC-change.patch
-Patch49: rh1462262-use-system-openssl-ciphers.patch
-Patch50: rh1465138-openssl-Fix-openssl-1-1-private-key-callback.patch
+Patch56: rh1451834-nl80211-Fix-race-condition-in-detecting-MAC-change.patch
+Patch57: rh1462262-use-system-openssl-ciphers.patch
+Patch58: rh1465138-openssl-Fix-openssl-1-1-private-key-callback.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -168,9 +183,17 @@ Graphical User Interface for wpa_supplicant written using QT
 %patch45 -p1 -b .macsec-0037
 %patch46 -p1 -b .macsec-0038
 %patch47 -p1 -b .macsec-0039
-%patch48 -p1 -b .rh1447073-detect-mac-change
-%patch49 -p1 -b .rh1462262-system-ciphers
-%patch50 -p1 -b .rh1465138-openssl-cb
+%patch48 -p1 -b .2017-1
+%patch49 -p1 -b .2017-1
+%patch50 -p1 -b .2017-1
+%patch51 -p1 -b .2017-1
+%patch52 -p1 -b .2017-1
+%patch53 -p1 -b .2017-1
+%patch54 -p1 -b .2017-1
+%patch55 -p1 -b .2017-1
+%patch56 -p1 -b .rh1447073-detect-mac-change
+%patch57 -p1 -b .rh1462262-system-ciphers
+%patch58 -p1 -b .rh1465138-openssl-cb
 
 %build
 pushd wpa_supplicant
@@ -271,6 +294,18 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Mon Oct 16 2017 Lubomir Rintel <lkundrak@v3.sk> - 1:2.6-11
+- hostapd: Avoid key reinstallation in FT handshake (CVE-2017-13082)
+- Fix PTK rekeying to generate a new ANonce
+- Prevent reinstallation of an already in-use group key and extend
+  protection of GTK/IGTK reinstallation of WNM-Sleep Mode cases
+  (CVE-2017-13078, CVE-2017-13079, CVE-2017-13080, CVE-2017-13081,
+  CVE-2017-13087, CVE-2017-13088)
+- Prevent installation of an all-zero TK
+- TDLS: Reject TPK-TK reconfiguration
+- WNM: Ignore WNM-Sleep Mode Response without pending request
+- FT: Do not allow multiple Reassociation Response frames
+
 * Thu Aug 03 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.6-10
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
 
