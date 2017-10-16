@@ -284,7 +284,7 @@ chmod -R 0644 %{name}/examples/*.py
 * Wed May 17 2017 Beniamino Galvani <bgalvani@redhat.com> - 1:2.6-7
 - nl80211: Fix race condition in detecting MAC change (rh #1451834)
 
-* Wed Apr 11 2017 Davide Caratti <dcaratti@redhat.com> - 1:2.6-6
+* Tue Apr 11 2017 Davide Caratti <dcaratti@redhat.com> - 1:2.6-6
 - Fix use-after-free when macsec secure channels are deleted
 - Fix segmentation fault in case macsec module is not loaded (rh#1428937)
 
