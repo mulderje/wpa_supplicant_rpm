@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.6
-Release: 11%{?dist}
+Release: 12%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -94,6 +94,10 @@ Patch55: https://w1.fi/security/2017-1/rebased-v2.6-0008-FT-Do-not-allow-multipl
 Patch56: rh1451834-nl80211-Fix-race-condition-in-detecting-MAC-change.patch
 Patch57: rh1462262-use-system-openssl-ciphers.patch
 Patch58: rh1465138-openssl-Fix-openssl-1-1-private-key-callback.patch
+
+# fixes for crash when using MACsec without loaded macsec.ko (rh #1497640)
+Patch59: rh1497640-mka-add-error-handling-for-secy_init_macsec.patch
+Patch60: rh1497640-pae-validate-input-before-pointer.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -194,6 +198,8 @@ Graphical User Interface for wpa_supplicant written using QT
 %patch56 -p1 -b .rh1447073-detect-mac-change
 %patch57 -p1 -b .rh1462262-system-ciphers
 %patch58 -p1 -b .rh1465138-openssl-cb
+%patch59 -p1 -b .rh1487640-mka
+%patch60 -p1 -b .rh1487640-pae
 
 %build
 pushd wpa_supplicant
@@ -294,6 +300,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Wed Nov  1 2017 Jiří Klimeš <blueowl@centrum.cz> - 1:2.6-12
+- Fix crash when using MACsec without loaded macsec.ko (rh #1497640)
+
 * Mon Oct 16 2017 Lubomir Rintel <lkundrak@v3.sk> - 1:2.6-11
 - hostapd: Avoid key reinstallation in FT handshake (CVE-2017-13082)
 - Fix PTK rekeying to generate a new ANonce

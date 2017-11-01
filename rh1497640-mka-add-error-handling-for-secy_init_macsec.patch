@@ -1,0 +1,106 @@
+From 7612e65b9bdfe03e5a018e3c897f4a3292c42ee4 Mon Sep 17 00:00:00 2001
+From: Sabrina Dubroca <sd@queasysnail.net>
+Date: Tue, 22 Aug 2017 10:34:19 +0200
+Subject: mka: Add error handling for secy_init_macsec() calls
+
+secy_init_macsec() can fail (if ->macsec_init fails), and
+ieee802_1x_kay_init() should handle this and not let MKA run any
+further, because nothing is going to work anyway.
+
+On failure, ieee802_1x_kay_init() must deinit its kay, which will free
+kay->ctx, so ieee802_1x_kay_init callers (only ieee802_1x_alloc_kay_sm)
+must not do it. Before this patch there is a double-free of the ctx
+argument when ieee802_1x_kay_deinit() was called.
+
+Signed-off-by: Sabrina Dubroca <sd@queasysnail.net>
+---
+ src/pae/ieee802_1x_kay.c  | 25 ++++++++++++++-----------
+ wpa_supplicant/wpas_kay.c |  5 ++---
+ 2 files changed, 16 insertions(+), 14 deletions(-)
+
+diff --git a/src/pae/ieee802_1x_kay.c b/src/pae/ieee802_1x_kay.c
+index ff55f88..c4bfcbc 100644
+--- a/src/pae/ieee802_1x_kay.c
++++ b/src/pae/ieee802_1x_kay.c
+@@ -3100,6 +3100,7 @@ ieee802_1x_kay_init(struct ieee802_1x_kay_ctx *ctx, enum macsec_policy policy,
+ 	kay = os_zalloc(sizeof(*kay));
+ 	if (!kay) {
+ 		wpa_printf(MSG_ERROR, "KaY-%s: out of memory", __func__);
++		os_free(ctx);
+ 		return NULL;
+ 	}
+ 
+@@ -3134,10 +3135,8 @@ ieee802_1x_kay_init(struct ieee802_1x_kay_ctx *ctx, enum macsec_policy policy,
+ 	dl_list_init(&kay->participant_list);
+ 
+ 	if (policy != DO_NOT_SECURE &&
+-	    secy_get_capability(kay, &kay->macsec_capable) < 0) {
+-		os_free(kay);
+-		return NULL;
+-	}
++	    secy_get_capability(kay, &kay->macsec_capable) < 0)
++		goto error;
+ 
+ 	if (policy == DO_NOT_SECURE ||
+ 	    kay->macsec_capable == MACSEC_CAP_NOT_IMPLEMENTED) {
+@@ -3164,16 +3163,17 @@ ieee802_1x_kay_init(struct ieee802_1x_kay_ctx *ctx, enum macsec_policy policy,
+ 	wpa_printf(MSG_DEBUG, "KaY: state machine created");
+ 
+ 	/* Initialize the SecY must be prio to CP, as CP will control SecY */
+-	secy_init_macsec(kay);
++	if (secy_init_macsec(kay) < 0) {
++		wpa_printf(MSG_DEBUG, "KaY: Could not initialize MACsec");
++		goto error;
++	}
+ 
+ 	wpa_printf(MSG_DEBUG, "KaY: secy init macsec done");
+ 
+ 	/* init CP */
+ 	kay->cp = ieee802_1x_cp_sm_init(kay);
+-	if (kay->cp == NULL) {
+-		ieee802_1x_kay_deinit(kay);
+-		return NULL;
+-	}
++	if (kay->cp == NULL)
++		goto error;
+ 
+ 	if (policy == DO_NOT_SECURE) {
+ 		ieee802_1x_cp_connect_authenticated(kay->cp);
+@@ -3184,12 +3184,15 @@ ieee802_1x_kay_init(struct ieee802_1x_kay_ctx *ctx, enum macsec_policy policy,
+ 		if (kay->l2_mka == NULL) {
+ 			wpa_printf(MSG_WARNING,
+ 				   "KaY: Failed to initialize L2 packet processing for MKA packet");
+-			ieee802_1x_kay_deinit(kay);
+-			return NULL;
++			goto error;
+ 		}
+ 	}
+ 
+ 	return kay;
++
++error:
++	ieee802_1x_kay_deinit(kay);
++	return NULL;
+ }
+ 
+ 
+diff --git a/wpa_supplicant/wpas_kay.c b/wpa_supplicant/wpas_kay.c
+index d087e00..587e5c3 100644
+--- a/wpa_supplicant/wpas_kay.c
++++ b/wpa_supplicant/wpas_kay.c
+@@ -235,10 +235,9 @@ int ieee802_1x_alloc_kay_sm(struct wpa_supplicant *wpa_s, struct wpa_ssid *ssid)
+ 	res = ieee802_1x_kay_init(kay_ctx, policy, ssid->macsec_port,
+ 				  ssid->mka_priority, wpa_s->ifname,
+ 				  wpa_s->own_addr);
+-	if (res == NULL) {
+-		os_free(kay_ctx);
++	/* ieee802_1x_kay_init() frees kay_ctx on failure */
++	if (res == NULL)
+ 		return -1;
+-	}
+ 
+ 	wpa_s->kay = res;
+ 
+-- 
+cgit v0.12
+
