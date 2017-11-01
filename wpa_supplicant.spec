@@ -302,6 +302,7 @@ chmod -R 0644 %{name}/examples/*.py
 %changelog
 * Wed Nov  1 2017 Jiří Klimeš <blueowl@centrum.cz> - 1:2.6-12
 - Fix crash when using MACsec without loaded macsec.ko (rh #1497640)
+- Enable Fast BSS Transition for station mode (rh #1372928)
 
 * Mon Oct 16 2017 Lubomir Rintel <lkundrak@v3.sk> - 1:2.6-11
 - hostapd: Avoid key reinstallation in FT handshake (CVE-2017-13082)
