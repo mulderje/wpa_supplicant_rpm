@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.6
-Release: 12%{?dist}
+Release: 13%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -262,9 +262,6 @@ chmod -R 0644 %{name}/examples/*.py
 %preun
 %systemd_preun wpa_supplicant.service
 
-%postun
-%systemd_postun_with_restart wpa_supplicant.service
-
 %triggerun -- wpa_supplicant < 0.7.3-10
 # Save the current service runlevel info
 # User must manually run systemd-sysv-convert --apply wpa_supplicant
@@ -300,6 +297,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Tue Jan 16 2018 Davide Caratti <dcaratti@redhat.com> - 1:2.6-13
+- Don't restart wpa_supplicant.service on package upgrade (rh#1535233)
+
 * Wed Nov  1 2017 Jiří Klimeš <blueowl@centrum.cz> - 1:2.6-12
 - Fix crash when using MACsec without loaded macsec.ko (rh #1497640)
 - Enable Fast BSS Transition for station mode (rh #1372928)
