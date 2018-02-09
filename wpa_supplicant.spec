@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.6
-Release: 13%{?dist}
+Release: 14%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -297,6 +297,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Fri Feb 09 2018 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.6-14
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
+
 * Tue Jan 16 2018 Davide Caratti <dcaratti@redhat.com> - 1:2.6-13
 - Don't restart wpa_supplicant.service on package upgrade (rh#1535233)
 
