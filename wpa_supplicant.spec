@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.6
-Release: 14%{?dist}
+Release: 15%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -98,6 +98,10 @@ Patch58: rh1465138-openssl-Fix-openssl-1-1-private-key-callback.patch
 # fixes for crash when using MACsec without loaded macsec.ko (rh #1497640)
 Patch59: rh1497640-mka-add-error-handling-for-secy_init_macsec.patch
 Patch60: rh1497640-pae-validate-input-before-pointer.patch
+
+# make PMF configurable using D-Bus (rh #1567474)
+Patch61: rh1567474-0001-D-Bus-Implement-Pmf-property.patch
+Patch62: rh1567474-0002-D-Bus-Add-pmf-to-global-capabilities.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -200,6 +204,8 @@ Graphical User Interface for wpa_supplicant written using QT
 %patch58 -p1 -b .rh1465138-openssl-cb
 %patch59 -p1 -b .rh1487640-mka
 %patch60 -p1 -b .rh1487640-pae
+%patch61 -p1 -b .rh1567474-pmf-0001
+%patch62 -p1 -b .rh1567474-pmf-0002
 
 %build
 pushd wpa_supplicant
@@ -297,6 +303,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Fri May 11 2018 Davide Caratti <dcaratti@redhat.com> - 1:2.6-15
+- Make PMF configurable using D-Bus (rh#1567474)
+
 * Fri Feb 09 2018 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.6-14
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_28_Mass_Rebuild
 
