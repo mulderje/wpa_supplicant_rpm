@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.6
-Release: 15%{?dist}
+Release: 16%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -102,6 +102,9 @@ Patch60: rh1497640-pae-validate-input-before-pointer.patch
 # make PMF configurable using D-Bus (rh #1567474)
 Patch61: rh1567474-0001-D-Bus-Implement-Pmf-property.patch
 Patch62: rh1567474-0002-D-Bus-Add-pmf-to-global-capabilities.patch
+
+# fix wrong encoding of NL80211_ATTR_SMPS_MODE (rh #1570903)
+Patch63: rh1570903-nl80211-Fix-NL80211_ATTR_SMPS_MODE-encoding.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -206,6 +209,7 @@ Graphical User Interface for wpa_supplicant written using QT
 %patch60 -p1 -b .rh1487640-pae
 %patch61 -p1 -b .rh1567474-pmf-0001
 %patch62 -p1 -b .rh1567474-pmf-0002
+%patch63 -p1 -b .rh1570903
 
 %build
 pushd wpa_supplicant
@@ -303,6 +307,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Fri Jun 22 2018 Davide Caratti <dcaratti@redhat.com> - 1:2.6-16
+- Fix endoding of NL80211_ATTR_SMPS_MODE (rh#1570903)
+
 * Fri May 11 2018 Davide Caratti <dcaratti@redhat.com> - 1:2.6-15
 - Make PMF configurable using D-Bus (rh#1567474)
 
