@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.6
-Release: 16%{?dist}
+Release: 17%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -307,6 +307,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Sat Jul 14 2018 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.6-17
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
+
 * Fri Jun 22 2018 Davide Caratti <dcaratti@redhat.com> - 1:2.6-16
 - Fix endoding of NL80211_ATTR_SMPS_MODE (rh#1570903)
 
