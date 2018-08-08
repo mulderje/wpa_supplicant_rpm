@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.6
-Release: 17%{?dist}
+Release: 18%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -105,6 +105,9 @@ Patch62: rh1567474-0002-D-Bus-Add-pmf-to-global-capabilities.patch
 
 # fix wrong encoding of NL80211_ATTR_SMPS_MODE (rh #1570903)
 Patch63: rh1570903-nl80211-Fix-NL80211_ATTR_SMPS_MODE-encoding.patch
+
+# Unauthenticated EAPOL-Key decryption in wpa_supplicant (CVE-2018-14526)
+Patch64: https://w1.fi/security/2018-1/rebased-v2.6-0001-WPA-Ignore-unauthenticated-encrypted-EAPOL-Key-data.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -210,6 +213,7 @@ Graphical User Interface for wpa_supplicant written using QT
 %patch61 -p1 -b .rh1567474-pmf-0001
 %patch62 -p1 -b .rh1567474-pmf-0002
 %patch63 -p1 -b .rh1570903
+%patch64 -p1 -b .2018-1
 
 %build
 pushd wpa_supplicant
@@ -307,6 +311,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Wed Aug  8 2018 Davide Caratti <dcaratti@redhat.com> - 1:2.6-18
+- Ignore unauthenticated encrypted EAPOL-Key data (CVE-2018-14526)
+
 * Sat Jul 14 2018 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.6-17
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
 
