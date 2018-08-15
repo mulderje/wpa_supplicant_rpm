@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.6
-Release: 18%{?dist}
+Release: 19%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -100,7 +100,6 @@ Patch59: rh1497640-mka-add-error-handling-for-secy_init_macsec.patch
 Patch60: rh1497640-pae-validate-input-before-pointer.patch
 
 # make PMF configurable using D-Bus (rh #1567474)
-Patch61: rh1567474-0001-D-Bus-Implement-Pmf-property.patch
 Patch62: rh1567474-0002-D-Bus-Add-pmf-to-global-capabilities.patch
 
 # fix wrong encoding of NL80211_ATTR_SMPS_MODE (rh #1570903)
@@ -210,7 +209,6 @@ Graphical User Interface for wpa_supplicant written using QT
 %patch58 -p1 -b .rh1465138-openssl-cb
 %patch59 -p1 -b .rh1487640-mka
 %patch60 -p1 -b .rh1487640-pae
-%patch61 -p1 -b .rh1567474-pmf-0001
 %patch62 -p1 -b .rh1567474-pmf-0002
 %patch63 -p1 -b .rh1570903
 %patch64 -p1 -b .2018-1
@@ -311,6 +309,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Wed Aug 15 2018 Lubomir Rintel <lkundrak@v3.sk> - 1:2.6-19
+- Drop the broken Pmf D-Bus property patch
+
 * Wed Aug  8 2018 Davide Caratti <dcaratti@redhat.com> - 1:2.6-18
 - Ignore unauthenticated encrypted EAPOL-Key data (CVE-2018-14526)
 
