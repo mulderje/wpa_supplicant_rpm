@@ -222,15 +222,15 @@ pushd wpa_supplicant
   # yes, BINDIR=_sbindir
   BINDIR="%{_sbindir}" ; export BINDIR ;
   LIBDIR="%{_libdir}" ; export LIBDIR ;
-  make %{_smp_mflags}
+  make %{_smp_mflags} V=1
 %if %{build_gui}
-  QTDIR=%{_libdir}/qt4 make wpa_gui-qt4 %{_smp_mflags} QMAKE='%{qmake_qt4}' LRELEASE='%{_qt4_bindir}/lrelease'
+  QTDIR=%{_libdir}/qt4 make wpa_gui-qt4 %{_smp_mflags} V=1 QMAKE='%{qmake_qt4}' LRELEASE='%{_qt4_bindir}/lrelease'
 %endif
-  make eapol_test
+  make eapol_test V=1
 popd
 
 pushd wpa_supplicant/doc/docbook
-  make man
+  make man V=1
 popd
 
 %install
