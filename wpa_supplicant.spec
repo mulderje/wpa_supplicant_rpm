@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.6
-Release: 19%{?dist}
+Release: 20%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -107,6 +107,12 @@ Patch63: rh1570903-nl80211-Fix-NL80211_ATTR_SMPS_MODE-encoding.patch
 
 # Unauthenticated EAPOL-Key decryption in wpa_supplicant (CVE-2018-14526)
 Patch64: https://w1.fi/security/2018-1/rebased-v2.6-0001-WPA-Ignore-unauthenticated-encrypted-EAPOL-Key-data.patch
+
+# dbus: Expose availability of SHA384 on D-Bus
+Patch65: https://w1.fi/cgit/hostap/patch/?id=d7591aa#/0002-dbus-Expose-availability-of-SHA384-on-D-Bus.patch
+
+# dbus: Expose availability of FT on D-Bus
+Patch66: https://w1.fi/cgit/hostap/patch/?id=eb7e747#/0001-dbus-Expose-availability-of-FT-on-D-Bus.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -309,6 +315,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Wed Aug 15 2018 Lubomir Rintel <lkundrak@v3.sk> - 1:2.6-20
+- Expose availability of SHA384 and FT on D-Bus
+
 * Wed Aug 15 2018 Lubomir Rintel <lkundrak@v3.sk> - 1:2.6-19
 - Drop the broken Pmf D-Bus property patch
 
