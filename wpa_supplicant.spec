@@ -6,8 +6,8 @@
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
-Version: 2.6
-Release: 20%{?dist}
+Version: 2.7
+Release: 1%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -31,88 +31,6 @@ Patch2: wpa_supplicant-dbus-service-file-args.patch
 Patch3: wpa_supplicant-quiet-scan-results-message.patch
 # distro specific customization for Qt4 build tools, not suitable for upstream
 Patch6: wpa_supplicant-gui-qt4.patch
-# Less aggressive roaming; signal strength is wildly variable
-# dcbw states (2015-04):
-# "upstream doesn't like that patch so it's been discussed and I think rejected"
-Patch8: rh837402-less-aggressive-roaming.patch
-# backport of macsec series
-Patch9: macsec-0001-mka-Move-structs-transmit-receive-_-sa-sc-to-a-commo.patch
-Patch10: macsec-0002-mka-Pass-full-structures-down-to-macsec-drivers-pack.patch
-Patch11: macsec-0003-mka-Pass-full-structures-down-to-macsec-drivers-tran.patch
-Patch12: macsec-0004-mka-Pass-full-structures-down-to-macsec-drivers-rece.patch
-Patch13: macsec-0005-mka-Pass-full-structures-down-to-macsec-drivers-tran.patch
-Patch14: macsec-0006-mka-Pass-full-structures-down-to-macsec-drivers-rece.patch
-Patch15: macsec-0007-mka-Add-driver-op-to-get-macsec-capabilities.patch
-Patch16: macsec-0008-mka-Remove-channel-hacks-from-the-stack-and-the-macs.patch
-Patch17: macsec-0009-mka-Sync-structs-definitions-with-IEEE-Std-802.1X-20.patch
-Patch18: macsec-0010-mka-Add-support-for-removing-SAs.patch
-Patch19: macsec-0011-mka-Implement-reference-counting-on-data_key.patch
-Patch20: macsec-0012-mka-Fix-getting-capabilities-from-the-driver.patch
-Patch21: macsec-0013-wpa_supplicant-Allow-pre-shared-CAK-CKN-pair-for-MKA.patch
-Patch22: macsec-0014-mka-Disable-peer-detection-timeout-for-PSK-mode.patch
-Patch23: macsec-0015-wpa_supplicant-Add-macsec_integ_only-setting-for-MKA.patch
-Patch24: macsec-0016-mka-Add-enable_encrypt-op-and-call-it-from-CP-state-.patch
-Patch25: macsec-0017-wpa_supplicant-Allow-configuring-the-MACsec-port-for.patch
-Patch26: macsec-0018-drivers-Move-common-definitions-for-wired-drivers-ou.patch
-Patch27: macsec-0019-drivers-Move-wired_multicast_membership-to-a-common-.patch
-Patch28: macsec-0020-drivers-Move-driver_wired_multi-to-a-common-file.patch
-Patch29: macsec-0021-drivers-Move-driver_wired_get_ifflags-to-a-common-fi.patch
-Patch30: macsec-0022-drivers-Move-driver_wired_set_ifflags-to-a-common-fi.patch
-Patch31: macsec-0023-drivers-Move-driver_wired_get_ifstatus-to-a-common-f.patch
-Patch32: macsec-0024-drivers-Move-driver_wired_init_common-to-a-common-fi.patch
-Patch33: macsec-0025-drivers-Move-driver_wired_deinit_common-to-a-common-.patch
-Patch34: macsec-0026-drivers-Move-driver_wired_get_capa-to-a-common-file.patch
-Patch35: macsec-0027-drivers-Move-driver_wired_get_bssid-to-a-common-file.patch
-Patch36: macsec-0028-drivers-Move-driver_wired_get_ssid-to-a-common-file.patch
-Patch37: macsec-0029-macsec_linux-Add-a-driver-for-macsec-on-Linux-kernel.patch
-Patch38: macsec-0030-mka-Remove-references-to-macsec_qca-from-wpa_supplic.patch
-Patch39: macsec-0031-PAE-Make-KaY-specific-details-available-via-control-.patch
-Patch40: macsec-0032-mka-Make-MKA-actor-priority-configurable.patch
-Patch41: macsec-0033-mka-Fix-an-incorrect-update-of-participant-to_use_sa.patch
-Patch42: macsec-0034-mka-Some-bug-fixes-for-MACsec-in-PSK-mode.patch
-Patch43: macsec-0035-mka-Send-MKPDUs-forever-if-mode-is-PSK.patch
-Patch44: macsec-0036-mka-Fix-the-order-of-operations-in-secure-channel-de.patch
-Patch45: macsec-0037-mka-Fix-use-after-free-when-receive-secure-channels-.patch
-Patch46: macsec-0038-mka-Fix-use-after-free-when-transmit-secure-channels.patch
-Patch47: macsec-0039-macsec_linux-Fix-NULL-pointer-dereference-on-error-c.patch
-
-# hostapd and replayed FT reassociation request frame (CVE-2017-13082)
-Patch48: https://w1.fi/security/2017-1/rebased-v2.6-0001-hostapd-Avoid-key-reinstallation-in-FT-handshake.patch
-
-# wpa_supplicant and GTK/IGTK rekeying (CVE-2017-13078, CVE-2017-13079,
-# CVE-2017-13080, CVE-2017-13081, CVE-2017-13087, CVE-2017-13088):
-Patch49: https://w1.fi/security/2017-1/rebased-v2.6-0002-Prevent-reinstallation-of-an-already-in-use-group-ke.patch
-Patch50: https://w1.fi/security/2017-1/rebased-v2.6-0003-Extend-protection-of-GTK-IGTK-reinstallation-of-WNM-.patch
-
-Patch51: https://w1.fi/security/2017-1/rebased-v2.6-0004-Prevent-installation-of-an-all-zero-TK.patch
-Patch52: https://w1.fi/security/2017-1/rebased-v2.6-0005-Fix-PTK-rekeying-to-generate-a-new-ANonce.patch
-Patch53: https://w1.fi/security/2017-1/rebased-v2.6-0006-TDLS-Reject-TPK-TK-reconfiguration.patch
-Patch54: https://w1.fi/security/2017-1/rebased-v2.6-0007-WNM-Ignore-WNM-Sleep-Mode-Response-without-pending-r.patch
-Patch55: https://w1.fi/security/2017-1/rebased-v2.6-0008-FT-Do-not-allow-multiple-Reassociation-Response-fram.patch
-
-# upstream patches not in 2.6
-Patch56: rh1451834-nl80211-Fix-race-condition-in-detecting-MAC-change.patch
-Patch57: rh1462262-use-system-openssl-ciphers.patch
-Patch58: rh1465138-openssl-Fix-openssl-1-1-private-key-callback.patch
-
-# fixes for crash when using MACsec without loaded macsec.ko (rh #1497640)
-Patch59: rh1497640-mka-add-error-handling-for-secy_init_macsec.patch
-Patch60: rh1497640-pae-validate-input-before-pointer.patch
-
-# make PMF configurable using D-Bus (rh #1567474)
-Patch62: rh1567474-0002-D-Bus-Add-pmf-to-global-capabilities.patch
-
-# fix wrong encoding of NL80211_ATTR_SMPS_MODE (rh #1570903)
-Patch63: rh1570903-nl80211-Fix-NL80211_ATTR_SMPS_MODE-encoding.patch
-
-# Unauthenticated EAPOL-Key decryption in wpa_supplicant (CVE-2018-14526)
-Patch64: https://w1.fi/security/2018-1/rebased-v2.6-0001-WPA-Ignore-unauthenticated-encrypted-EAPOL-Key-data.patch
-
-# dbus: Expose availability of SHA384 on D-Bus
-Patch65: https://w1.fi/cgit/hostap/patch/?id=d7591aa#/0002-dbus-Expose-availability-of-SHA384-on-D-Bus.patch
-
-# dbus: Expose availability of FT on D-Bus
-Patch66: https://w1.fi/cgit/hostap/patch/?id=eb7e747#/0001-dbus-Expose-availability-of-FT-on-D-Bus.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -156,68 +74,7 @@ Graphical User Interface for wpa_supplicant written using QT
 %endif
 
 %prep
-%setup -q -n %{name}-%{version}%{rcver}
-%patch0 -p1 -b .assoc-timeout
-%patch1 -p1 -b .flush-debug-output
-%patch2 -p1 -b .dbus-service-file
-%patch3 -p1 -b .quiet-scan-results-msg
-%patch6 -p1 -b .qt4
-%patch8 -p1 -b .rh837402-less-aggressive-roaming
-%patch9 -p1 -b .macsec-0001
-%patch10 -p1 -b .macsec-0002
-%patch11 -p1 -b .macsec-0003
-%patch12 -p1 -b .macsec-0004
-%patch13 -p1 -b .macsec-0005
-%patch14 -p1 -b .macsec-0006
-%patch15 -p1 -b .macsec-0007
-%patch16 -p1 -b .macsec-0008
-%patch17 -p1 -b .macsec-0009
-%patch18 -p1 -b .macsec-0010
-%patch19 -p1 -b .macsec-0011
-%patch20 -p1 -b .macsec-0012
-%patch21 -p1 -b .macsec-0013
-%patch22 -p1 -b .macsec-0014
-%patch23 -p1 -b .macsec-0015
-%patch24 -p1 -b .macsec-0016
-%patch25 -p1 -b .macsec-0017
-%patch26 -p1 -b .macsec-0018
-%patch27 -p1 -b .macsec-0019
-%patch28 -p1 -b .macsec-0020
-%patch29 -p1 -b .macsec-0021
-%patch30 -p1 -b .macsec-0022
-%patch31 -p1 -b .macsec-0023
-%patch32 -p1 -b .macsec-0024
-%patch33 -p1 -b .macsec-0025
-%patch34 -p1 -b .macsec-0026
-%patch35 -p1 -b .macsec-0027
-%patch36 -p1 -b .macsec-0028
-%patch37 -p1 -b .macsec-0029
-%patch38 -p1 -b .macsec-0030
-%patch39 -p1 -b .macsec-0031
-%patch40 -p1 -b .macsec-0032
-%patch41 -p1 -b .macsec-0033
-%patch42 -p1 -b .macsec-0034
-%patch43 -p1 -b .macsec-0035
-%patch44 -p1 -b .macsec-0036
-%patch45 -p1 -b .macsec-0037
-%patch46 -p1 -b .macsec-0038
-%patch47 -p1 -b .macsec-0039
-%patch48 -p1 -b .2017-1
-%patch49 -p1 -b .2017-1
-%patch50 -p1 -b .2017-1
-%patch51 -p1 -b .2017-1
-%patch52 -p1 -b .2017-1
-%patch53 -p1 -b .2017-1
-%patch54 -p1 -b .2017-1
-%patch55 -p1 -b .2017-1
-%patch56 -p1 -b .rh1447073-detect-mac-change
-%patch57 -p1 -b .rh1462262-system-ciphers
-%patch58 -p1 -b .rh1465138-openssl-cb
-%patch59 -p1 -b .rh1487640-mka
-%patch60 -p1 -b .rh1487640-pae
-%patch62 -p1 -b .rh1567474-pmf-0002
-%patch63 -p1 -b .rh1570903
-%patch64 -p1 -b .2018-1
+%autosetup -p1 -n %{name}-%{version}%{rcver}
 
 %build
 pushd wpa_supplicant
@@ -315,6 +172,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Tue Dec 18 2018 Lubomir Rintel <lkundrak@v3.sk> - 1:2.7-1
+- Update to 2.7 upstream release
+
 * Wed Aug 15 2018 Lubomir Rintel <lkundrak@v3.sk> - 1:2.6-20
 - Expose availability of SHA384 and FT on D-Bus
 
