@@ -579,7 +579,7 @@ CONFIG_IBSS_RSN=y
 #CONFIG_PMKSA_CACHE_EXTERNAL=y
 
 # Mesh Networking (IEEE 802.11s)
-#CONFIG_MESH=y
+CONFIG_MESH=y
 
 # Background scanning modules
 # These can be used to request wpa_supplicant to perform background scanning
@@ -597,3 +597,6 @@ CONFIG_BGSCAN_SIMPLE=y
 
 #CONFIG_FIPS=y
 CONFIG_PEERKEY=y
+
+# Simultaneous Authentication of Equals (SAE)
+CONFIG_SAE=y

@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.7
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -172,6 +172,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Mon Jan 21 2019 Lubomir Rintel <lkundrak@v3.sk> - 1:2.7-2
+- Enable MESH & SAE
+
 * Tue Dec 18 2018 Lubomir Rintel <lkundrak@v3.sk> - 1:2.7-1
 - Update to 2.7 upstream release
 
