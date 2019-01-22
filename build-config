@@ -600,3 +600,6 @@ CONFIG_PEERKEY=y
 
 # Simultaneous Authentication of Equals (SAE)
 CONFIG_SAE=y
+
+# Device Provisioning Protocol (DPP)
+CONFIG_DPP=y
