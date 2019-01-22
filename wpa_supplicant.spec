@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.7
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: BSD
 Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
@@ -31,6 +31,9 @@ Patch2: wpa_supplicant-dbus-service-file-args.patch
 Patch3: wpa_supplicant-quiet-scan-results-message.patch
 # distro specific customization for Qt4 build tools, not suitable for upstream
 Patch6: wpa_supplicant-gui-qt4.patch
+
+# http://lists.infradead.org/pipermail/hostap/2019-January/039338.html
+Patch7: https://github.com/NetworkManager/hostap/commit/24b22f0.patch#/0001-dbus-Expose-support-of-SAE-key-management.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -172,8 +175,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
-* Mon Jan 21 2019 Lubomir Rintel <lkundrak@v3.sk> - 1:2.7
+* Mon Jan 21 2019 Lubomir Rintel <lkundrak@v3.sk> - 1:2.7-3
 - Enable OWE and DPP
+- Expose SAE support on D-Bus
 
 * Mon Jan 21 2019 Lubomir Rintel <lkundrak@v3.sk> - 1:2.7-2
 - Enable MESH & SAE
