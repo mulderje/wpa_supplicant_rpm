@@ -173,7 +173,7 @@ chmod -R 0644 %{name}/examples/*.py
 
 %changelog
 * Mon Jan 21 2019 Lubomir Rintel <lkundrak@v3.sk> - 1:2.7
-- Enable DPP
+- Enable OWE and DPP
 
 * Mon Jan 21 2019 Lubomir Rintel <lkundrak@v3.sk> - 1:2.7-2
 - Enable MESH & SAE
