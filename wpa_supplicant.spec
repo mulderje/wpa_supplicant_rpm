@@ -9,7 +9,6 @@ Epoch: 1
 Version: 2.7
 Release: 3%{?dist}
 License: BSD
-Group: System Environment/Base
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
 Source1: build-config
 Source2: %{name}.conf
@@ -69,7 +68,6 @@ authentication/association of the wlan driver.
 
 %package gui
 Summary: Graphical User Interface for %{name}
-Group: Applications/System
 
 %description gui
 Graphical User Interface for wpa_supplicant written using QT
