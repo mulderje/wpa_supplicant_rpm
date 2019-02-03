@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.7
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
 Source1: build-config
@@ -173,6 +173,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Sun Feb 03 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.7-4
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
+
 * Mon Jan 21 2019 Lubomir Rintel <lkundrak@v3.sk> - 1:2.7-3
 - Enable OWE and DPP
 - Expose SAE support on D-Bus
