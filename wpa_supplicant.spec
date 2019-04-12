@@ -7,7 +7,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.7
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
 Source1: build-config
@@ -33,6 +33,27 @@ Patch6: wpa_supplicant-gui-qt4.patch
 
 # http://lists.infradead.org/pipermail/hostap/2019-January/039338.html
 Patch7: https://github.com/NetworkManager/hostap/commit/24b22f0.patch#/0001-dbus-Expose-support-of-SAE-key-management.patch
+
+# CVE-2019-9494 http://w1.fi/security/2019-1
+# CVE-2019-9495 http://w1.fi/security/2019-2
+# CVE-2019-9496 http://w1.fi/security/2019-3
+# CVE-2019-9497 http://w1.fi/security/2019-4
+# CVE-2019-9498 http://w1.fi/security/2019-4
+# CVE-2019-9499 http://w1.fi/security/2019-4
+Patch8: http://w1.fi/security/2019-1/0001-OpenSSL-Use-constant-time-operations-for-private-big.patch
+Patch9: http://w1.fi/security/2019-1/0002-Add-helper-functions-for-constant-time-operations.patch
+Patch10: http://w1.fi/security/2019-1/0003-OpenSSL-Use-constant-time-selection-for-crypto_bignu.patch
+Patch11: http://w1.fi/security/2019-2/0004-EAP-pwd-Use-constant-time-and-memory-access-for-find.patch
+Patch12: http://w1.fi/security/2019-1/0005-SAE-Minimize-timing-differences-in-PWE-derivation.patch
+Patch13: http://w1.fi/security/2019-1/0006-SAE-Avoid-branches-in-is_quadratic_residue_blind.patch
+Patch14: http://w1.fi/security/2019-1/0007-SAE-Mask-timing-of-MODP-groups-22-23-24.patch
+Patch15: http://w1.fi/security/2019-1/0008-SAE-Use-const_time-selection-for-PWE-in-FFC.patch
+Patch16: http://w1.fi/security/2019-1/0009-SAE-Use-constant-time-operations-in-sae_test_pwd_see.patch
+Patch17: http://w1.fi/security/2019-3/0010-SAE-Fix-confirm-message-validation-in-error-cases.patch
+Patch18: http://w1.fi/security/2019-4/0011-EAP-pwd-server-Verify-received-scalar-and-element.patch
+Patch19: http://w1.fi/security/2019-4/0012-EAP-pwd-server-Detect-reflection-attacks.patch
+Patch20: http://w1.fi/security/2019-4/0013-EAP-pwd-client-Verify-received-scalar-and-element.patch
+Patch21: http://w1.fi/security/2019-4/0014-EAP-pwd-Check-element-x-y-coordinates-explicitly.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -173,6 +194,15 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Fri Apr 12 2019 Davide Caratti <dcaratti@redhat.com> - 1:2.7-5
+- fix SAE and EAP_PWD vulnerabilities:
+  CVE-2019-9494 (cache attack against SAE)
+  CVE-2019-9495 (cache attack against EAP-pwd)
+  CVE-2019-9496 (SAE confirm missing state validation in hostapd/AP)
+  CVE-2019-9497 (EAP-pwd server not checking for reflection attack)
+  CVE-2019-9498 (EAP-pwd server missing commit validation for scalar/element)
+  CVE-2019-9499 (EAP-pwd peer missing commit validation for scalar/element)
+
 * Sun Feb 03 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.7-4
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
 
