@@ -6,8 +6,8 @@
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
-Version: 2.7
-Release: 5%{?dist}
+Version: 2.8
+Release: 1%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
 Source1: build-config
@@ -24,36 +24,10 @@ Patch0: wpa_supplicant-assoc-timeout.patch
 # ensures that debug output gets flushed immediately to help diagnose driver
 # bugs, not suitable for upstream
 Patch1: wpa_supplicant-flush-debug-output.patch
-# disto specific customization for log paths, not suitable for upstream
-Patch2: wpa_supplicant-dbus-service-file-args.patch
 # quiet an annoying and frequent syslog message
 Patch3: wpa_supplicant-quiet-scan-results-message.patch
 # distro specific customization for Qt4 build tools, not suitable for upstream
 Patch6: wpa_supplicant-gui-qt4.patch
-
-# http://lists.infradead.org/pipermail/hostap/2019-January/039338.html
-Patch7: https://github.com/NetworkManager/hostap/commit/24b22f0.patch#/0001-dbus-Expose-support-of-SAE-key-management.patch
-
-# CVE-2019-9494 http://w1.fi/security/2019-1
-# CVE-2019-9495 http://w1.fi/security/2019-2
-# CVE-2019-9496 http://w1.fi/security/2019-3
-# CVE-2019-9497 http://w1.fi/security/2019-4
-# CVE-2019-9498 http://w1.fi/security/2019-4
-# CVE-2019-9499 http://w1.fi/security/2019-4
-Patch8: http://w1.fi/security/2019-1/0001-OpenSSL-Use-constant-time-operations-for-private-big.patch
-Patch9: http://w1.fi/security/2019-1/0002-Add-helper-functions-for-constant-time-operations.patch
-Patch10: http://w1.fi/security/2019-1/0003-OpenSSL-Use-constant-time-selection-for-crypto_bignu.patch
-Patch11: http://w1.fi/security/2019-2/0004-EAP-pwd-Use-constant-time-and-memory-access-for-find.patch
-Patch12: http://w1.fi/security/2019-1/0005-SAE-Minimize-timing-differences-in-PWE-derivation.patch
-Patch13: http://w1.fi/security/2019-1/0006-SAE-Avoid-branches-in-is_quadratic_residue_blind.patch
-Patch14: http://w1.fi/security/2019-1/0007-SAE-Mask-timing-of-MODP-groups-22-23-24.patch
-Patch15: http://w1.fi/security/2019-1/0008-SAE-Use-const_time-selection-for-PWE-in-FFC.patch
-Patch16: http://w1.fi/security/2019-1/0009-SAE-Use-constant-time-operations-in-sae_test_pwd_see.patch
-Patch17: http://w1.fi/security/2019-3/0010-SAE-Fix-confirm-message-validation-in-error-cases.patch
-Patch18: http://w1.fi/security/2019-4/0011-EAP-pwd-server-Verify-received-scalar-and-element.patch
-Patch19: http://w1.fi/security/2019-4/0012-EAP-pwd-server-Detect-reflection-attacks.patch
-Patch20: http://w1.fi/security/2019-4/0013-EAP-pwd-client-Verify-received-scalar-and-element.patch
-Patch21: http://w1.fi/security/2019-4/0014-EAP-pwd-Check-element-x-y-coordinates-explicitly.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -135,7 +109,6 @@ install -m 0755 %{name}/wpa_supplicant %{buildroot}/%{_sbindir}
 install -m 0755 %{name}/eapol_test %{buildroot}/%{_sbindir}
 install -D -m 0644 %{name}/dbus/dbus-wpa_supplicant.conf %{buildroot}/%{_sysconfdir}/dbus-1/system.d/wpa_supplicant.conf
 install -D -m 0644 %{name}/dbus/fi.w1.wpa_supplicant1.service %{buildroot}/%{_datadir}/dbus-1/system-services/fi.w1.wpa_supplicant1.service
-install -D -m 0644 %{name}/dbus/fi.epitest.hostap.WPASupplicant.service %{buildroot}/%{_datadir}/dbus-1/system-services/fi.epitest.hostap.WPASupplicant.service
 
 %if %{build_gui}
 # gui
@@ -178,7 +151,6 @@ chmod -R 0644 %{name}/examples/*.py
 %config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
 %{_unitdir}/%{name}.service
 %{_sysconfdir}/dbus-1/system.d/%{name}.conf
-%{_datadir}/dbus-1/system-services/fi.epitest.hostap.WPASupplicant.service
 %{_datadir}/dbus-1/system-services/fi.w1.wpa_supplicant1.service
 %{_sbindir}/wpa_passphrase
 %{_sbindir}/wpa_supplicant
@@ -194,6 +166,12 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Thu May 02 2019 Davide Caratti <dcaratti@redhat.com> - 1:2.8-1
+- Update to 2.8 upstream release, to include latest fix for NULL
+  pointer dereference when EAP-PWD peer receives unexpected EAP
+  fragments (rh #1703418, rh #1701759) and CTRL-EVENT-SCAN-FAILED
+  errors when broadcom-wl driver is used (rh#1703745)
+
 * Fri Apr 12 2019 Davide Caratti <dcaratti@redhat.com> - 1:2.7-5
 - fix SAE and EAP_PWD vulnerabilities:
   CVE-2019-9494 (cache attack against SAE)
