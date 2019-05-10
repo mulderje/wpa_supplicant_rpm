@@ -166,11 +166,13 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Fri May 10 2019 Davide Caratti <dcaratti@redhat.com> - 1:2.8-2
+- fix changelog for version 2.8-1
+
 * Thu May 02 2019 Davide Caratti <dcaratti@redhat.com> - 1:2.8-1
 - Update to 2.8 upstream release, to include latest fix for NULL
   pointer dereference when EAP-PWD peer receives unexpected EAP
-  fragments (rh #1703418, rh #1701759) and CTRL-EVENT-SCAN-FAILED
-  errors when broadcom-wl driver is used (rh#1703745)
+  fragments (CVE-2019-11555, rh #1701759)
 
 * Fri Apr 12 2019 Davide Caratti <dcaratti@redhat.com> - 1:2.7-5
 - fix SAE and EAP_PWD vulnerabilities:
