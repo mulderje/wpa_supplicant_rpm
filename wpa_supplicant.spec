@@ -6,8 +6,8 @@
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
-Version: 2.8
-Release: 3%{?dist}
+Version: 2.9
+Release: 1%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
 Source1: build-config
@@ -166,6 +166,9 @@ chmod -R 0644 %{name}/examples/*.py
 %endif
 
 %changelog
+* Fri Aug 16 2019 Lubomir Rintel <lkundrak@v3.sk> - 1:2.9-1
+- Update to version 2.9
+
 * Sat Jul 27 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.8-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
 
