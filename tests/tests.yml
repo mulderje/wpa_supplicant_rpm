@@ -5,7 +5,7 @@
     tags:
     - classic
     repositories:
-    - repo: "https://gitlab.com/NetworkManager/NetworkManager-ci"
+    - repo: "https://gitlab.freedesktop.org/NetworkManager/NetworkManager-ci"
       dest: "NetworkManager-ci"
     tests:
     - sanity-tests:
