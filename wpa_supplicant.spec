@@ -10,7 +10,6 @@ Version: 2.9
 Release: 1%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
-Source1: build-config
 Source2: %{name}.conf
 Source3: %{name}.service
 Source4: %{name}.sysconfig
@@ -19,15 +18,17 @@ Source6: %{name}.logrotate
 %define build_gui 1
 
 # distro specific customization and not suitable for upstream,
+# Fedora-specific updates to defconfig
+Patch0: wpa_supplicant-config.patch
 # works around busted drivers
-Patch0: wpa_supplicant-assoc-timeout.patch
+Patch1: wpa_supplicant-assoc-timeout.patch
 # ensures that debug output gets flushed immediately to help diagnose driver
 # bugs, not suitable for upstream
-Patch1: wpa_supplicant-flush-debug-output.patch
+Patch2: wpa_supplicant-flush-debug-output.patch
 # quiet an annoying and frequent syslog message
 Patch3: wpa_supplicant-quiet-scan-results-message.patch
 # distro specific customization for Qt4 build tools, not suitable for upstream
-Patch6: wpa_supplicant-gui-qt4.patch
+Patch4: wpa_supplicant-gui-qt4.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -74,7 +75,7 @@ Graphical User Interface for wpa_supplicant written using QT
 
 %build
 pushd wpa_supplicant
-  cp %{SOURCE1} .config
+  cp defconfig .config
   CFLAGS="${CFLAGS:-%optflags} -fPIE -DPIE" ; export CFLAGS ;
   CXXFLAGS="${CXXFLAGS:-%optflags} -fPIE -DPIE" ; export CXXFLAGS ;
   LDFLAGS="${LDFLAGS:-%optflags} -pie -Wl,-z,now" ; export LDFLAGS ;
