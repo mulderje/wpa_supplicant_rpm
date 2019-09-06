@@ -157,7 +157,12 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 %{_sbindir}/wpa_cli
 %{_sbindir}/eapol_test
 %dir %{_sysconfdir}/wpa_supplicant
-%{_mandir}/man8/*
+%{_mandir}/man8/wpa_supplicant.8.gz
+%{_mandir}/man8/wpa_priv.8.gz
+%{_mandir}/man8/wpa_passphrase.8.gz
+%{_mandir}/man8/wpa_cli.8.gz
+%{_mandir}/man8/wpa_background.8.gz
+%{_mandir}/man8/eapol_test.8.gz
 %{_mandir}/man5/*
 %doc README
 %doc wpa_supplicant/ChangeLog
@@ -171,6 +176,7 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 %if %with gui
 %files gui
 %{_bindir}/wpa_gui
+%{_mandir}/man8/wpa_gui.8.gz
 %endif
 
 
