@@ -1,7 +1,5 @@
-%define rcver %{nil}
-%define snapshot %{nil}
-
 %global _hardened_build 1
+%bcond_without gui
 
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
@@ -9,13 +7,11 @@ Epoch: 1
 Version: 2.9
 Release: 1%{?dist}
 License: BSD
-Source0: http://w1.fi/releases/%{name}-%{version}%{rcver}%{snapshot}.tar.gz
-Source2: %{name}.conf
-Source3: %{name}.service
-Source4: %{name}.sysconfig
-Source6: %{name}.logrotate
-
-%define build_gui 1
+Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
+Source1: wpa_supplicant.conf
+Source2: wpa_supplicant.service
+Source3: wpa_supplicant.sysconfig
+Source4: wpa_supplicant.logrotate
 
 # distro specific customization and not suitable for upstream,
 # Fedora-specific updates to defconfig
@@ -32,7 +28,7 @@ Patch4: wpa_supplicant-gui-qt4.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
-%if %{build_gui}
+%if %with gui
 BuildRequires: qt-devel >= 4.0
 %endif
 BuildRequires: openssl-devel
@@ -60,75 +56,79 @@ component that is used in the client stations. It implements key negotiation
 with a WPA Authenticator and it controls the roaming and IEEE 802.11
 authentication/association of the wlan driver.
 
-%if %{build_gui}
 
+%if %with gui
 %package gui
 Summary: Graphical User Interface for %{name}
 
 %description gui
 Graphical User Interface for wpa_supplicant written using QT
-
 %endif
 
+
 %prep
-%autosetup -p1 -n %{name}-%{version}%{rcver}
+%autosetup -p1
+
 
 %build
 pushd wpa_supplicant
   cp defconfig .config
-  CFLAGS="${CFLAGS:-%optflags} -fPIE -DPIE" ; export CFLAGS ;
-  CXXFLAGS="${CXXFLAGS:-%optflags} -fPIE -DPIE" ; export CXXFLAGS ;
-  LDFLAGS="${LDFLAGS:-%optflags} -pie -Wl,-z,now" ; export LDFLAGS ;
+  export CFLAGS="${CFLAGS:-%optflags} -fPIE -DPIE"
+  export CXXFLAGS="${CXXFLAGS:-%optflags} -fPIE -DPIE"
+  export LDFLAGS="${LDFLAGS:-%optflags} -pie -Wl,-z,now"
   # yes, BINDIR=_sbindir
-  BINDIR="%{_sbindir}" ; export BINDIR ;
-  LIBDIR="%{_libdir}" ; export LIBDIR ;
+  export BINDIR="%{_sbindir}"
+  export LIBDIR="%{_libdir}"
   make %{_smp_mflags} V=1
-%if %{build_gui}
-  QTDIR=%{_libdir}/qt4 make wpa_gui-qt4 %{_smp_mflags} V=1 QMAKE='%{qmake_qt4}' LRELEASE='%{_qt4_bindir}/lrelease'
+%if %with gui
+  make wpa_gui-qt4 %{_smp_mflags} V=1 QTDIR=%{_libdir}/qt4 \
+    QMAKE='%{qmake_qt4}' LRELEASE='%{_qt4_bindir}/lrelease'
 %endif
   make eapol_test V=1
+  make -C doc/docbook man V=1
 popd
 
-pushd wpa_supplicant/doc/docbook
-  make man V=1
-popd
 
 %install
-# init scripts
-install -D -m 0644 %{SOURCE3} %{buildroot}/%{_unitdir}/%{name}.service
-install -D -m 0644 %{SOURCE4} %{buildroot}/%{_sysconfdir}/sysconfig/%{name}
-install -D -m 0644 %{SOURCE6} %{buildroot}/%{_sysconfdir}/logrotate.d/%{name}
-
 # config
-install -D -m 0600 %{SOURCE2} %{buildroot}/%{_sysconfdir}/%{name}/%{name}.conf
+install -D -m 0600 %{SOURCE1} %{buildroot}/%{_sysconfdir}/wpa_supplicant/wpa_supplicant.conf
+
+# init scripts
+install -D -m 0644 %{SOURCE2} %{buildroot}/%{_unitdir}/wpa_supplicant.service
+install -D -m 0644 %{SOURCE3} %{buildroot}/%{_sysconfdir}/sysconfig/wpa_supplicant
+install -D -m 0644 %{SOURCE4} %{buildroot}/%{_sysconfdir}/logrotate.d/wpa_supplicant
 
 # binary
 install -d %{buildroot}/%{_sbindir}
-install -m 0755 %{name}/wpa_passphrase %{buildroot}/%{_sbindir}
-install -m 0755 %{name}/wpa_cli %{buildroot}/%{_sbindir}
-install -m 0755 %{name}/wpa_supplicant %{buildroot}/%{_sbindir}
-install -m 0755 %{name}/eapol_test %{buildroot}/%{_sbindir}
-install -D -m 0644 %{name}/dbus/dbus-wpa_supplicant.conf %{buildroot}/%{_sysconfdir}/dbus-1/system.d/wpa_supplicant.conf
-install -D -m 0644 %{name}/dbus/fi.w1.wpa_supplicant1.service %{buildroot}/%{_datadir}/dbus-1/system-services/fi.w1.wpa_supplicant1.service
+install -m 0755 wpa_supplicant/wpa_passphrase %{buildroot}/%{_sbindir}
+install -m 0755 wpa_supplicant/wpa_cli %{buildroot}/%{_sbindir}
+install -m 0755 wpa_supplicant/wpa_supplicant %{buildroot}/%{_sbindir}
+install -m 0755 wpa_supplicant/eapol_test %{buildroot}/%{_sbindir}
+install -D -m 0644 wpa_supplicant/dbus/dbus-wpa_supplicant.conf \
+  %{buildroot}/%{_sysconfdir}/dbus-1/system.d/wpa_supplicant.conf
+install -D -m 0644 wpa_supplicant/dbus/fi.w1.wpa_supplicant1.service \
+  %{buildroot}/%{_datadir}/dbus-1/system-services/fi.w1.wpa_supplicant1.service
 
-%if %{build_gui}
+%if %with gui
 # gui
 install -d %{buildroot}/%{_bindir}
-install -m 0755 %{name}/wpa_gui-qt4/wpa_gui %{buildroot}/%{_bindir}
+install -m 0755 wpa_supplicant/wpa_gui-qt4/wpa_gui %{buildroot}/%{_bindir}
 %endif
 
 # man pages
 install -d %{buildroot}%{_mandir}/man{5,8}
-install -m 0644 %{name}/doc/docbook/*.8 %{buildroot}%{_mandir}/man8
-install -m 0644 %{name}/doc/docbook/*.5 %{buildroot}%{_mandir}/man5
+install -m 0644 wpa_supplicant/doc/docbook/*.8 %{buildroot}%{_mandir}/man8
+install -m 0644 wpa_supplicant/doc/docbook/*.5 %{buildroot}%{_mandir}/man5
 
 # some cleanup in docs and examples
-rm -f  %{name}/doc/.cvsignore
-rm -rf %{name}/doc/docbook
-chmod -R 0644 %{name}/examples/*.py
+rm -f  wpa_supplicant/doc/.cvsignore
+rm -rf wpa_supplicant/doc/docbook
+chmod -R 0644 wpa_supplicant/examples/*.py
+
 
 %post
 %systemd_post wpa_supplicant.service
+
 
 %preun
 %systemd_preun wpa_supplicant.service
@@ -145,26 +145,34 @@ chmod -R 0644 %{name}/examples/*.py
 
 
 %files
-%license COPYING
-%doc %{name}/ChangeLog README %{name}/eap_testing.txt %{name}/todo.txt %{name}/wpa_supplicant.conf %{name}/examples
-%config(noreplace) %{_sysconfdir}/%{name}/%{name}.conf
-%config(noreplace) %{_sysconfdir}/sysconfig/%{name}
-%config(noreplace) %{_sysconfdir}/logrotate.d/%{name}
-%{_unitdir}/%{name}.service
-%{_sysconfdir}/dbus-1/system.d/%{name}.conf
+%config(noreplace) %{_sysconfdir}/wpa_supplicant/wpa_supplicant.conf
+%config(noreplace) %{_sysconfdir}/sysconfig/wpa_supplicant
+%dir %{_sysconfdir}/logrotate.d
+%config(noreplace) %{_sysconfdir}/logrotate.d/wpa_supplicant
+%{_unitdir}/wpa_supplicant.service
+%{_sysconfdir}/dbus-1/system.d/wpa_supplicant.conf
 %{_datadir}/dbus-1/system-services/fi.w1.wpa_supplicant1.service
 %{_sbindir}/wpa_passphrase
 %{_sbindir}/wpa_supplicant
 %{_sbindir}/wpa_cli
 %{_sbindir}/eapol_test
-%dir %{_sysconfdir}/%{name}
+%dir %{_sysconfdir}/wpa_supplicant
 %{_mandir}/man8/*
 %{_mandir}/man5/*
+%doc README
+%doc wpa_supplicant/ChangeLog
+%doc wpa_supplicant/eap_testing.txt
+%doc wpa_supplicant/todo.txt
+%doc wpa_supplicant/wpa_supplicant.conf
+%doc wpa_supplicant/examples
+%license COPYING
 
-%if %{build_gui}
+
+%if %with gui
 %files gui
 %{_bindir}/wpa_gui
 %endif
+
 
 %changelog
 * Fri Aug 16 2019 Lubomir Rintel <lkundrak@v3.sk> - 1:2.9-1
