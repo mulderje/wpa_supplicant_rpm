@@ -5,7 +5,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.9
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -25,6 +25,8 @@ Patch2: wpa_supplicant-flush-debug-output.patch
 Patch3: wpa_supplicant-quiet-scan-results-message.patch
 # distro specific customization for Qt4 build tools, not suitable for upstream
 Patch4: wpa_supplicant-gui-qt4.patch
+# fix AP mode PMF disconnection protection bypass
+Patch5: 0001-AP-Silently-ignore-management-frame-from-unexpected-.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -181,6 +183,9 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Wed Oct 30 2019 Davide Caratti <dcaratti@redhat.com> - 1:2.9-2
+- fix AP mode PMF disconnection protection bypass (CVE-2019-16275, rh #1767026)
+
 * Fri Aug 16 2019 Lubomir Rintel <lkundrak@v3.sk> - 1:2.9-1
 - Update to version 2.9
 
