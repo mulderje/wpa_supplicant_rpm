@@ -5,7 +5,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.9
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -183,6 +183,9 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Fri Jan 31 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.9-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
+
 * Wed Oct 30 2019 Davide Caratti <dcaratti@redhat.com> - 1:2.9-2
 - fix AP mode PMF disconnection protection bypass (CVE-2019-16275, rh #1767026)
 
