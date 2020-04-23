@@ -55,6 +55,15 @@ index cdfb197..83c992a 100644
  
  # IEEE 802.11n (High Throughput) support (mainly for AP mode)
  CONFIG_IEEE80211N=y
+@@ -514,7 +515,7 @@ CONFIG_AP=y
+ CONFIG_P2P=y
+ 
+ # Enable TDLS support
+-#CONFIG_TDLS=y
++CONFIG_TDLS=y
+ 
+ # Wi-Fi Display
+ # This can be used to enable Wi-Fi Display extensions for P2P using an external
 @@ -593,7 +594,7 @@ CONFIG_IBSS_RSN=y
  #CONFIG_PMKSA_CACHE_EXTERNAL=y
  
