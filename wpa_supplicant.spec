@@ -1,12 +1,13 @@
 %global _hardened_build 1
 %bcond_without gui
 
-Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.9
-Release: 4%{?dist}
+Release: 5%{?dist}
+Summary: WPA/WPA2/IEEE 802.1X Supplicant
 License: BSD
+URL: http://w1.fi/wpa_supplicant/
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
 Source2: wpa_supplicant.service
@@ -28,28 +29,19 @@ Patch4: wpa_supplicant-gui-qt4.patch
 # fix AP mode PMF disconnection protection bypass
 Patch5: 0001-AP-Silently-ignore-management-frame-from-unexpected-.patch
 
-URL: http://w1.fi/wpa_supplicant/
 
 %if %with gui
 BuildRequires: qt-devel >= 4.0
 %endif
+BuildRequires: dbus-devel
+BuildRequires: docbook-utils
+BuildRequires: libnl3-devel
 BuildRequires: openssl-devel
 BuildRequires: readline-devel
-BuildRequires: dbus-devel
-BuildRequires: libnl3-devel
-BuildRequires: systemd-units
-BuildRequires: docbook-utils
-Requires(post): systemd-sysv
+BuildRequires: systemd
 Requires(post): systemd
 Requires(preun): systemd
 Requires(postun): systemd
-# libeap used to be built from wpa_supplicant with some fairly horrible
-# hackery, solely for use by WiMAX. We dropped all WiMAX support around
-# F21. This is here so people don't wind up with obsolete libeap packages
-# lying around. If it's ever resurrected for any reason, this needs
-# dropping.
-Obsoletes: libeap < %{epoch}:%{version}-%{release}
-Obsoletes: libeap-devel < %{epoch}:%{version}-%{release}
 
 %description
 wpa_supplicant is a WPA Supplicant for Linux, BSD and Windows with support
@@ -58,6 +50,11 @@ component that is used in the client stations. It implements key negotiation
 with a WPA Authenticator and it controls the roaming and IEEE 802.11
 authentication/association of the wlan driver.
 
+%package docs
+Summary: Docs and examples for %{name}
+
+%description docs
+Documentation and extra examples for %{name}.
 
 %if %with gui
 %package gui
@@ -131,22 +128,12 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 %post
 %systemd_post wpa_supplicant.service
 
-
 %preun
 %systemd_preun wpa_supplicant.service
 
-%triggerun -- wpa_supplicant < 0.7.3-10
-# Save the current service runlevel info
-# User must manually run systemd-sysv-convert --apply wpa_supplicant
-# to migrate them to systemd targets
-/usr/bin/systemd-sysv-convert --save wpa_supplicant >/dev/null 2>&1 ||:
-
-# Run these because the SysV package being removed won't do them
-/sbin/chkconfig --del wpa_supplicant >/dev/null 2>&1 || :
-/bin/systemctl try-restart wpa_supplicant.service >/dev/null 2>&1 || :
-
 
 %files
+%license COPYING README
 %config(noreplace) %{_sysconfdir}/wpa_supplicant/wpa_supplicant.conf
 %config(noreplace) %{_sysconfdir}/sysconfig/wpa_supplicant
 %dir %{_sysconfdir}/logrotate.d
@@ -159,20 +146,20 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 %{_sbindir}/wpa_cli
 %{_sbindir}/eapol_test
 %dir %{_sysconfdir}/wpa_supplicant
+%{_mandir}/man5/wpa_supplicant.conf.5.gz
 %{_mandir}/man8/wpa_supplicant.8.gz
 %{_mandir}/man8/wpa_priv.8.gz
 %{_mandir}/man8/wpa_passphrase.8.gz
 %{_mandir}/man8/wpa_cli.8.gz
 %{_mandir}/man8/wpa_background.8.gz
 %{_mandir}/man8/eapol_test.8.gz
-%{_mandir}/man5/*
-%doc README
+
+%files docs
 %doc wpa_supplicant/ChangeLog
 %doc wpa_supplicant/eap_testing.txt
 %doc wpa_supplicant/todo.txt
 %doc wpa_supplicant/wpa_supplicant.conf
 %doc wpa_supplicant/examples
-%license COPYING
 
 
 %if %with gui
@@ -183,6 +170,10 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Tue May 19 2020 Peter Robinson <pbrobinson@fedoraproject.org> - 1:2.9-5
+- Spec file cleanups
+- Split out docs/examples
+
 * Thu Apr 23 2020 Davide Caratti <dcaratti@redhat.com> - 1:2.9-4
 - Enable Tunneled Direct Link Setup (TDLS)
 
