@@ -5,7 +5,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.9
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -27,6 +27,11 @@ Patch3: wpa_supplicant-quiet-scan-results-message.patch
 Patch4: wpa_supplicant-gui-qt4.patch
 # fix AP mode PMF disconnection protection bypass
 Patch5: 0001-AP-Silently-ignore-management-frame-from-unexpected-.patch
+
+# fix some issues with P2P operation
+Patch6: 0001-P2P-Always-use-global-p2p_long_listen.patch
+Patch7: 0001-D-Bus-Fix-P2P-NULL-dereference-after-interface-remov.patch
+Patch8: 0001-p2p-Limit-P2P_DEVICE-name-to-appropriate-ifname-size.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -183,6 +188,9 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Mon Jun 15 2020 Benjamin Berg <bberg@redhat.com> - 1:2.9-4
+- fix some issues with P2P operation
+
 * Fri Jan 31 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.9-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
 
