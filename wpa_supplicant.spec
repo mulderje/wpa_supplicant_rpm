@@ -5,7 +5,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.9
-Release: 5%{?dist}
+Release: 6%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -188,6 +188,9 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Wed Jul 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.9-6
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
 * Mon Jun 15 2020 Benjamin Berg <bberg@redhat.com> - 1:2.9-5
 - fix some issues with P2P operation
 
