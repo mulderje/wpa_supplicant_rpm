@@ -4,11 +4,9 @@ Date: Fri, 6 Sep 2019 09:46:00 +0200
 Subject: [PATCH] defconfig: Fedora configuration
 
 ---
- wpa_supplicant/defconfig | 13 +++++++------
- 1 file changed, 7 insertions(+), 6 deletions(-)
+ wpa_supplicant/defconfig | 16 +++++++++-------
+ 1 file changed, 9 insertions(+), 7 deletions(-)
 
-diff --git a/wpa_supplicant/defconfig b/wpa_supplicant/defconfig
-index cdfb197..83c992a 100644
 --- a/wpa_supplicant/defconfig
 +++ b/wpa_supplicant/defconfig
 @@ -77,7 +77,7 @@ CONFIG_DRIVER_WIRED=y
@@ -73,7 +71,7 @@ index cdfb197..83c992a 100644
  
  # Background scanning modules
  # These can be used to request wpa_supplicant to perform background scanning
-@@ -607,7 +608,7 @@ CONFIG_BGSCAN_SIMPLE=y
+@@ -607,9 +608,10 @@ CONFIG_BGSCAN_SIMPLE=y
  
  # Opportunistic Wireless Encryption (OWE)
  # Experimental implementation of draft-harkins-owe-07.txt
@@ -82,6 +80,6 @@ index cdfb197..83c992a 100644
  
  # Device Provisioning Protocol (DPP)
  # This requires CONFIG_IEEE80211W=y to be enabled, too. (see
--- 
-2.21.0
-
+ # wpa_supplicant/README-DPP for details)
+ CONFIG_DPP=y
++CONFIG_SUITEB192=y

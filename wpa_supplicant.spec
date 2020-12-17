@@ -9,7 +9,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.9
-Release: 7%{?dist}
+Release: 8%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -196,6 +196,9 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Thu Dec 17 2020 Antonio Cardace <acardace@redhat.com> - 1:2.9-8
+- Enable WPA-EAP-SUITE-B-192 cipher suite
+
 * Thu Dec 17 2020 Davide Caratti <dcaratti@redhat.com> - 1:2.9-7
 - fix build on ELN target (rh #1902609)
 
