@@ -1,11 +1,15 @@
 %global _hardened_build 1
+%if 0%{?fedora}
 %bcond_without gui
+%else
+%bcond_with gui
+%endif
 
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.9
-Release: 6%{?dist}
+Release: 7%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -44,6 +48,7 @@ BuildRequires: dbus-devel
 BuildRequires: libnl3-devel
 BuildRequires: systemd-units
 BuildRequires: docbook-utils
+BuildRequires: gcc
 Requires(post): systemd-sysv
 Requires(post): systemd
 Requires(preun): systemd
@@ -93,6 +98,9 @@ pushd wpa_supplicant
 %endif
   make eapol_test V=1
   make -C doc/docbook man V=1
+%if !%with gui
+  rm doc/docbook/wpa_gui.8
+%endif
 popd
 
 
@@ -188,6 +196,9 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Thu Dec 17 2020 Davide Caratti <dcaratti@redhat.com> - 1:2.9-7
+- fix build on ELN target (rh #1902609)
+
 * Wed Jul 29 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.9-6
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
 
