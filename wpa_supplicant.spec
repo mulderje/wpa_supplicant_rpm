@@ -39,6 +39,7 @@ Patch8: 0001-p2p-Limit-P2P_DEVICE-name-to-appropriate-ifname-size.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
+BuildRequires: make
 %if %with gui
 BuildRequires: qt-devel >= 4.0
 %endif
