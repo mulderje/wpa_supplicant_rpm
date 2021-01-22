@@ -9,7 +9,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.9
-Release: 8%{?dist}
+Release: 9%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -37,9 +37,14 @@ Patch6: 0001-P2P-Always-use-global-p2p_long_listen.patch
 Patch7: 0001-D-Bus-Fix-P2P-NULL-dereference-after-interface-remov.patch
 Patch8: 0001-p2p-Limit-P2P_DEVICE-name-to-appropriate-ifname-size.patch
 
+#fix for bz1915236
+Patch9: 0001-D-Bus-Allow-changing-an-interface-bridge-via-D-Bus.patch
+
+#expose OWE capability in D-Bus
+Patch10: 0001-dbus-Export-OWE-capability-and-OWE-BSS-key_mgmt.patch
+
 URL: http://w1.fi/wpa_supplicant/
 
-BuildRequires: make
 %if %with gui
 BuildRequires: qt-devel >= 4.0
 %endif
@@ -197,6 +202,10 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Fri Jan 22 2021 Davide Caratti <dcaratti@redhat.com> - 1:2.9-9
+- Expose OWE capability on D-Bus
+- Allow changing interface bridge using D-Bus
+
 * Thu Dec 17 2020 Antonio Cardace <acardace@redhat.com> - 1:2.9-8
 - Enable WPA-EAP-SUITE-B-192 cipher suite
 
