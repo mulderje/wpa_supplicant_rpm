@@ -9,7 +9,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.9
-Release: 9%{?dist}
+Release: 10%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -202,6 +202,9 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.9-10
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
+
 * Fri Jan 22 2021 Davide Caratti <dcaratti@redhat.com> - 1:2.9-9
 - Expose OWE capability on D-Bus
 - Allow changing interface bridge using D-Bus
