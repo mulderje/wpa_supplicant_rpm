@@ -9,7 +9,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.9
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -42,6 +42,9 @@ Patch9: 0001-D-Bus-Allow-changing-an-interface-bridge-via-D-Bus.patch
 
 #expose OWE capability in D-Bus
 Patch10: 0001-dbus-Export-OWE-capability-and-OWE-BSS-key_mgmt.patch
+
+#fix for CVE-2021-0326
+Patch11: 0001-P2P-Fix-copying-of-secondary-device-types-for-P2P-gr.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -202,6 +205,9 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Thu Feb  4 2021 Davide Caratti <dcaratti@redhat.com> - 1:2.9-11
+- Fix copying of secondary device types for P2P group client (CVE-2021-0326)
+
 * Wed Jan 27 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.9-10
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
 
