@@ -9,7 +9,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.9
-Release: 11%{?dist}
+Release: 12%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -45,6 +45,9 @@ Patch10: 0001-dbus-Export-OWE-capability-and-OWE-BSS-key_mgmt.patch
 
 #fix for CVE-2021-0326
 Patch11: 0001-P2P-Fix-copying-of-secondary-device-types-for-P2P-gr.patch
+
+#fix for CVE-2021-27803
+Patch12: 0001-P2P-Fix-a-corner-case-in-peer-addition-based-on-PD-R.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -205,6 +208,9 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Mon Mar  1 2021 Davide Caratti <dcaratti@redhat.com> - 1:2.9-12
+- Fix a corner case in peer addition based on PD Request (CVE-2021-27803)
+
 * Thu Feb  4 2021 Davide Caratti <dcaratti@redhat.com> - 1:2.9-11
 - Fix copying of secondary device types for P2P group client (CVE-2021-0326)
 
