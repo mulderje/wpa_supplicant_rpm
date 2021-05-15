@@ -9,7 +9,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.9
-Release: 13%{?dist}
+Release: 14%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -48,6 +48,9 @@ Patch11: 0001-P2P-Fix-copying-of-secondary-device-types-for-P2P-gr.patch
 
 #fix for CVE-2021-27803
 Patch12: 0001-P2P-Fix-a-corner-case-in-peer-addition-based-on-PD-R.patch
+
+# fix for 802.11r networks, and cards that don't support it
+Patch13: 0001-Check-for-FT-support-when-selecting-FT-suites.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -208,6 +211,9 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Tue Jul 27 2021 Dave Olsthoorn <dave@bewaar.me> - 1:2.9-14
+- Fix issues with FT a.k.a. 802.11r when not supported by adapter
+
 * Fri Jul 23 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.9-13
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
 
