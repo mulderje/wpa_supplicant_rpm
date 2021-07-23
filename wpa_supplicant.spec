@@ -9,7 +9,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.9
-Release: 12%{?dist}
+Release: 13%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -208,6 +208,9 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Fri Jul 23 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.9-13
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
 * Mon Mar  1 2021 Davide Caratti <dcaratti@redhat.com> - 1:2.9-12
 - Fix a corner case in peer addition based on PD Request (CVE-2021-27803)
 
