@@ -9,7 +9,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.9
-Release: 14%{?dist}
+Release: 15%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -51,6 +51,12 @@ Patch12: 0001-P2P-Fix-a-corner-case-in-peer-addition-based-on-PD-R.patch
 
 # fix for 802.11r networks, and cards that don't support it
 Patch13: 0001-Check-for-FT-support-when-selecting-FT-suites.patch
+
+#fix nmci failures with OpenSSL-3.0.0
+Patch14: 0001-OpenSSL-Allow-systemwide-secpolicy-overrides-for-TLS.patch
+Patch15: 0001-EAP-TTLS-PEAP-peer-Fix-failure-when-using-session-ti.patch
+Patch16: 0001-openssl-Disable-padding-after-initializing-the-ciphe.patch
+Patch17: 0001-openssl-Remove-deprecated-functions-from-des_encrypt.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -211,6 +217,9 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Fri Sep  9 2021 Davide Caratti <dcaratti@redhat.com> - 1:2.9-15
+- Fix NetworkManager-CI failures with OpenSSL 3.0
+
 * Tue Jul 27 2021 Dave Olsthoorn <dave@bewaar.me> - 1:2.9-14
 - Fix issues with FT a.k.a. 802.11r when not supported by adapter
 
