@@ -217,7 +217,7 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
-* Fri Sep  9 2021 Davide Caratti <dcaratti@redhat.com> - 1:2.9-15
+* Fri Sep  3 2021 Davide Caratti <dcaratti@redhat.com> - 1:2.9-15
 - Fix NetworkManager-CI failures with OpenSSL 3.0
 
 * Tue Jul 27 2021 Dave Olsthoorn <dave@bewaar.me> - 1:2.9-14
