@@ -9,7 +9,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.9
-Release: 15%{?dist}
+Release: 16%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -217,6 +217,9 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Tue Sep 14 2021 Sahana Prasad <sahana@redhat.com> - 1:2.9-16
+- Rebuilt with OpenSSL 3.0.0
+
 * Fri Sep  3 2021 Davide Caratti <dcaratti@redhat.com> - 1:2.9-15
 - Fix NetworkManager-CI failures with OpenSSL 3.0
 
