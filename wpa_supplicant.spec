@@ -9,7 +9,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.10
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -189,6 +189,9 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Thu Jan 20 2022 Michael Yartys <michael.yartys@protonmail.com> - 1:2.10-2
+- Enable Operating Channel Validation (OCV) support
+
 * Mon Jan 17 2022 Davide Caratti <dcaratti@redhat.com> - 1:2.10-1
 - Update to version 2.10 (keeping CONFIG_WEP enabled). Related: rhbz#2041269
 
