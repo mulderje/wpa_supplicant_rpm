@@ -8,8 +8,8 @@
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
-Version: 2.9
-Release: 13%{?dist}
+Version: 2.10
+Release: 1%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -29,28 +29,6 @@ Patch2: wpa_supplicant-flush-debug-output.patch
 Patch3: wpa_supplicant-quiet-scan-results-message.patch
 # distro specific customization for Qt4 build tools, not suitable for upstream
 Patch4: wpa_supplicant-gui-qt4.patch
-# fix AP mode PMF disconnection protection bypass
-Patch5: 0001-AP-Silently-ignore-management-frame-from-unexpected-.patch
-
-# fix some issues with P2P operation
-Patch6: 0001-P2P-Always-use-global-p2p_long_listen.patch
-Patch7: 0001-D-Bus-Fix-P2P-NULL-dereference-after-interface-remov.patch
-Patch8: 0001-p2p-Limit-P2P_DEVICE-name-to-appropriate-ifname-size.patch
-
-#fix for bz1915236
-Patch9: 0001-D-Bus-Allow-changing-an-interface-bridge-via-D-Bus.patch
-
-#expose OWE capability in D-Bus
-Patch10: 0001-dbus-Export-OWE-capability-and-OWE-BSS-key_mgmt.patch
-
-#fix for CVE-2021-0326
-Patch11: 0001-P2P-Fix-copying-of-secondary-device-types-for-P2P-gr.patch
-
-#fix for CVE-2021-27803
-Patch12: 0001-P2P-Fix-a-corner-case-in-peer-addition-based-on-PD-R.patch
-
-# fix for 802.11r networks, and cards that don't support it
-Patch13: 0001-Check-for-FT-support-when-selecting-FT-suites.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -94,7 +72,7 @@ Graphical User Interface for wpa_supplicant written using QT
 
 
 %prep
-%autosetup -p1
+%autosetup -p1 -n %{name}-%{version}
 
 
 %build
@@ -211,6 +189,9 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Mon Jan 17 2022 Davide Caratti <dcaratti@redhat.com> - 1:2.10-1
+- Update to version 2.10 (keeping CONFIG_WEP enabled). Related: rhbz#2041269
+
 * Tue Jul 27 2021 Dave Olsthoorn <dave@bewaar.me> - 1:2.9-13
 - Fix issues with FT a.k.a. 802.11r when not supported by adapter
 

@@ -9,15 +9,6 @@ Subject: [PATCH] defconfig: Fedora configuration
 
 --- a/wpa_supplicant/defconfig
 +++ b/wpa_supplicant/defconfig
-@@ -77,7 +77,7 @@ CONFIG_DRIVER_WIRED=y
- #CONFIG_DRIVER_MACSEC_QCA=y
- 
- # Driver interface for Linux MACsec drivers
--#CONFIG_DRIVER_MACSEC_LINUX=y
-+CONFIG_DRIVER_MACSEC_LINUX=y
- 
- # Driver interface for the Broadcom RoboSwitch family
- #CONFIG_DRIVER_ROBOSWITCH=y
 @@ -146,7 +146,7 @@ CONFIG_EAP_PAX=y
  CONFIG_EAP_LEAP=y
  
@@ -27,16 +18,7 @@ Subject: [PATCH] defconfig: Fedora configuration
  
  # EAP-AKA' (enable CONFIG_PCSC, if EAP-AKA' is used).
  # This requires CONFIG_EAP_AKA to be enabled, too.
-@@ -183,7 +183,7 @@ CONFIG_EAP_IKEV2=y
- #CONFIG_EAP_EKE=y
- 
- # MACsec
--#CONFIG_MACSEC=y
-+CONFIG_MACSEC=y
- 
- # PKCS#12 (PFX) support (used to read private key and certificate file from
- # a file that usually has extension .p12 or .pfx)
-@@ -342,6 +342,7 @@ CONFIG_IEEE80211W=y
+@@ -338,6 +338,7 @@ CONFIG_BACKEND=file
  # Select which ciphers to use by default with OpenSSL if the user does not
  # specify them.
  #CONFIG_TLS_DEFAULT_CIPHERS="DEFAULT:!EXP:!LOW"
@@ -44,25 +26,16 @@ Subject: [PATCH] defconfig: Fedora configuration
  
  # If CONFIG_TLS=internal is used, additional library and include paths are
  # needed for LibTomMath. Alternatively, an integrated, minimal version of
-@@ -473,7 +474,7 @@ CONFIG_DEBUG_SYSLOG=y
+@@ -469,7 +470,7 @@ CONFIG_DEBUG_SYSLOG=y
  # Should we attempt to use the getrandom(2) call that provides more reliable
  # yet secure randomness source than /dev/random on Linux 3.17 and newer.
  # Requires glibc 2.25 to build, falls back to /dev/random if unavailable.
 -#CONFIG_GETRANDOM=y
 +CONFIG_GETRANDOM=y
  
- # IEEE 802.11n (High Throughput) support (mainly for AP mode)
- CONFIG_IEEE80211N=y
-@@ -514,7 +515,7 @@ CONFIG_AP=y
- CONFIG_P2P=y
- 
- # Enable TDLS support
--#CONFIG_TDLS=y
-+CONFIG_TDLS=y
- 
- # Wi-Fi Display
- # This can be used to enable Wi-Fi Display extensions for P2P using an external
-@@ -593,7 +594,7 @@ CONFIG_IBSS_RSN=y
+ # IEEE 802.11ac (Very High Throughput) support (mainly for AP mode)
+ CONFIG_IEEE80211AC=y
+@@ -587,7 +588,7 @@ CONFIG_IBSS_RSN=y
  #CONFIG_PMKSA_CACHE_EXTERNAL=y
  
  # Mesh Networking (IEEE 802.11s)
@@ -71,15 +44,28 @@ Subject: [PATCH] defconfig: Fedora configuration
  
  # Background scanning modules
  # These can be used to request wpa_supplicant to perform background scanning
-@@ -607,9 +608,10 @@ CONFIG_BGSCAN_SIMPLE=y
+@@ -601,7 +602,7 @@ CONFIG_BGSCAN_SIMPLE=y
  
  # Opportunistic Wireless Encryption (OWE)
  # Experimental implementation of draft-harkins-owe-07.txt
 -#CONFIG_OWE=y
 +CONFIG_OWE=y
  
- # Device Provisioning Protocol (DPP)
- # This requires CONFIG_IEEE80211W=y to be enabled, too. (see
- # wpa_supplicant/README-DPP for details)
+ # Device Provisioning Protocol (DPP) (also known as Wi-Fi Easy Connect)
  CONFIG_DPP=y
+@@ -617,7 +618,7 @@ CONFIG_DPP2=y
+ # functionality needed to use WEP is available in the current wpa_supplicant
+ # release under this optional build parameter. This functionality is subject to
+ # be completely removed in a future release.
+-#CONFIG_WEP=y
++CONFIG_WEP=y
+ 
+ # Remove all TKIP functionality
+ # TKIP is an old cryptographic data confidentiality algorithm that is not
+@@ -633,3 +634,6 @@ CONFIG_DPP2=y
+ # design is still subject to change. As such, this should not yet be enabled in
+ # production use.
+ #CONFIG_PASN=y
++#
 +CONFIG_SUITEB192=y
++
