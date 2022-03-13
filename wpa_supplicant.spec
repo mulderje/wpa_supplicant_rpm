@@ -17,18 +17,23 @@ Source2: wpa_supplicant.service
 Source3: wpa_supplicant.sysconfig
 Source4: wpa_supplicant.logrotate
 
-# distro specific customization and not suitable for upstream,
+# Distro specific customization and not suitable for upstream,
 # Fedora-specific updates to defconfig
-Patch0: wpa_supplicant-config.patch
-# works around busted drivers
+Patch0: wpa_supplicant-defconfig-keep-options-we-ve-traditionally-used-enab.patch
+# Works around busted drivers
 Patch1: wpa_supplicant-assoc-timeout.patch
-# ensures that debug output gets flushed immediately to help diagnose driver
+# Ensures that debug output gets flushed immediately to help diagnose driver
 # bugs, not suitable for upstream
 Patch2: wpa_supplicant-flush-debug-output.patch
-# quiet an annoying and frequent syslog message
+# Quiet an annoying and frequent syslog message
 Patch3: wpa_supplicant-quiet-scan-results-message.patch
-# distro specific customization for Qt4 build tools, not suitable for upstream
+# Distro specific customization for Qt4 build tools, not suitable for upstream
 Patch4: wpa_supplicant-gui-qt4.patch
+# We keep WEP enabled for now to avoid breaking user setups
+Patch6: wpa_supplicant-defconfig-keep-CONFIG_WEP-enabled.patch
+# FIXME: Explain why are these two here
+Patch7: wpa_supplicant-defconfig-enable-WPA-EAP-SUITE-B-192-ciphers.patch
+Patch8: wpa_supplicant-defconfig-enable-OCV-support.patch
 
 URL: http://w1.fi/wpa_supplicant/
 

@@ -1,12 +1,16 @@
-rom 72ee1e934e98ea87e4de292958817e724114703e Mon Sep 17 00:00:00 2001
+From 060c09b4704ac84502df5321ec4073c062923128 Mon Sep 17 00:00:00 2001
 From: Lubomir Rintel <lkundrak@v3.sk>
-Date: Fri, 6 Sep 2019 09:46:00 +0200
-Subject: [PATCH] defconfig: Fedora configuration
+Date: Sun, 13 Mar 2022 18:33:15 +0100
+Subject: [PATCH 1/5] defconfig: keep options we've traditionally used enabled
 
+These are deviations from the upstream defconfig we've inherited when we
+switched to basing our configuration on upstream defconfig.
 ---
- wpa_supplicant/defconfig | 16 +++++++++-------
- 1 file changed, 9 insertions(+), 7 deletions(-)
+ wpa_supplicant/defconfig | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
 
+diff --git a/wpa_supplicant/defconfig b/wpa_supplicant/defconfig
+index a4719db..85a50e9 100644
 --- a/wpa_supplicant/defconfig
 +++ b/wpa_supplicant/defconfig
 @@ -146,7 +146,7 @@ CONFIG_EAP_PAX=y
@@ -18,15 +22,6 @@ Subject: [PATCH] defconfig: Fedora configuration
  
  # EAP-AKA' (enable CONFIG_PCSC, if EAP-AKA' is used).
  # This requires CONFIG_EAP_AKA to be enabled, too.
-@@ -311,7 +311,7 @@ CONFIG_BACKEND=file
- #CONFIG_NO_LINUX_PACKET_SOCKET_WAR=y
- 
- # Support Operating Channel Validation
--#CONFIG_OCV=y
-+CONFIG_OCV=y
- 
- # Select TLS implementation
- # openssl = OpenSSL (default)
 @@ -338,6 +338,7 @@ CONFIG_BACKEND=file
  # Select which ciphers to use by default with OpenSSL if the user does not
  # specify them.
@@ -62,19 +57,6 @@ Subject: [PATCH] defconfig: Fedora configuration
  
  # Device Provisioning Protocol (DPP) (also known as Wi-Fi Easy Connect)
  CONFIG_DPP=y
-@@ -617,7 +618,7 @@ CONFIG_DPP2=y
- # functionality needed to use WEP is available in the current wpa_supplicant
- # release under this optional build parameter. This functionality is subject to
- # be completely removed in a future release.
--#CONFIG_WEP=y
-+CONFIG_WEP=y
- 
- # Remove all TKIP functionality
- # TKIP is an old cryptographic data confidentiality algorithm that is not
-@@ -633,3 +634,6 @@ CONFIG_DPP2=y
- # design is still subject to change. As such, this should not yet be enabled in
- # production use.
- #CONFIG_PASN=y
-+#
-+CONFIG_SUITEB192=y
-+
+-- 
+2.35.1
+
