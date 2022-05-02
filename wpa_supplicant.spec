@@ -9,7 +9,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.10
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -34,6 +34,11 @@ Patch6: wpa_supplicant-defconfig-keep-CONFIG_WEP-enabled.patch
 # FIXME: Explain why are these two here
 Patch7: wpa_supplicant-defconfig-enable-WPA-EAP-SUITE-B-192-ciphers.patch
 Patch8: wpa_supplicant-defconfig-enable-OCV-support.patch
+# Allow legacy renegotiation with openssl 3.0 to fix connection to
+# PEAP/Radius servers that don't support secure renegotiation:
+# https://bugzilla.redhat.com/show_bug.cgi?id=2072070
+# From James Ralston in comment #24, thanks to James
+Patch9: wpa_supplicant-allow-legacy-renegotiation.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -194,6 +199,9 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Mon May 02 2022 Adam Williamson <awilliam@redhat.com> - 1:2.10-4
+- Allow legacy renegotiation for bad PEAP servers (James Ralston) (#2072070)
+
 * Wed Jan 26 2022 Michael Yartys <michael.yartys@protonmail.com> - 1:2.10-3
 - Enable Operating Channel Validation (OCV) support
 
