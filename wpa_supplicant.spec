@@ -9,7 +9,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.10
-Release: 4%{?dist}
+Release: 5%{?dist}
 License: BSD
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -199,6 +199,9 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Sat Jul 23 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.10-5
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
 * Mon May 02 2022 Adam Williamson <awilliam@redhat.com> - 1:2.10-4
 - Allow legacy renegotiation for bad PEAP servers (James Ralston) (#2072070)
 
