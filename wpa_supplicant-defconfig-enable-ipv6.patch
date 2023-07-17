@@ -1,0 +1,8 @@
+--- a/wpa_supplicant/defconfig
++++ b/wpa_supplicant/defconfig
+@@ -637,3 +637,5 @@ CONFIG_WEP=y
+ #
+ CONFIG_SUITEB192=y
+ 
++# Support IPv6
++CONFIG_IPV6=y
