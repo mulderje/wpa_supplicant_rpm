@@ -46,6 +46,12 @@ Patch11: wpa_supplicant-sae-pass-sae-password-on-connect-for-sae-authentication-
 # Enable IPv6 (#2095296)
 Patch12: wpa_supplicant-defconfig-enable-ipv6.patch
 
+# support macsec HW offload
+Patch13: wpa_supplicant-MACsec-Support-GCM-AES-256-cipher-suite.patch
+Patch14: wpa_supplicant-macsec_linux-Support-cipher-suite-configuration.patch
+Patch15: wpa_supplicant-mka-Allow-configuration-of-MACsec-hardware-offload.patch
+Patch16: wpa_supplicant-macsec_linux-Add-support-for-MACsec-hardware-offload.patch
+
 URL: http://w1.fi/wpa_supplicant/
 
 %if %with gui
