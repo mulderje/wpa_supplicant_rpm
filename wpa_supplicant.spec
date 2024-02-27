@@ -9,7 +9,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.10
-Release: 10%{?dist}
+Release: 11%{?dist}
 License: BSD-3-Clause
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -214,6 +214,9 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Tue Feb 27 2024 Rahul Sundaram <sundaram@fedoraproject.org> - 1:2.10-11
+- Update Systemd security settings as part of https://fedoraproject.org/wiki/Changes/SystemdSecurityHardening
+
 * Mon Feb 19 2024 Davide Caratti <dcaratti@redhat.com> - 1:2.10-10
 - Backport support for macsec hardware offload
 - Backport fix for PEAP client (CVE-2023-52160)
