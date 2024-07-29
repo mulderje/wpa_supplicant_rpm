@@ -8,8 +8,8 @@
 Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
-Version: 2.10
-Release: 10%{?dist}
+Version: 2.11
+Release: 1%{?dist}
 License: BSD-3-Clause
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -39,21 +39,6 @@ Patch8: wpa_supplicant-defconfig-enable-OCV-support.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=2072070
 # From James Ralston in comment #24, thanks to James
 Patch9: wpa_supplicant-allow-legacy-renegotiation.patch
-# Add WPA3 support for Broadcom device
-# https://bugzilla.redhat.com/show_bug.cgi?id=2226569
-Patch10: wpa_supplicant-nl80211-check-sae-authentication-offload-support.patch
-Patch11: wpa_supplicant-sae-pass-sae-password-on-connect-for-sae-authentication-offload-support.patch
-# Enable IPv6 (#2095296)
-Patch12: wpa_supplicant-defconfig-enable-ipv6.patch
-
-# support macsec HW offload
-Patch13: wpa_supplicant-MACsec-Support-GCM-AES-256-cipher-suite.patch
-Patch14: wpa_supplicant-macsec_linux-Support-cipher-suite-configuration.patch
-Patch15: wpa_supplicant-mka-Allow-configuration-of-MACsec-hardware-offload.patch
-Patch16: wpa_supplicant-macsec_linux-Add-support-for-MACsec-hardware-offload.patch
-
-# fix PEAP client to require successful Phase2 authentication when needed (CVE-2023-52160)
-Patch17: wpa_supplicant-PEAP-client-Update-Phase-2-authentication-requiremen.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -103,8 +88,8 @@ Graphical User Interface for wpa_supplicant written using QT
 %build
 pushd wpa_supplicant
   cp defconfig .config
-  export CFLAGS="${CFLAGS:-%optflags} -fPIE -DPIE"
-  export CXXFLAGS="${CXXFLAGS:-%optflags} -fPIE -DPIE"
+  export CFLAGS="${CFLAGS:-%optflags} -fPIE -DPIE -DOPENSSL_NO_ENGINE"
+  export CXXFLAGS="${CXXFLAGS:-%optflags} -fPIE -DPIE -DOPENSSL_NO_ENGINE"
   export LDFLAGS="${LDFLAGS:-%optflags} -pie -Wl,-z,now"
   # yes, BINDIR=_sbindir
   export BINDIR="%{_sbindir}"
@@ -214,6 +199,10 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Mon Jul 29 2024 Davide Caratti <dcaratti@redhat.com> - 1:2.11-1
+- Update to version 2.11 (#2299036)
+- Disable OpenSSL ENGINE API (#2301368)
+
 * Mon Feb 19 2024 Davide Caratti <dcaratti@redhat.com> - 1:2.10-10
 - Backport support for macsec hardware offload
 - Backport fix for PEAP client (CVE-2023-52160)
