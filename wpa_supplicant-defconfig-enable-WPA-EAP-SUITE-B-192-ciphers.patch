@@ -11,17 +11,12 @@ FIXME: It needs to be either upstreamed or dropped.
  wpa_supplicant/defconfig | 3 +++
  1 file changed, 3 insertions(+)
 
-diff --git a/wpa_supplicant/defconfig b/wpa_supplicant/defconfig
-index 07d9752..3f73282 100644
 --- a/wpa_supplicant/defconfig
 +++ b/wpa_supplicant/defconfig
-@@ -634,3 +634,6 @@ CONFIG_WEP=y
- # design is still subject to change. As such, this should not yet be enabled in
- # production use.
- #CONFIG_PASN=y
+@@ -687,3 +687,6 @@ CONFIG_WEP=y
+ 
+ # Wi-Fi Aware unsynchronized service discovery (NAN USD)
+ #CONFIG_NAN_USD=y
 +#
 +CONFIG_SUITEB192=y
 +
--- 
-2.35.1
-
