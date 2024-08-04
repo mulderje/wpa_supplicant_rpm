@@ -9,7 +9,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.11
-Release: 1%{?dist}
+Release: 2%{?dist}
 License: BSD-3-Clause
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -39,6 +39,10 @@ Patch8: wpa_supplicant-defconfig-enable-OCV-support.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=2072070
 # From James Ralston in comment #24, thanks to James
 Patch9: wpa_supplicant-allow-legacy-renegotiation.patch
+# Revert 41638606054 ("Mark authorization completed on driver indication during
+# 4-way HS offload") as it break authentication on at least brcmfmac.
+# see https://bugzilla.redhat.com/show_bug.cgi?id=2302577
+Patch10: wpa_supplicant-Revert-Mark-authorization-completed-on-driver-indica.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -199,6 +203,9 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Sun Aug 04 2024 Janne Grunau <janne-fdr@jannau.net> - 1:2.11-2
+- Revert commit breaking authentication on brcmfmac (#2302577)
+
 * Mon Jul 29 2024 Davide Caratti <dcaratti@redhat.com> - 1:2.11-1
 - Update to version 2.11 (#2299036)
 - Disable OpenSSL ENGINE API (#2301368)
