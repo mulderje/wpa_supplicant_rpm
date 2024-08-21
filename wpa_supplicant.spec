@@ -9,7 +9,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.11
-Release: 3%{?dist}
+Release: 4%{?dist}
 License: BSD-3-Clause
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -43,6 +43,13 @@ Patch9: wpa_supplicant-allow-legacy-renegotiation.patch
 # 4-way HS offload") as it break authentication on at least brcmfmac.
 # see https://bugzilla.redhat.com/show_bug.cgi?id=2302577
 Patch10: wpa_supplicant-Revert-Mark-authorization-completed-on-driver-indica.patch
+# [PATCH] nl80211: add extra-ies only if allowed by driver
+# Bug: https://bugzilla.redhat.com/show_bug.cgi?id=2302577
+# Bug: http://lists.infradead.org/pipermail/hostap/2022-January/040178.html
+# Bug-ArchLinux: https://bugs.archlinux.org/task/73495
+# Bug-Debian: https://bugs.debian.org/1004524
+# Origin: http://lists.infradead.org/pipermail/hostap/2022-January/040185.html
+Patch11: wpa_supplicant-nl80211-add-extra-ies-only-if-allowed-by-driver.patch
 
 URL: http://w1.fi/wpa_supplicant/
 
@@ -203,6 +210,9 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Wed Aug 21 2024 Jon Mulder <jon.e.mulder@gmail.com> - 1:2.11-4
+- Add patch to enable extra-ies only if allowed by driver (#2302577)
+
 * Sat Aug 10 2024 Davide Caratti <dcaratti@redhat.com> - 1:2.11-3
 - re-enable OpenSSL ENGINE API on f40 (#2303165)
 
