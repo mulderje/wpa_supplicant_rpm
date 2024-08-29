@@ -9,7 +9,7 @@ Summary: WPA/WPA2/IEEE 802.1X Supplicant
 Name: wpa_supplicant
 Epoch: 1
 Version: 2.11
-Release: 2%{?dist}
+Release: 3%{?dist}
 License: BSD-3-Clause
 Source0: http://w1.fi/releases/%{name}-%{version}.tar.gz
 Source1: wpa_supplicant.conf
@@ -203,15 +203,15 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
+* Sat Aug 10 2024 Davide Caratti <dcaratti@redhat.com> - 1:2.11-3
+- re-enable OpenSSL ENGINE API on f40 (#2303165)
+
 * Sun Aug 04 2024 Janne Grunau <janne-fdr@jannau.net> - 1:2.11-2
 - Revert commit breaking authentication on brcmfmac (#2302577)
 
 * Mon Jul 29 2024 Davide Caratti <dcaratti@redhat.com> - 1:2.11-1
 - Update to version 2.11 (#2299036)
 - Disable OpenSSL ENGINE API (#2301368)
-
-* Sat Jul 20 2024 Fedora Release Engineering <releng@fedoraproject.org> - 1:2.10-11
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_41_Mass_Rebuild
 
 * Mon Feb 19 2024 Davide Caratti <dcaratti@redhat.com> - 1:2.10-10
 - Backport support for macsec hardware offload
