@@ -1,0 +1,19 @@
+name: Sync multiple branches
+on:
+  push:
+    branches:
+      - 'f40'
+jobs:
+  sync-branch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Merge f40 -> main
+        uses: devmasx/merge-branch@master
+        with:
+          type: now
+          from_branch: f40
+          target_branch: main
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
