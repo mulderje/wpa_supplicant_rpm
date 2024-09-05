@@ -210,7 +210,7 @@ chmod -R 0644 wpa_supplicant/examples/*.py
 
 
 %changelog
-* Wed Aug 21 2024 Jon Mulder <jon.e.mulder@gmail.com> - 1:2.11-4
+* Wed Aug 21 2024 Jon Mulder <jon.e.mulder@gmail.com> - 1:2.11-3~20240905_164600
 - Add patch to enable extra-ies only if allowed by driver (#2302577)
 
 * Sat Aug 10 2024 Davide Caratti <dcaratti@redhat.com> - 1:2.11-3
